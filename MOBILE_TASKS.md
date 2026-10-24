@@ -11,8 +11,8 @@
 | **01** | `mobile/01-project-scaffold` | Flutter 3.24+ project bootstrap, dependencies & build config | 🟢 **Completed** |
 | **02** | `mobile/02-theme-ui-system` | Cheerful color palette, typography & micro-animations | 🟢 **Completed** |
 | **03** | `mobile/03-core-network-tenancy` | Dio client, tenant interceptor, secure storage & errors | 🟢 **Completed** |
-| **04** | `mobile/04-auth-smart-login` | Two-step email discovery, clinic cards & biometric unlock | 🟡 **Ready to Start** |
-| **05** | `mobile/05-drift-clinical-database` | Drift SQLite setup, clinical tables (Clients, Patients, Cases) | ⚪ Pending |
+| **04** | `mobile/04-auth-smart-login` | Two-step email discovery, clinic cards & biometric unlock | 🟢 **Completed** |
+| **05** | `mobile/05-drift-clinical-database` | Drift SQLite setup, clinical tables (Clients, Patients, Cases) | 🟡 **Ready to Start** |
 | **06** | `mobile/06-drift-pharmacy-tables` | 4-tier pharmacy tables (Products, Batches, Containers, Ledger) | ⚪ Pending |
 | **07** | `mobile/07-offline-sync-engine` | FIFO mutation queue & Force-Reconcile conflict protocol | ⚪ Pending |
 | **08** | `mobile/08-clients-patients-module` | Client/Patient lists, search, and `OpenContainer` hero morph | ⚪ Pending |
@@ -77,7 +77,7 @@
 
 #### Part 04: Two-Step Smart Login & Session Management
 * **Branch**: `mobile/04-auth-smart-login`
-* **Status**: ⚪ Pending
+* **Status**: 🟢 **Completed**
 * **Files to Create**:
   - `lib/features/auth/presentation/screens/smart_login_screen.dart` (Step 1: Email discovery -> Staggered clinic cards -> Step 2: Password)
   - `lib/features/auth/presentation/screens/biometric_unlock_screen.dart` (FaceID/Fingerprint)
