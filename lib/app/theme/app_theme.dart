@@ -45,7 +45,7 @@ abstract final class AppTheme {
       ),
 
       // Card Theme (Soft, modern, 1dp subtle warm border, no harsh shadows)
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: AppColors.surfaceWhite,
         elevation: 0,
         margin: EdgeInsets.zero,
@@ -96,19 +96,19 @@ abstract final class AppTheme {
         labelStyle: AppTextStyles.titleMedium.copyWith(color: AppColors.textMuted),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          side: const BorderSide(color: AppColors.borderSubtle, width: 1),
+          borderSide: const BorderSide(color: AppColors.borderSubtle, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          side: const BorderSide(color: AppColors.primaryEmerald, width: 2),
+          borderSide: const BorderSide(color: AppColors.primaryEmerald, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          side: const BorderSide(color: Color(0xFFE11D48), width: 1),
+          borderSide: const BorderSide(color: Color(0xFFE11D48), width: 1),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          side: const BorderSide(color: Color(0xFFE11D48), width: 2),
+          borderSide: const BorderSide(color: Color(0xFFE11D48), width: 2),
         ),
       ),
 
@@ -158,7 +158,7 @@ abstract final class AppTheme {
         iconTheme: const IconThemeData(color: AppColors.darkTextPrimary),
       ),
 
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: AppColors.darkSurface,
         elevation: 0,
         shape: RoundedRectangleBorder(

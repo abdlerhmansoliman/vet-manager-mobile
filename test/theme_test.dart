@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:vet_manager_mobile/app/theme/app_colors.dart';
 import 'package:vet_manager_mobile/app/theme/app_theme.dart';
 import 'package:vet_manager_mobile/core/widgets/animal_species_avatar.dart';
 import 'package:vet_manager_mobile/core/widgets/triage_priority_badge.dart';
 
 void main() {
+  setUpAll(() {
+    GoogleFonts.config.allowRuntimeFetching = false;
+  });
+
   test('AppColors tokens match agreed specifications', () {
     expect(AppColors.backgroundCream, const Color(0xFFFAF8F5));
     expect(AppColors.primaryEmerald, const Color(0xFF0D9488));
