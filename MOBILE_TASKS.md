@@ -12,8 +12,8 @@
 | **02** | `mobile/02-theme-ui-system` | Cheerful color palette, typography & micro-animations | 🟢 **Completed** |
 | **03** | `mobile/03-core-network-tenancy` | Dio client, tenant interceptor, secure storage & errors | 🟢 **Completed** |
 | **04** | `mobile/04-auth-smart-login` | Two-step email discovery, clinic cards & biometric unlock | 🟢 **Completed** |
-| **05** | `mobile/05-drift-clinical-database` | Drift SQLite setup, clinical tables (Clients, Patients, Cases) | 🟡 **Ready to Start** |
-| **06** | `mobile/06-drift-pharmacy-tables` | 4-tier pharmacy tables (Products, Batches, Containers, Ledger) | ⚪ Pending |
+| **05** | `mobile/05-drift-clinical-database` | Drift SQLite setup, clinical tables (Clients, Patients, Cases) | 🟢 **Completed** |
+| **06** | `mobile/06-drift-pharmacy-tables` | 4-tier pharmacy tables (Products, Batches, Containers, Ledger) | 🟡 **Ready to Start** |
 | **07** | `mobile/07-offline-sync-engine` | FIFO mutation queue & Force-Reconcile conflict protocol | ⚪ Pending |
 | **08** | `mobile/08-clients-patients-module` | Client/Patient lists, search, and `OpenContainer` hero morph | ⚪ Pending |
 | **09** | `mobile/09-cases-triage-board` | Triage board (Routine/Urgent/Critical), SOAP notes & addenda | ⚪ Pending |
@@ -92,7 +92,7 @@
 
 #### Part 05: Drift Clinical Relational Database
 * **Branch**: `mobile/05-drift-clinical-database`
-* **Status**: ⚪ Pending
+* **Status**: 🟢 **Completed**
 * **Files to Create**:
   - `lib/database/app_database.dart`
   - `lib/database/tables/clients_table.dart`
@@ -110,7 +110,7 @@
 
 #### Part 06: Drift 4-Tier Pharmacy Schema
 * **Branch**: `mobile/06-drift-pharmacy-tables`
-* **Status**: ⚪ Pending
+* **Status**: 🟡 **Ready to Start**
 * **Files to Create**:
   - `lib/database/tables/inventory_products_table.dart`
   - `lib/database/tables/inventory_batches_table.dart` (FEFO lot tracking)
