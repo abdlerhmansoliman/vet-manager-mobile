@@ -10,8 +10,8 @@
 | :--- | :--- | :--- | :--- |
 | **01** | `mobile/01-project-scaffold` | Flutter 3.24+ project bootstrap, dependencies & build config | 🟢 **Completed** |
 | **02** | `mobile/02-theme-ui-system` | Cheerful color palette, typography & micro-animations | 🟢 **Completed** |
-| **03** | `mobile/03-core-network-tenancy` | Dio client, tenant interceptor, secure storage & errors | 🟡 **Ready to Start** |
-| **04** | `mobile/04-auth-smart-login` | Two-step email discovery, clinic cards & biometric unlock | ⚪ Pending |
+| **03** | `mobile/03-core-network-tenancy` | Dio client, tenant interceptor, secure storage & errors | 🟢 **Completed** |
+| **04** | `mobile/04-auth-smart-login` | Two-step email discovery, clinic cards & biometric unlock | 🟡 **Ready to Start** |
 | **05** | `mobile/05-drift-clinical-database` | Drift SQLite setup, clinical tables (Clients, Patients, Cases) | ⚪ Pending |
 | **06** | `mobile/06-drift-pharmacy-tables` | 4-tier pharmacy tables (Products, Batches, Containers, Ledger) | ⚪ Pending |
 | **07** | `mobile/07-offline-sync-engine` | FIFO mutation queue & Force-Reconcile conflict protocol | ⚪ Pending |
@@ -63,7 +63,7 @@
 
 #### Part 03: Core Networking & Tenant Interceptors
 * **Branch**: `mobile/03-core-network-tenancy`
-* **Status**: ⚪ Pending
+* **Status**: 🟢 **Completed**
 * **Files to Create**:
   - `lib/core/network/api_client.dart` (Dio singleton)
   - `lib/core/network/tenant_interceptor.dart` (Injects `X-Tenant-ID` & Bearer token)
