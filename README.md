@@ -12,11 +12,14 @@ Enterprise-grade, offline-first clinical client for veterinary clinics, hospital
 # 1. Fetch dependencies
 flutter pub get
 
-# 2. Run code generation (Drift, Injectable, JSON Serializable)
+# 2. Setup environment configuration
+cp .env.example .env
+
+# 3. Run code generation (Drift, Injectable, JSON Serializable)
 dart run build_runner build --delete-conflicting-outputs
 
-# 3. Run on connected device or emulator
-flutter run
+# 4. Run on connected device or emulator
+flutter run --dart-define-from-file=.env
 ```
 
 ## Architecture
