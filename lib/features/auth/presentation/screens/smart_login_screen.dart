@@ -99,7 +99,7 @@ class _SmartLoginScreenState extends State<SmartLoginScreen> {
             borderRadius: BorderRadius.circular(22),
             boxShadow: [
               BoxShadow(
-                color: AppColors.primaryEmerald.withOpacity(0.25),
+                color: AppColors.primaryEmerald.withValues(alpha: 0.25),
                 blurRadius: 20,
                 offset: const Offset(0, 8),
               ),
@@ -151,10 +151,10 @@ class _SmartLoginScreenState extends State<SmartLoginScreen> {
           controller: _emailController,
           keyboardType: TextInputType.emailAddress,
           autocorrect: false,
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             hintText: 'doctor@veterinaryclinic.com',
             labelText: 'Staff Email Address',
-            prefixIcon: const Icon(Icons.email_outlined, color: AppColors.primaryEmerald),
+            prefixIcon: Icon(Icons.email_outlined, color: AppColors.primaryEmerald),
           ),
         ),
         const SizedBox(height: 24),
@@ -169,7 +169,7 @@ class _SmartLoginScreenState extends State<SmartLoginScreen> {
               borderRadius: BorderRadius.circular(14),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.primaryEmerald.withOpacity(0.28),
+                  color: AppColors.primaryEmerald.withValues(alpha: 0.28),
                   blurRadius: 14,
                   offset: const Offset(0, 6),
                 ),
@@ -340,7 +340,7 @@ class _SmartLoginScreenState extends State<SmartLoginScreen> {
               borderRadius: BorderRadius.circular(14),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.primaryEmerald.withOpacity(0.28),
+                  color: AppColors.primaryEmerald.withValues(alpha: 0.28),
                   blurRadius: 14,
                   offset: const Offset(0, 6),
                 ),

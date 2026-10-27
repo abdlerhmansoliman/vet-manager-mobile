@@ -6,7 +6,6 @@ import '../../../../app/theme/text_styles.dart';
 import '../../../../core/widgets/animated_pressable.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
-import '../bloc/auth_state.dart';
 
 /// Screen displayed when an authenticated clinician re-opens the app during shift.
 class BiometricUnlockScreen extends StatelessWidget {
@@ -35,7 +34,7 @@ class BiometricUnlockScreen extends StatelessWidget {
                   width: 90,
                   height: 90,
                   decoration: BoxDecoration(
-                    color: AppColors.primaryEmerald.withOpacity(0.12),
+                    color: AppColors.primaryEmerald.withValues(alpha: 0.12),
                     shape: BoxShape.circle,
                     border: Border.all(color: AppColors.primaryEmerald, width: 2),
                   ),
@@ -76,7 +75,7 @@ class BiometricUnlockScreen extends StatelessWidget {
                       border: Border.all(color: AppColors.primaryEmerald, width: 1.5),
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.primaryEmerald.withOpacity(0.2),
+                          color: AppColors.primaryEmerald.withValues(alpha: 0.2),
                           blurRadius: 20,
                           offset: const Offset(0, 6),
                         ),

@@ -128,7 +128,7 @@
 
 #### Part 07: Offline Sync Engine & Force-Reconcile Protocol
 * **Branch**: `mobile/07-offline-sync-engine`
-* **Status**: 🟡 **Ready to Start**
+* **Status**: 🟢 **Completed**
 * **Files to Create**:
   - `lib/sync/sync_manager.dart` (Connectivity listener)
   - `lib/sync/sync_queue_dispatcher.dart` (Flushes FIFO queue to `POST /api/v1/sync/push`)
@@ -145,7 +145,7 @@
 
 #### Part 08: Clients & Patients Directory
 * **Branch**: `mobile/08-clients-patients-module`
-* **Status**: ⚪ Pending
+* **Status**: 🟡 **Ready to Start**
 * **Files to Create**:
   - `lib/features/clients_patients/presentation/screens/patient_list_screen.dart`
   - `lib/features/clients_patients/presentation/screens/patient_detail_screen.dart`
