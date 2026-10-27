@@ -16,9 +16,9 @@
 | **04** | `mobile/04-auth-smart-login` | Two-step email discovery, clinic cards & biometric unlock | 🟢 **Completed** |
 | **05** | `mobile/05-drift-clinical-database` | Drift SQLite setup, clinical tables (Clients, Patients, Cases) | 🟢 **Completed** |
 | **06** | `mobile/06-drift-pharmacy-tables` | 4-tier pharmacy tables (Products, Batches, Containers, Ledger) | 🟢 **Completed** |
-| **07** | `mobile/07-offline-sync-engine` | FIFO mutation queue & Force-Reconcile conflict protocol | 🟡 **Ready to Start** |
-| **08** | `mobile/08-clients-patients-module` | Client/Patient lists, search, and `OpenContainer` hero morph | ⚪ Pending |
-| **09** | `mobile/09-cases-triage-board` | Triage board (Routine/Urgent/Critical), SOAP notes & addenda | ⚪ Pending |
+| **07** | `mobile/07-offline-sync-engine` | FIFO mutation queue & Force-Reconcile conflict protocol | 🟢 **Completed** |
+| **08** | `mobile/08-clients-patients-module` | Client/Patient lists, search, and `OpenContainer` hero morph | 🟢 **Completed** |
+| **09** | `mobile/09-cases-triage-board` | Triage board (Routine/Urgent/Critical), SOAP notes & addenda | 🟡 **Ready to Start** |
 | **10** | `mobile/10-case-study-pdf-export` | Case study PDF generator with owner anonymization toggle | ⚪ Pending |
 | **11** | `mobile/11-staff-and-doctor-profile` | Doctor profile, on-duty toggle & Owner staff management | ⚪ Pending |
 | **12** | `mobile/12-witness-pin-and-dosing` | Fractional dosing slider & blurred witness PIN bottom sheet | ⚪ Pending |
