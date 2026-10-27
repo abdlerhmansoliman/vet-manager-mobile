@@ -6,17 +6,26 @@ import '../../features/auth/presentation/screens/biometric_unlock_screen.dart';
 import '../../features/auth/presentation/screens/smart_login_screen.dart';
 import '../../features/showcase/presentation/screens/ui_showcase_screen.dart';
 
+import '../../features/clients_patients/domain/repositories/patient_repository.dart';
+import '../../features/clients_patients/presentation/screens/patient_list_screen.dart';
+
 abstract class AppRoutes {
   static const String login = '/login';
   static const String biometricUnlock = '/biometric-unlock';
   static const String showcase = '/showcase';
+  static const String patients = '/patients';
   static const String home = '/';
 }
 
 class AppRouter {
   final AuthBloc _authBloc;
+  final IPatientRepository? _patientRepository;
 
-  AppRouter({required AuthBloc authBloc}) : _authBloc = authBloc;
+  AppRouter({
+    required AuthBloc authBloc,
+    IPatientRepository? patientRepository,
+  })  : _authBloc = authBloc,
+        _patientRepository = patientRepository;
 
   late final GoRouter router = GoRouter(
     initialLocation: AppRoutes.login,
@@ -36,7 +45,9 @@ class AppRouter {
 
       if (authState is AuthAuthenticated) {
         if (isLoggingIn || isBiometric) {
-          return AppRoutes.showcase;
+          return _patientRepository != null
+              ? AppRoutes.patients
+              : AppRoutes.showcase;
         }
       }
 
@@ -66,6 +77,15 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.showcase,
         builder: (context, state) => const UiShowcaseScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.patients,
+        builder: (context, state) {
+          if (_patientRepository != null) {
+            return PatientListScreen(repository: _patientRepository);
+          }
+          return const UiShowcaseScreen();
+        },
       ),
     ],
   );

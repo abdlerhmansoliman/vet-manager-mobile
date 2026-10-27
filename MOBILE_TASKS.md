@@ -145,22 +145,30 @@
 
 #### Part 08: Clients & Patients Directory
 * **Branch**: `mobile/08-clients-patients-module`
-* **Status**: 🟡 **Ready to Start**
-* **Files to Create**:
+* **Status**: 🟢 **Completed**
+* **Files Created**:
+  - `lib/database/daos/client_patient_dao.dart` (Reactive cross-entity search & sync queue outbox)
+  - `lib/features/clients_patients/domain/entities/patient_entity.dart`
+  - `lib/features/clients_patients/domain/repositories/patient_repository.dart`
+  - `lib/features/clients_patients/data/repositories/patient_repository_impl.dart`
+  - `lib/features/clients_patients/presentation/bloc/patient_list_bloc.dart`
   - `lib/features/clients_patients/presentation/screens/patient_list_screen.dart`
   - `lib/features/clients_patients/presentation/screens/patient_detail_screen.dart`
-  - `lib/features/clients_patients/presentation/widgets/patient_card.dart` (`OpenContainer` hero transition)
   - `lib/features/clients_patients/presentation/screens/create_patient_screen.dart`
-  - `test/features/clients_patients/patient_list_screen_test.dart`
+  - `lib/features/clients_patients/presentation/widgets/patient_card.dart` (`OpenContainer` hero transition)
+  - `test/database/client_patient_dao_test.dart`
+  - `test/features/clients_patients/patient_list_bloc_test.dart`
   - `test/features/clients_patients/patient_card_widget_test.dart`
+  - `test/features/clients_patients/patient_detail_screen_test.dart`
+  - `test/features/clients_patients/patient_list_screen_test.dart`
 * **Definition of Done**:
-  - Search by phone/name, filter by species, and seamless transition from card to patient profile; widget tests pass.
+  - Search by phone/name, filter by species, and seamless transition from card to patient profile; all widget & unit tests pass.
 
 ---
 
 #### Part 09: Cases Board & SOAP Notes
 * **Branch**: `mobile/09-cases-triage-board`
-* **Status**: ⚪ Pending
+* **Status**: 🟡 **Ready to Start**
 * **Files to Create**:
   - `lib/features/clinical_cases/presentation/screens/cases_board_screen.dart` (Routine/Urgent/Critical tabs)
   - `lib/features/clinical_cases/presentation/screens/case_detail_screen.dart`

@@ -6,15 +6,19 @@ import '../features/auth/presentation/bloc/auth_event.dart';
 import 'router/app_router.dart';
 import 'theme/app_theme.dart';
 
+import '../features/clients_patients/domain/repositories/patient_repository.dart';
+
 /// Root Application Widget for VetManager Mobile Client.
 class VetManagerApp extends StatefulWidget {
   final IAuthRepository? authRepository;
   final AuthBloc? authBloc;
+  final IPatientRepository? patientRepository;
 
   const VetManagerApp({
     super.key,
     this.authRepository,
     this.authBloc,
+    this.patientRepository,
   });
 
   @override
@@ -33,7 +37,10 @@ class _VetManagerAppState extends State<VetManagerApp> {
           authRepository: widget.authRepository ?? AuthRepository(),
         );
 
-    _appRouter = AppRouter(authBloc: _authBloc);
+    _appRouter = AppRouter(
+      authBloc: _authBloc,
+      patientRepository: widget.patientRepository,
+    );
     _authBloc.add(const AuthCheckRequested());
   }
 
