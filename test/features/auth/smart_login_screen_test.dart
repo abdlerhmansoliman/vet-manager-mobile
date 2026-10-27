@@ -5,7 +5,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:vet_manager_mobile/features/auth/domain/models/clinic_tenant.dart';
 import 'package:vet_manager_mobile/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:vet_manager_mobile/features/auth/presentation/bloc/auth_event.dart';
 import 'package:vet_manager_mobile/features/auth/presentation/bloc/auth_state.dart';
 import 'package:vet_manager_mobile/features/auth/presentation/screens/smart_login_screen.dart';
 

@@ -78,7 +78,7 @@ void main() {
       when(
         () => mockApiClient.post<Map<String, dynamic>>(
           '/auth/login',
-          data: any(named: 'data'),
+          data: any<dynamic>(named: 'data'),
           options: any(named: 'options'),
         ),
       ).thenAnswer(

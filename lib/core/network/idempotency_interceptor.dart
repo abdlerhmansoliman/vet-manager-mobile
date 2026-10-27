@@ -34,7 +34,7 @@ class IdempotencyInterceptor extends Interceptor {
       final existingKey = options.headers[headerIdempotencyKey];
       if (existingKey == null || existingKey.toString().trim().isEmpty) {
         final newKey = _customGenerator != null
-            ? _customGenerator!()
+            ? _customGenerator()
             : _uuid.v7();
         options.headers[headerIdempotencyKey] = newKey;
       }

@@ -313,7 +313,7 @@ class UiShowcaseScreen extends StatelessWidget {
   }
 
   void _openInfoBottomSheet(BuildContext context) {
-    showBlurredBottomSheet(
+    showBlurredBottomSheet<void>(
       context: context,
       builder: (sheetContext) {
         return Padding(
