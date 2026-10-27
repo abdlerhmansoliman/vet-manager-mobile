@@ -105,7 +105,11 @@ Refer to `MOBILE_TASKS.md` for active development branches, phase completion sta
    - Never catch untyped exceptions silently; present meaningful user messages or handle them in BLoC state.
 4. **Calculations**:
    - Always use `Decimal` from the `decimal` package for pharmacy stock quantities, unit conversions, and dosage calculations. Avoid native double/float rounding errors.
-5. **Testing Requirements**:
-   - Every new BLoC must have unit tests using `bloc_test`.
-   - Every new Drift table/DAO must have in-memory database tests in `test/database/`.
-   - Every repository or network client must mock dependencies with `mocktail`.
+5. **Mandatory Testing Requirements (Zero Untested Code)**:
+   - **Every single feature, module, service, use case, or screen added MUST include dedicated automated test cases.** No task or branch is considered complete without accompanying passing tests.
+   - **BLoC State Management**: Every BLoC/Cubit must have comprehensive event-driven state transition tests using `bloc_test`.
+   - **Database & DAOs**: Every Drift table, schema migration, and DAO query must have isolated in-memory SQLite tests in `test/database/` verifying relational constraints, sorting (e.g., FEFO), and atomic mutations.
+   - **Repositories & Network**: Every repository and remote client must mock dependencies with `mocktail`, verifying request payload mapping, header injection, and typed error handling.
+   - **Sync Engine**: Offline queue dispatchers and conflict resolvers must have simulation tests proving zero clinical data loss.
+   - **UI Components & Screens**: Reusable widgets, bottom sheets, and critical user flows must have widget tests verifying rendering, user input, and state responsiveness.
+   - **Invariant**: All tests must pass (`flutter test`) before merging any branch into `main`.

@@ -414,3 +414,22 @@ dev_dependencies:
 | **Google Play** | **16 KB Memory Page Size** | Linked with `sqlite3_flutter_libs` compiled for 16KB alignment | Configured |
 | **Google Play** | **Photo Picker Access** | Uses system photo picker without requesting `READ_MEDIA_IMAGES` | Configured |
 | **Google Play** | **Data Safety Section** | Discloses TLS 1.3 transit encryption and local encrypted patient storage | Configured |
+
+---
+
+## 8. Automated Testing Architecture & Invariants
+
+VetManager Mobile enforces a strict **Zero-Untested-Code** policy. Every feature added to the application must be verified by automated tests across the following layers:
+
+1. **Database Persistence Layer (`test/database/`)**:
+   - In-memory SQLite tests validating foreign key cascades, tenant boundaries, atomic transactions, and custom type conversions.
+   - Clinical sorting validation (e.g., triage urgency priority, FEFO batch lot ordering, and open-vial priority).
+2. **BLoC & State Machines (`test/features/*/presentation/bloc/`)**:
+   - Event-driven state transition tests using `bloc_test`.
+   - Error states, network failure recovery, and loading transitions.
+3. **Domain & Business Logic (`test/features/*/domain/`)**:
+   - Use cases and precision mathematical computations (dosages, drug waste, conversions).
+4. **Networking & Sync (`test/sync/`, `test/core/network/`)**:
+   - HTTP interceptor tests, tenant header attachment, UUID v7 idempotency verification, and conflict reconciliation simulations.
+5. **Widget & Presentation Layer (`test/features/*/presentation/`)**:
+   - Widget tests validating responsive layout, text input controllers, modal dialogs, and species avatar chips.

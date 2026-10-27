@@ -1,6 +1,8 @@
 # VetManager Mobile Application: Task & Branch Roadmap
 
 > **Workflow Rule**: Each task corresponds to an isolated Git branch. Work proceeds strictly one branch at a time. After each branch is implemented, test-verified, and reviewed, we merge to `main` before starting the next.
+>
+> **Testing Mandate**: Every feature added to this project MUST include corresponding automated test cases (unit, widget, or integration tests). No branch can be merged to `main` without dedicated passing tests for the newly added feature.
 
 ---
 
@@ -132,8 +134,10 @@
   - `lib/sync/sync_queue_dispatcher.dart` (Flushes FIFO queue to `POST /api/v1/sync/push`)
   - `lib/sync/sync_pull_service.dart` (Ingests deltas from `GET /api/v1/sync/pull`)
   - `lib/sync/conflict_resolver.dart` (Force-Reconcile & Immutable Append-Only protocol)
+  - `test/sync/sync_manager_test.dart` (Connectivity & automatic queue flushing)
+  - `test/sync/conflict_resolver_test.dart` (Force-Reconcile & FEFO spillover simulation)
 * **Definition of Done**:
-  - Simulation tests proving offline doses and notes commit without data loss.
+  - Simulation tests proving offline doses and notes commit without data loss; all sync unit tests pass.
 
 ---
 
@@ -147,8 +151,10 @@
   - `lib/features/clients_patients/presentation/screens/patient_detail_screen.dart`
   - `lib/features/clients_patients/presentation/widgets/patient_card.dart` (`OpenContainer` hero transition)
   - `lib/features/clients_patients/presentation/screens/create_patient_screen.dart`
+  - `test/features/clients_patients/patient_list_screen_test.dart`
+  - `test/features/clients_patients/patient_card_widget_test.dart`
 * **Definition of Done**:
-  - Search by phone/name, filter by species, and seamless transition from card to patient profile.
+  - Search by phone/name, filter by species, and seamless transition from card to patient profile; widget tests pass.
 
 ---
 
@@ -160,8 +166,10 @@
   - `lib/features/clinical_cases/presentation/screens/case_detail_screen.dart`
   - `lib/features/clinical_cases/presentation/widgets/soap_notes_view.dart`
   - `lib/features/clinical_cases/presentation/widgets/create_addendum_dialog.dart`
+  - `test/features/clinical_cases/cases_board_screen_test.dart`
+  - `test/features/clinical_cases/soap_notes_view_test.dart`
 * **Definition of Done**:
-  - Attending doctor can triage cases, record SOAP notes, and append immutable signed addenda.
+  - Attending doctor can triage cases, record SOAP notes, and append immutable signed addenda; all clinical case tests pass.
 
 ---
 
@@ -171,8 +179,9 @@
 * **Files to Create**:
   - `lib/features/clinical_cases/presentation/widgets/export_case_study_pdf_sheet.dart`
   - `lib/features/clinical_cases/domain/usecases/export_case_pdf_usecase.dart`
+  - `test/features/clinical_cases/export_case_pdf_usecase_test.dart`
 * **Definition of Done**:
-  - Live PDF preview via `printing` package with functional "Anonymize Owner & Pet" toggle switch.
+  - Live PDF preview via `printing` package with functional "Anonymize Owner & Pet" toggle switch; PII anonymization unit tests pass.
 
 ---
 
@@ -184,8 +193,10 @@
 * **Files to Create**:
   - `lib/features/staff_profile/presentation/screens/doctor_profile_screen.dart` (License, DEA, active workload, `is_available` toggle)
   - `lib/features/staff_profile/presentation/screens/staff_management_screen.dart` (Owner staff CRUD + PIN setup)
+  - `test/features/staff_profile/doctor_profile_screen_test.dart`
+  - `test/features/staff_profile/staff_management_test.dart`
 * **Definition of Done**:
-  - Doctor can toggle on-duty availability; Owner can manage staff and reset 4-digit PINs.
+  - Doctor can toggle on-duty availability; Owner can manage staff and reset 4-digit PINs; unit and widget tests pass.
 
 ---
 
@@ -196,8 +207,10 @@
   - `lib/features/inventory_doses/presentation/screens/administer_dose_screen.dart`
   - `lib/features/inventory_doses/presentation/widgets/witness_pin_bottom_sheet.dart` (Blurred 4-digit PIN modal)
   - `lib/features/inventory_doses/presentation/widgets/void_dose_bottom_sheet.dart` (Ledger reversal)
+  - `test/features/inventory_doses/administer_dose_screen_test.dart`
+  - `test/features/inventory_doses/witness_pin_bottom_sheet_test.dart`
 * **Definition of Done**:
-  - Controlled drug administration requires supervisor PIN verification before ledger write.
+  - Controlled drug administration requires supervisor PIN verification before ledger write; PIN verification & void reversal tests pass.
 
 ---
 
@@ -208,8 +221,10 @@
   - `lib/features/media/data/services/r2_direct_uploader.dart` (Direct HTTP PUT to presigned URLs)
   - `lib/features/media/presentation/widgets/camera_capture_sheet.dart` (WebP compression)
   - `lib/features/media/presentation/screens/photo_viewer_screen.dart` (Pinch-to-zoom radiograph viewer)
+  - `test/features/media/r2_direct_uploader_test.dart`
+  - `test/features/media/photo_viewer_screen_test.dart`
 * **Definition of Done**:
-  - Photo is compressed to WebP locally and uploaded directly to R2; offline photos queue properly.
+  - Photo is compressed to WebP locally and uploaded directly to R2; offline photos queue properly; upload and image viewer tests pass.
 
 ---
 
@@ -220,5 +235,7 @@
   - `lib/features/settings/presentation/screens/delete_account_screen.dart` (App Store Guideline 5.1.1(v))
   - `lib/features/settings/presentation/screens/medical_disclaimer_screen.dart` (App Store Guideline 1.4.1)
   - `ios/Runner/PrivacyInfo.xcprivacy` (Final Apple audit)
+  - `test/features/settings/delete_account_screen_test.dart`
+  - `test/features/settings/medical_disclaimer_screen_test.dart`
 * **Definition of Done**:
-  - Account deletion works; privacy manifests pass `xcrun altool` audit; edge-to-edge passes Android 15 audit.
+  - Account deletion works; privacy manifests pass `xcrun altool` audit; edge-to-edge passes Android 15 audit; compliance widget tests pass.

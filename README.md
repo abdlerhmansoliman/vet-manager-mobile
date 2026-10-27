@@ -25,3 +25,18 @@ flutter run
 - **Networking**: `dio` with dynamic multi-tenant injection (`X-Tenant-ID`, `Idempotency-Key` UUID v7)
 - **UI & Motion**: Cheerful Warm Cream palette, Plus Jakarta Sans, `flutter_animate`, and `animations` Hero Container Transforms
 - **Store Compliance**: Android 15 edge-to-edge + Photo Picker, Apple `PrivacyInfo.xcprivacy` manifest & in-app account deletion
+
+## Testing & Quality Assurance
+Every feature added to VetManager Mobile includes dedicated automated tests:
+```bash
+# Run the entire test suite
+flutter test
+
+# Run a specific test suite (e.g. database, auth, sync)
+flutter test test/database/inventory_dao_test.dart
+flutter test test/features/auth/smart_login_screen_test.dart
+
+# Run static analysis
+flutter analyze
+```
+> **Rule**: All features must maintain 100% test pass rate with zero analyzer warnings.
