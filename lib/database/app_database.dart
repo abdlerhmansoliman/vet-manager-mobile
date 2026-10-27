@@ -1,8 +1,10 @@
 import 'dart:io';
+import 'package:decimal/decimal.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
+import 'converters/decimal_converter.dart';
 
 import 'tables/clients_table.dart';
 import 'tables/patients_table.dart';
@@ -11,7 +13,12 @@ import 'tables/clinical_progress_notes_table.dart';
 import 'tables/diagnoses_table.dart';
 import 'tables/media_upload_queue_table.dart';
 import 'tables/sync_queue_table.dart';
+import 'tables/inventory_products_table.dart';
+import 'tables/inventory_batches_table.dart';
+import 'tables/inventory_containers_table.dart';
+import 'tables/inventory_movement_ledger_table.dart';
 import 'daos/clinical_case_dao.dart';
+import 'daos/inventory_dao.dart';
 
 part 'app_database.g.dart';
 
@@ -31,15 +38,20 @@ part 'app_database.g.dart';
     DiagnosesTable,
     MediaUploadQueueTable,
     SyncQueueTable,
+    InventoryProductsTable,
+    InventoryBatchesTable,
+    InventoryContainersTable,
+    InventoryMovementLedgerTable,
   ],
   daos: [
     ClinicalCaseDao,
+    InventoryDao,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
 
-  AppDatabase.forTesting(QueryExecutor e) : super(e);
+  AppDatabase.forTesting(super.e);
 
   @override
   int get schemaVersion => 1;

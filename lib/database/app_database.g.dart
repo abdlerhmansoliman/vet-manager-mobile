@@ -5923,6 +5923,3233 @@ class SyncQueueTableCompanion extends UpdateCompanion<SyncQueueData> {
   }
 }
 
+class $InventoryProductsTableTable extends InventoryProductsTable
+    with TableInfo<$InventoryProductsTableTable, InventoryProductData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $InventoryProductsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _tenantIdMeta =
+      const VerificationMeta('tenantId');
+  @override
+  late final GeneratedColumn<String> tenantId = GeneratedColumn<String>(
+      'tenant_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _skuMeta = const VerificationMeta('sku');
+  @override
+  late final GeneratedColumn<String> sku = GeneratedColumn<String>(
+      'sku', aliasedName, false,
+      additionalChecks:
+          GeneratedColumn.checkTextLength(minTextLength: 1, maxTextLength: 64),
+      type: DriftSqlType.string,
+      requiredDuringInsert: true);
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      additionalChecks:
+          GeneratedColumn.checkTextLength(minTextLength: 1, maxTextLength: 255),
+      type: DriftSqlType.string,
+      requiredDuringInsert: true);
+  static const VerificationMeta _descriptionMeta =
+      const VerificationMeta('description');
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+      'description', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _baseUnitMeta =
+      const VerificationMeta('baseUnit');
+  @override
+  late final GeneratedColumn<String> baseUnit = GeneratedColumn<String>(
+      'base_unit', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('ml'));
+  static const VerificationMeta _isControlledMeta =
+      const VerificationMeta('isControlled');
+  @override
+  late final GeneratedColumn<bool> isControlled = GeneratedColumn<bool>(
+      'is_controlled', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("is_controlled" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _controlledScheduleMeta =
+      const VerificationMeta('controlledSchedule');
+  @override
+  late final GeneratedColumn<String> controlledSchedule =
+      GeneratedColumn<String>('controlled_schedule', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
+  @override
+  late final GeneratedColumnWithTypeConverter<Decimal, String> minThreshold =
+      GeneratedColumn<String>('min_threshold', aliasedName, false,
+              type: DriftSqlType.string,
+              requiredDuringInsert: false,
+              defaultValue: const Constant('0'))
+          .withConverter<Decimal>(
+              $InventoryProductsTableTable.$converterminThreshold);
+  @override
+  late final GeneratedColumnWithTypeConverter<Decimal, String> currentStockQty =
+      GeneratedColumn<String>('current_stock_qty', aliasedName, false,
+              type: DriftSqlType.string,
+              requiredDuringInsert: false,
+              defaultValue: const Constant('0'))
+          .withConverter<Decimal>(
+              $InventoryProductsTableTable.$convertercurrentStockQty);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _deletedAtMeta =
+      const VerificationMeta('deletedAt');
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+      'deleted_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _syncStatusMeta =
+      const VerificationMeta('syncStatus');
+  @override
+  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
+      'sync_status', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('synced'));
+  static const VerificationMeta _lastSyncedAtMeta =
+      const VerificationMeta('lastSyncedAt');
+  @override
+  late final GeneratedColumn<DateTime> lastSyncedAt = GeneratedColumn<DateTime>(
+      'last_synced_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        tenantId,
+        sku,
+        name,
+        description,
+        baseUnit,
+        isControlled,
+        controlledSchedule,
+        minThreshold,
+        currentStockQty,
+        createdAt,
+        updatedAt,
+        deletedAt,
+        syncStatus,
+        lastSyncedAt
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'inventory_products';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<InventoryProductData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('tenant_id')) {
+      context.handle(_tenantIdMeta,
+          tenantId.isAcceptableOrUnknown(data['tenant_id']!, _tenantIdMeta));
+    } else if (isInserting) {
+      context.missing(_tenantIdMeta);
+    }
+    if (data.containsKey('sku')) {
+      context.handle(
+          _skuMeta, sku.isAcceptableOrUnknown(data['sku']!, _skuMeta));
+    } else if (isInserting) {
+      context.missing(_skuMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+          _descriptionMeta,
+          description.isAcceptableOrUnknown(
+              data['description']!, _descriptionMeta));
+    }
+    if (data.containsKey('base_unit')) {
+      context.handle(_baseUnitMeta,
+          baseUnit.isAcceptableOrUnknown(data['base_unit']!, _baseUnitMeta));
+    }
+    if (data.containsKey('is_controlled')) {
+      context.handle(
+          _isControlledMeta,
+          isControlled.isAcceptableOrUnknown(
+              data['is_controlled']!, _isControlledMeta));
+    }
+    if (data.containsKey('controlled_schedule')) {
+      context.handle(
+          _controlledScheduleMeta,
+          controlledSchedule.isAcceptableOrUnknown(
+              data['controlled_schedule']!, _controlledScheduleMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(_deletedAtMeta,
+          deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta));
+    }
+    if (data.containsKey('sync_status')) {
+      context.handle(
+          _syncStatusMeta,
+          syncStatus.isAcceptableOrUnknown(
+              data['sync_status']!, _syncStatusMeta));
+    }
+    if (data.containsKey('last_synced_at')) {
+      context.handle(
+          _lastSyncedAtMeta,
+          lastSyncedAt.isAcceptableOrUnknown(
+              data['last_synced_at']!, _lastSyncedAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  InventoryProductData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return InventoryProductData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      tenantId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}tenant_id'])!,
+      sku: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}sku'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      description: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}description']),
+      baseUnit: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}base_unit'])!,
+      isControlled: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_controlled'])!,
+      controlledSchedule: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}controlled_schedule']),
+      minThreshold: $InventoryProductsTableTable.$converterminThreshold.fromSql(
+          attachedDatabase.typeMapping.read(
+              DriftSqlType.string, data['${effectivePrefix}min_threshold'])!),
+      currentStockQty: $InventoryProductsTableTable.$convertercurrentStockQty
+          .fromSql(attachedDatabase.typeMapping.read(DriftSqlType.string,
+              data['${effectivePrefix}current_stock_qty'])!),
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      deletedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}deleted_at']),
+      syncStatus: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}sync_status'])!,
+      lastSyncedAt: attachedDatabase.typeMapping.read(
+          DriftSqlType.dateTime, data['${effectivePrefix}last_synced_at']),
+    );
+  }
+
+  @override
+  $InventoryProductsTableTable createAlias(String alias) {
+    return $InventoryProductsTableTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<Decimal, String> $converterminThreshold =
+      const DecimalConverter();
+  static TypeConverter<Decimal, String> $convertercurrentStockQty =
+      const DecimalConverter();
+}
+
+class InventoryProductData extends DataClass
+    implements Insertable<InventoryProductData> {
+  /// Primary UUID v7 identifier
+  final String id;
+
+  /// Multi-tenant clinical practice isolation key
+  final String tenantId;
+
+  /// Stock Keeping Unit or internal item barcode identifier
+  final String sku;
+
+  /// Commercial trade name or generic pharmaceutical designation
+  final String name;
+
+  /// Formulation details, active concentrations, or indications
+  final String? description;
+
+  /// Base measurement unit for inventory calculation: ml, mg, tablet, bolus, vial
+  final String baseUnit;
+
+  /// Flag indicating whether the drug is subject to controlled substance protocols
+  final bool isControlled;
+
+  /// DEA/National Controlled Substance Schedule (e.g., 'schedule_ii', 'schedule_iii', 'schedule_iv', 'schedule_v')
+  final String? controlledSchedule;
+
+  /// Safety restock threshold in base units
+  final Decimal minThreshold;
+
+  /// Aggregated cached stock on hand in base units
+  final Decimal currentStockQty;
+
+  /// Record creation timestamp
+  final DateTime createdAt;
+
+  /// Record modification timestamp
+  final DateTime updatedAt;
+
+  /// Soft deletion timestamp
+  final DateTime? deletedAt;
+
+  /// Offline synchronization lifecycle: synced, pending_create, pending_update, pending_delete
+  final String syncStatus;
+
+  /// Last server sync timestamp
+  final DateTime? lastSyncedAt;
+  const InventoryProductData(
+      {required this.id,
+      required this.tenantId,
+      required this.sku,
+      required this.name,
+      this.description,
+      required this.baseUnit,
+      required this.isControlled,
+      this.controlledSchedule,
+      required this.minThreshold,
+      required this.currentStockQty,
+      required this.createdAt,
+      required this.updatedAt,
+      this.deletedAt,
+      required this.syncStatus,
+      this.lastSyncedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['tenant_id'] = Variable<String>(tenantId);
+    map['sku'] = Variable<String>(sku);
+    map['name'] = Variable<String>(name);
+    if (!nullToAbsent || description != null) {
+      map['description'] = Variable<String>(description);
+    }
+    map['base_unit'] = Variable<String>(baseUnit);
+    map['is_controlled'] = Variable<bool>(isControlled);
+    if (!nullToAbsent || controlledSchedule != null) {
+      map['controlled_schedule'] = Variable<String>(controlledSchedule);
+    }
+    {
+      map['min_threshold'] = Variable<String>($InventoryProductsTableTable
+          .$converterminThreshold
+          .toSql(minThreshold));
+    }
+    {
+      map['current_stock_qty'] = Variable<String>($InventoryProductsTableTable
+          .$convertercurrentStockQty
+          .toSql(currentStockQty));
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['sync_status'] = Variable<String>(syncStatus);
+    if (!nullToAbsent || lastSyncedAt != null) {
+      map['last_synced_at'] = Variable<DateTime>(lastSyncedAt);
+    }
+    return map;
+  }
+
+  InventoryProductsTableCompanion toCompanion(bool nullToAbsent) {
+    return InventoryProductsTableCompanion(
+      id: Value(id),
+      tenantId: Value(tenantId),
+      sku: Value(sku),
+      name: Value(name),
+      description: description == null && nullToAbsent
+          ? const Value.absent()
+          : Value(description),
+      baseUnit: Value(baseUnit),
+      isControlled: Value(isControlled),
+      controlledSchedule: controlledSchedule == null && nullToAbsent
+          ? const Value.absent()
+          : Value(controlledSchedule),
+      minThreshold: Value(minThreshold),
+      currentStockQty: Value(currentStockQty),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      syncStatus: Value(syncStatus),
+      lastSyncedAt: lastSyncedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastSyncedAt),
+    );
+  }
+
+  factory InventoryProductData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return InventoryProductData(
+      id: serializer.fromJson<String>(json['id']),
+      tenantId: serializer.fromJson<String>(json['tenantId']),
+      sku: serializer.fromJson<String>(json['sku']),
+      name: serializer.fromJson<String>(json['name']),
+      description: serializer.fromJson<String?>(json['description']),
+      baseUnit: serializer.fromJson<String>(json['baseUnit']),
+      isControlled: serializer.fromJson<bool>(json['isControlled']),
+      controlledSchedule:
+          serializer.fromJson<String?>(json['controlledSchedule']),
+      minThreshold: serializer.fromJson<Decimal>(json['minThreshold']),
+      currentStockQty: serializer.fromJson<Decimal>(json['currentStockQty']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      syncStatus: serializer.fromJson<String>(json['syncStatus']),
+      lastSyncedAt: serializer.fromJson<DateTime?>(json['lastSyncedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'tenantId': serializer.toJson<String>(tenantId),
+      'sku': serializer.toJson<String>(sku),
+      'name': serializer.toJson<String>(name),
+      'description': serializer.toJson<String?>(description),
+      'baseUnit': serializer.toJson<String>(baseUnit),
+      'isControlled': serializer.toJson<bool>(isControlled),
+      'controlledSchedule': serializer.toJson<String?>(controlledSchedule),
+      'minThreshold': serializer.toJson<Decimal>(minThreshold),
+      'currentStockQty': serializer.toJson<Decimal>(currentStockQty),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'syncStatus': serializer.toJson<String>(syncStatus),
+      'lastSyncedAt': serializer.toJson<DateTime?>(lastSyncedAt),
+    };
+  }
+
+  InventoryProductData copyWith(
+          {String? id,
+          String? tenantId,
+          String? sku,
+          String? name,
+          Value<String?> description = const Value.absent(),
+          String? baseUnit,
+          bool? isControlled,
+          Value<String?> controlledSchedule = const Value.absent(),
+          Decimal? minThreshold,
+          Decimal? currentStockQty,
+          DateTime? createdAt,
+          DateTime? updatedAt,
+          Value<DateTime?> deletedAt = const Value.absent(),
+          String? syncStatus,
+          Value<DateTime?> lastSyncedAt = const Value.absent()}) =>
+      InventoryProductData(
+        id: id ?? this.id,
+        tenantId: tenantId ?? this.tenantId,
+        sku: sku ?? this.sku,
+        name: name ?? this.name,
+        description: description.present ? description.value : this.description,
+        baseUnit: baseUnit ?? this.baseUnit,
+        isControlled: isControlled ?? this.isControlled,
+        controlledSchedule: controlledSchedule.present
+            ? controlledSchedule.value
+            : this.controlledSchedule,
+        minThreshold: minThreshold ?? this.minThreshold,
+        currentStockQty: currentStockQty ?? this.currentStockQty,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+        syncStatus: syncStatus ?? this.syncStatus,
+        lastSyncedAt:
+            lastSyncedAt.present ? lastSyncedAt.value : this.lastSyncedAt,
+      );
+  InventoryProductData copyWithCompanion(InventoryProductsTableCompanion data) {
+    return InventoryProductData(
+      id: data.id.present ? data.id.value : this.id,
+      tenantId: data.tenantId.present ? data.tenantId.value : this.tenantId,
+      sku: data.sku.present ? data.sku.value : this.sku,
+      name: data.name.present ? data.name.value : this.name,
+      description:
+          data.description.present ? data.description.value : this.description,
+      baseUnit: data.baseUnit.present ? data.baseUnit.value : this.baseUnit,
+      isControlled: data.isControlled.present
+          ? data.isControlled.value
+          : this.isControlled,
+      controlledSchedule: data.controlledSchedule.present
+          ? data.controlledSchedule.value
+          : this.controlledSchedule,
+      minThreshold: data.minThreshold.present
+          ? data.minThreshold.value
+          : this.minThreshold,
+      currentStockQty: data.currentStockQty.present
+          ? data.currentStockQty.value
+          : this.currentStockQty,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      syncStatus:
+          data.syncStatus.present ? data.syncStatus.value : this.syncStatus,
+      lastSyncedAt: data.lastSyncedAt.present
+          ? data.lastSyncedAt.value
+          : this.lastSyncedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('InventoryProductData(')
+          ..write('id: $id, ')
+          ..write('tenantId: $tenantId, ')
+          ..write('sku: $sku, ')
+          ..write('name: $name, ')
+          ..write('description: $description, ')
+          ..write('baseUnit: $baseUnit, ')
+          ..write('isControlled: $isControlled, ')
+          ..write('controlledSchedule: $controlledSchedule, ')
+          ..write('minThreshold: $minThreshold, ')
+          ..write('currentStockQty: $currentStockQty, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('lastSyncedAt: $lastSyncedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id,
+      tenantId,
+      sku,
+      name,
+      description,
+      baseUnit,
+      isControlled,
+      controlledSchedule,
+      minThreshold,
+      currentStockQty,
+      createdAt,
+      updatedAt,
+      deletedAt,
+      syncStatus,
+      lastSyncedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is InventoryProductData &&
+          other.id == this.id &&
+          other.tenantId == this.tenantId &&
+          other.sku == this.sku &&
+          other.name == this.name &&
+          other.description == this.description &&
+          other.baseUnit == this.baseUnit &&
+          other.isControlled == this.isControlled &&
+          other.controlledSchedule == this.controlledSchedule &&
+          other.minThreshold == this.minThreshold &&
+          other.currentStockQty == this.currentStockQty &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.syncStatus == this.syncStatus &&
+          other.lastSyncedAt == this.lastSyncedAt);
+}
+
+class InventoryProductsTableCompanion
+    extends UpdateCompanion<InventoryProductData> {
+  final Value<String> id;
+  final Value<String> tenantId;
+  final Value<String> sku;
+  final Value<String> name;
+  final Value<String?> description;
+  final Value<String> baseUnit;
+  final Value<bool> isControlled;
+  final Value<String?> controlledSchedule;
+  final Value<Decimal> minThreshold;
+  final Value<Decimal> currentStockQty;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<String> syncStatus;
+  final Value<DateTime?> lastSyncedAt;
+  final Value<int> rowid;
+  const InventoryProductsTableCompanion({
+    this.id = const Value.absent(),
+    this.tenantId = const Value.absent(),
+    this.sku = const Value.absent(),
+    this.name = const Value.absent(),
+    this.description = const Value.absent(),
+    this.baseUnit = const Value.absent(),
+    this.isControlled = const Value.absent(),
+    this.controlledSchedule = const Value.absent(),
+    this.minThreshold = const Value.absent(),
+    this.currentStockQty = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    this.lastSyncedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  InventoryProductsTableCompanion.insert({
+    required String id,
+    required String tenantId,
+    required String sku,
+    required String name,
+    this.description = const Value.absent(),
+    this.baseUnit = const Value.absent(),
+    this.isControlled = const Value.absent(),
+    this.controlledSchedule = const Value.absent(),
+    this.minThreshold = const Value.absent(),
+    this.currentStockQty = const Value.absent(),
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.deletedAt = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    this.lastSyncedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        tenantId = Value(tenantId),
+        sku = Value(sku),
+        name = Value(name),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt);
+  static Insertable<InventoryProductData> custom({
+    Expression<String>? id,
+    Expression<String>? tenantId,
+    Expression<String>? sku,
+    Expression<String>? name,
+    Expression<String>? description,
+    Expression<String>? baseUnit,
+    Expression<bool>? isControlled,
+    Expression<String>? controlledSchedule,
+    Expression<String>? minThreshold,
+    Expression<String>? currentStockQty,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<String>? syncStatus,
+    Expression<DateTime>? lastSyncedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (tenantId != null) 'tenant_id': tenantId,
+      if (sku != null) 'sku': sku,
+      if (name != null) 'name': name,
+      if (description != null) 'description': description,
+      if (baseUnit != null) 'base_unit': baseUnit,
+      if (isControlled != null) 'is_controlled': isControlled,
+      if (controlledSchedule != null) 'controlled_schedule': controlledSchedule,
+      if (minThreshold != null) 'min_threshold': minThreshold,
+      if (currentStockQty != null) 'current_stock_qty': currentStockQty,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (syncStatus != null) 'sync_status': syncStatus,
+      if (lastSyncedAt != null) 'last_synced_at': lastSyncedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  InventoryProductsTableCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? tenantId,
+      Value<String>? sku,
+      Value<String>? name,
+      Value<String?>? description,
+      Value<String>? baseUnit,
+      Value<bool>? isControlled,
+      Value<String?>? controlledSchedule,
+      Value<Decimal>? minThreshold,
+      Value<Decimal>? currentStockQty,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
+      Value<DateTime?>? deletedAt,
+      Value<String>? syncStatus,
+      Value<DateTime?>? lastSyncedAt,
+      Value<int>? rowid}) {
+    return InventoryProductsTableCompanion(
+      id: id ?? this.id,
+      tenantId: tenantId ?? this.tenantId,
+      sku: sku ?? this.sku,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      baseUnit: baseUnit ?? this.baseUnit,
+      isControlled: isControlled ?? this.isControlled,
+      controlledSchedule: controlledSchedule ?? this.controlledSchedule,
+      minThreshold: minThreshold ?? this.minThreshold,
+      currentStockQty: currentStockQty ?? this.currentStockQty,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      syncStatus: syncStatus ?? this.syncStatus,
+      lastSyncedAt: lastSyncedAt ?? this.lastSyncedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (tenantId.present) {
+      map['tenant_id'] = Variable<String>(tenantId.value);
+    }
+    if (sku.present) {
+      map['sku'] = Variable<String>(sku.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (baseUnit.present) {
+      map['base_unit'] = Variable<String>(baseUnit.value);
+    }
+    if (isControlled.present) {
+      map['is_controlled'] = Variable<bool>(isControlled.value);
+    }
+    if (controlledSchedule.present) {
+      map['controlled_schedule'] = Variable<String>(controlledSchedule.value);
+    }
+    if (minThreshold.present) {
+      map['min_threshold'] = Variable<String>($InventoryProductsTableTable
+          .$converterminThreshold
+          .toSql(minThreshold.value));
+    }
+    if (currentStockQty.present) {
+      map['current_stock_qty'] = Variable<String>($InventoryProductsTableTable
+          .$convertercurrentStockQty
+          .toSql(currentStockQty.value));
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<String>(syncStatus.value);
+    }
+    if (lastSyncedAt.present) {
+      map['last_synced_at'] = Variable<DateTime>(lastSyncedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('InventoryProductsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('tenantId: $tenantId, ')
+          ..write('sku: $sku, ')
+          ..write('name: $name, ')
+          ..write('description: $description, ')
+          ..write('baseUnit: $baseUnit, ')
+          ..write('isControlled: $isControlled, ')
+          ..write('controlledSchedule: $controlledSchedule, ')
+          ..write('minThreshold: $minThreshold, ')
+          ..write('currentStockQty: $currentStockQty, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('lastSyncedAt: $lastSyncedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $InventoryBatchesTableTable extends InventoryBatchesTable
+    with TableInfo<$InventoryBatchesTableTable, InventoryBatchData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $InventoryBatchesTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _tenantIdMeta =
+      const VerificationMeta('tenantId');
+  @override
+  late final GeneratedColumn<String> tenantId = GeneratedColumn<String>(
+      'tenant_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _productIdMeta =
+      const VerificationMeta('productId');
+  @override
+  late final GeneratedColumn<String> productId = GeneratedColumn<String>(
+      'product_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES inventory_products (id)'));
+  static const VerificationMeta _lotNumberMeta =
+      const VerificationMeta('lotNumber');
+  @override
+  late final GeneratedColumn<String> lotNumber = GeneratedColumn<String>(
+      'lot_number', aliasedName, false,
+      additionalChecks:
+          GeneratedColumn.checkTextLength(minTextLength: 1, maxTextLength: 64),
+      type: DriftSqlType.string,
+      requiredDuringInsert: true);
+  static const VerificationMeta _expiresAtMeta =
+      const VerificationMeta('expiresAt');
+  @override
+  late final GeneratedColumn<DateTime> expiresAt = GeneratedColumn<DateTime>(
+      'expires_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  @override
+  late final GeneratedColumnWithTypeConverter<Decimal, String> unitCost =
+      GeneratedColumn<String>('unit_cost', aliasedName, false,
+              type: DriftSqlType.string,
+              requiredDuringInsert: false,
+              defaultValue: const Constant('0'))
+          .withConverter<Decimal>(
+              $InventoryBatchesTableTable.$converterunitCost);
+  @override
+  late final GeneratedColumnWithTypeConverter<Decimal, String> initialBaseQty =
+      GeneratedColumn<String>('initial_base_qty', aliasedName, false,
+              type: DriftSqlType.string, requiredDuringInsert: true)
+          .withConverter<Decimal>(
+              $InventoryBatchesTableTable.$converterinitialBaseQty);
+  @override
+  late final GeneratedColumnWithTypeConverter<Decimal, String>
+      remainingBaseQty = GeneratedColumn<String>(
+              'remaining_base_qty', aliasedName, false,
+              type: DriftSqlType.string, requiredDuringInsert: true)
+          .withConverter<Decimal>(
+              $InventoryBatchesTableTable.$converterremainingBaseQty);
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+      'status', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('active'));
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _deletedAtMeta =
+      const VerificationMeta('deletedAt');
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+      'deleted_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _syncStatusMeta =
+      const VerificationMeta('syncStatus');
+  @override
+  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
+      'sync_status', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('synced'));
+  static const VerificationMeta _lastSyncedAtMeta =
+      const VerificationMeta('lastSyncedAt');
+  @override
+  late final GeneratedColumn<DateTime> lastSyncedAt = GeneratedColumn<DateTime>(
+      'last_synced_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        tenantId,
+        productId,
+        lotNumber,
+        expiresAt,
+        unitCost,
+        initialBaseQty,
+        remainingBaseQty,
+        status,
+        createdAt,
+        updatedAt,
+        deletedAt,
+        syncStatus,
+        lastSyncedAt
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'inventory_batches';
+  @override
+  VerificationContext validateIntegrity(Insertable<InventoryBatchData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('tenant_id')) {
+      context.handle(_tenantIdMeta,
+          tenantId.isAcceptableOrUnknown(data['tenant_id']!, _tenantIdMeta));
+    } else if (isInserting) {
+      context.missing(_tenantIdMeta);
+    }
+    if (data.containsKey('product_id')) {
+      context.handle(_productIdMeta,
+          productId.isAcceptableOrUnknown(data['product_id']!, _productIdMeta));
+    } else if (isInserting) {
+      context.missing(_productIdMeta);
+    }
+    if (data.containsKey('lot_number')) {
+      context.handle(_lotNumberMeta,
+          lotNumber.isAcceptableOrUnknown(data['lot_number']!, _lotNumberMeta));
+    } else if (isInserting) {
+      context.missing(_lotNumberMeta);
+    }
+    if (data.containsKey('expires_at')) {
+      context.handle(_expiresAtMeta,
+          expiresAt.isAcceptableOrUnknown(data['expires_at']!, _expiresAtMeta));
+    } else if (isInserting) {
+      context.missing(_expiresAtMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(_statusMeta,
+          status.isAcceptableOrUnknown(data['status']!, _statusMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(_deletedAtMeta,
+          deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta));
+    }
+    if (data.containsKey('sync_status')) {
+      context.handle(
+          _syncStatusMeta,
+          syncStatus.isAcceptableOrUnknown(
+              data['sync_status']!, _syncStatusMeta));
+    }
+    if (data.containsKey('last_synced_at')) {
+      context.handle(
+          _lastSyncedAtMeta,
+          lastSyncedAt.isAcceptableOrUnknown(
+              data['last_synced_at']!, _lastSyncedAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  InventoryBatchData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return InventoryBatchData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      tenantId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}tenant_id'])!,
+      productId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}product_id'])!,
+      lotNumber: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}lot_number'])!,
+      expiresAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}expires_at'])!,
+      unitCost: $InventoryBatchesTableTable.$converterunitCost.fromSql(
+          attachedDatabase.typeMapping
+              .read(DriftSqlType.string, data['${effectivePrefix}unit_cost'])!),
+      initialBaseQty: $InventoryBatchesTableTable.$converterinitialBaseQty
+          .fromSql(attachedDatabase.typeMapping.read(DriftSqlType.string,
+              data['${effectivePrefix}initial_base_qty'])!),
+      remainingBaseQty: $InventoryBatchesTableTable.$converterremainingBaseQty
+          .fromSql(attachedDatabase.typeMapping.read(DriftSqlType.string,
+              data['${effectivePrefix}remaining_base_qty'])!),
+      status: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}status'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      deletedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}deleted_at']),
+      syncStatus: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}sync_status'])!,
+      lastSyncedAt: attachedDatabase.typeMapping.read(
+          DriftSqlType.dateTime, data['${effectivePrefix}last_synced_at']),
+    );
+  }
+
+  @override
+  $InventoryBatchesTableTable createAlias(String alias) {
+    return $InventoryBatchesTableTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<Decimal, String> $converterunitCost =
+      const DecimalConverter();
+  static TypeConverter<Decimal, String> $converterinitialBaseQty =
+      const DecimalConverter();
+  static TypeConverter<Decimal, String> $converterremainingBaseQty =
+      const DecimalConverter();
+}
+
+class InventoryBatchData extends DataClass
+    implements Insertable<InventoryBatchData> {
+  /// Primary UUID v7 identifier
+  final String id;
+
+  /// Multi-tenant clinical practice isolation key
+  final String tenantId;
+
+  /// Foreign key linking batch to parent product catalog item
+  final String productId;
+
+  /// Manufacturer lot or batch code
+  final String lotNumber;
+
+  /// Batch expiration date (fundamental for FEFO ordering)
+  final DateTime expiresAt;
+
+  /// Purchase unit cost per base unit (high precision)
+  final Decimal unitCost;
+
+  /// Total initial base quantity received in this batch
+  final Decimal initialBaseQty;
+
+  /// Remaining available base quantity remaining in this batch
+  final Decimal remainingBaseQty;
+
+  /// Batch status: active, quarantined, recalled, expired, depleted
+  final String status;
+
+  /// Record creation timestamp
+  final DateTime createdAt;
+
+  /// Record modification timestamp
+  final DateTime updatedAt;
+
+  /// Soft deletion timestamp
+  final DateTime? deletedAt;
+
+  /// Offline synchronization lifecycle: synced, pending_create, pending_update, pending_delete
+  final String syncStatus;
+
+  /// Last server sync timestamp
+  final DateTime? lastSyncedAt;
+  const InventoryBatchData(
+      {required this.id,
+      required this.tenantId,
+      required this.productId,
+      required this.lotNumber,
+      required this.expiresAt,
+      required this.unitCost,
+      required this.initialBaseQty,
+      required this.remainingBaseQty,
+      required this.status,
+      required this.createdAt,
+      required this.updatedAt,
+      this.deletedAt,
+      required this.syncStatus,
+      this.lastSyncedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['tenant_id'] = Variable<String>(tenantId);
+    map['product_id'] = Variable<String>(productId);
+    map['lot_number'] = Variable<String>(lotNumber);
+    map['expires_at'] = Variable<DateTime>(expiresAt);
+    {
+      map['unit_cost'] = Variable<String>(
+          $InventoryBatchesTableTable.$converterunitCost.toSql(unitCost));
+    }
+    {
+      map['initial_base_qty'] = Variable<String>($InventoryBatchesTableTable
+          .$converterinitialBaseQty
+          .toSql(initialBaseQty));
+    }
+    {
+      map['remaining_base_qty'] = Variable<String>($InventoryBatchesTableTable
+          .$converterremainingBaseQty
+          .toSql(remainingBaseQty));
+    }
+    map['status'] = Variable<String>(status);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['sync_status'] = Variable<String>(syncStatus);
+    if (!nullToAbsent || lastSyncedAt != null) {
+      map['last_synced_at'] = Variable<DateTime>(lastSyncedAt);
+    }
+    return map;
+  }
+
+  InventoryBatchesTableCompanion toCompanion(bool nullToAbsent) {
+    return InventoryBatchesTableCompanion(
+      id: Value(id),
+      tenantId: Value(tenantId),
+      productId: Value(productId),
+      lotNumber: Value(lotNumber),
+      expiresAt: Value(expiresAt),
+      unitCost: Value(unitCost),
+      initialBaseQty: Value(initialBaseQty),
+      remainingBaseQty: Value(remainingBaseQty),
+      status: Value(status),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      syncStatus: Value(syncStatus),
+      lastSyncedAt: lastSyncedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastSyncedAt),
+    );
+  }
+
+  factory InventoryBatchData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return InventoryBatchData(
+      id: serializer.fromJson<String>(json['id']),
+      tenantId: serializer.fromJson<String>(json['tenantId']),
+      productId: serializer.fromJson<String>(json['productId']),
+      lotNumber: serializer.fromJson<String>(json['lotNumber']),
+      expiresAt: serializer.fromJson<DateTime>(json['expiresAt']),
+      unitCost: serializer.fromJson<Decimal>(json['unitCost']),
+      initialBaseQty: serializer.fromJson<Decimal>(json['initialBaseQty']),
+      remainingBaseQty: serializer.fromJson<Decimal>(json['remainingBaseQty']),
+      status: serializer.fromJson<String>(json['status']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      syncStatus: serializer.fromJson<String>(json['syncStatus']),
+      lastSyncedAt: serializer.fromJson<DateTime?>(json['lastSyncedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'tenantId': serializer.toJson<String>(tenantId),
+      'productId': serializer.toJson<String>(productId),
+      'lotNumber': serializer.toJson<String>(lotNumber),
+      'expiresAt': serializer.toJson<DateTime>(expiresAt),
+      'unitCost': serializer.toJson<Decimal>(unitCost),
+      'initialBaseQty': serializer.toJson<Decimal>(initialBaseQty),
+      'remainingBaseQty': serializer.toJson<Decimal>(remainingBaseQty),
+      'status': serializer.toJson<String>(status),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'syncStatus': serializer.toJson<String>(syncStatus),
+      'lastSyncedAt': serializer.toJson<DateTime?>(lastSyncedAt),
+    };
+  }
+
+  InventoryBatchData copyWith(
+          {String? id,
+          String? tenantId,
+          String? productId,
+          String? lotNumber,
+          DateTime? expiresAt,
+          Decimal? unitCost,
+          Decimal? initialBaseQty,
+          Decimal? remainingBaseQty,
+          String? status,
+          DateTime? createdAt,
+          DateTime? updatedAt,
+          Value<DateTime?> deletedAt = const Value.absent(),
+          String? syncStatus,
+          Value<DateTime?> lastSyncedAt = const Value.absent()}) =>
+      InventoryBatchData(
+        id: id ?? this.id,
+        tenantId: tenantId ?? this.tenantId,
+        productId: productId ?? this.productId,
+        lotNumber: lotNumber ?? this.lotNumber,
+        expiresAt: expiresAt ?? this.expiresAt,
+        unitCost: unitCost ?? this.unitCost,
+        initialBaseQty: initialBaseQty ?? this.initialBaseQty,
+        remainingBaseQty: remainingBaseQty ?? this.remainingBaseQty,
+        status: status ?? this.status,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+        syncStatus: syncStatus ?? this.syncStatus,
+        lastSyncedAt:
+            lastSyncedAt.present ? lastSyncedAt.value : this.lastSyncedAt,
+      );
+  InventoryBatchData copyWithCompanion(InventoryBatchesTableCompanion data) {
+    return InventoryBatchData(
+      id: data.id.present ? data.id.value : this.id,
+      tenantId: data.tenantId.present ? data.tenantId.value : this.tenantId,
+      productId: data.productId.present ? data.productId.value : this.productId,
+      lotNumber: data.lotNumber.present ? data.lotNumber.value : this.lotNumber,
+      expiresAt: data.expiresAt.present ? data.expiresAt.value : this.expiresAt,
+      unitCost: data.unitCost.present ? data.unitCost.value : this.unitCost,
+      initialBaseQty: data.initialBaseQty.present
+          ? data.initialBaseQty.value
+          : this.initialBaseQty,
+      remainingBaseQty: data.remainingBaseQty.present
+          ? data.remainingBaseQty.value
+          : this.remainingBaseQty,
+      status: data.status.present ? data.status.value : this.status,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      syncStatus:
+          data.syncStatus.present ? data.syncStatus.value : this.syncStatus,
+      lastSyncedAt: data.lastSyncedAt.present
+          ? data.lastSyncedAt.value
+          : this.lastSyncedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('InventoryBatchData(')
+          ..write('id: $id, ')
+          ..write('tenantId: $tenantId, ')
+          ..write('productId: $productId, ')
+          ..write('lotNumber: $lotNumber, ')
+          ..write('expiresAt: $expiresAt, ')
+          ..write('unitCost: $unitCost, ')
+          ..write('initialBaseQty: $initialBaseQty, ')
+          ..write('remainingBaseQty: $remainingBaseQty, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('lastSyncedAt: $lastSyncedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id,
+      tenantId,
+      productId,
+      lotNumber,
+      expiresAt,
+      unitCost,
+      initialBaseQty,
+      remainingBaseQty,
+      status,
+      createdAt,
+      updatedAt,
+      deletedAt,
+      syncStatus,
+      lastSyncedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is InventoryBatchData &&
+          other.id == this.id &&
+          other.tenantId == this.tenantId &&
+          other.productId == this.productId &&
+          other.lotNumber == this.lotNumber &&
+          other.expiresAt == this.expiresAt &&
+          other.unitCost == this.unitCost &&
+          other.initialBaseQty == this.initialBaseQty &&
+          other.remainingBaseQty == this.remainingBaseQty &&
+          other.status == this.status &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.syncStatus == this.syncStatus &&
+          other.lastSyncedAt == this.lastSyncedAt);
+}
+
+class InventoryBatchesTableCompanion
+    extends UpdateCompanion<InventoryBatchData> {
+  final Value<String> id;
+  final Value<String> tenantId;
+  final Value<String> productId;
+  final Value<String> lotNumber;
+  final Value<DateTime> expiresAt;
+  final Value<Decimal> unitCost;
+  final Value<Decimal> initialBaseQty;
+  final Value<Decimal> remainingBaseQty;
+  final Value<String> status;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<String> syncStatus;
+  final Value<DateTime?> lastSyncedAt;
+  final Value<int> rowid;
+  const InventoryBatchesTableCompanion({
+    this.id = const Value.absent(),
+    this.tenantId = const Value.absent(),
+    this.productId = const Value.absent(),
+    this.lotNumber = const Value.absent(),
+    this.expiresAt = const Value.absent(),
+    this.unitCost = const Value.absent(),
+    this.initialBaseQty = const Value.absent(),
+    this.remainingBaseQty = const Value.absent(),
+    this.status = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    this.lastSyncedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  InventoryBatchesTableCompanion.insert({
+    required String id,
+    required String tenantId,
+    required String productId,
+    required String lotNumber,
+    required DateTime expiresAt,
+    this.unitCost = const Value.absent(),
+    required Decimal initialBaseQty,
+    required Decimal remainingBaseQty,
+    this.status = const Value.absent(),
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.deletedAt = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    this.lastSyncedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        tenantId = Value(tenantId),
+        productId = Value(productId),
+        lotNumber = Value(lotNumber),
+        expiresAt = Value(expiresAt),
+        initialBaseQty = Value(initialBaseQty),
+        remainingBaseQty = Value(remainingBaseQty),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt);
+  static Insertable<InventoryBatchData> custom({
+    Expression<String>? id,
+    Expression<String>? tenantId,
+    Expression<String>? productId,
+    Expression<String>? lotNumber,
+    Expression<DateTime>? expiresAt,
+    Expression<String>? unitCost,
+    Expression<String>? initialBaseQty,
+    Expression<String>? remainingBaseQty,
+    Expression<String>? status,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<String>? syncStatus,
+    Expression<DateTime>? lastSyncedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (tenantId != null) 'tenant_id': tenantId,
+      if (productId != null) 'product_id': productId,
+      if (lotNumber != null) 'lot_number': lotNumber,
+      if (expiresAt != null) 'expires_at': expiresAt,
+      if (unitCost != null) 'unit_cost': unitCost,
+      if (initialBaseQty != null) 'initial_base_qty': initialBaseQty,
+      if (remainingBaseQty != null) 'remaining_base_qty': remainingBaseQty,
+      if (status != null) 'status': status,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (syncStatus != null) 'sync_status': syncStatus,
+      if (lastSyncedAt != null) 'last_synced_at': lastSyncedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  InventoryBatchesTableCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? tenantId,
+      Value<String>? productId,
+      Value<String>? lotNumber,
+      Value<DateTime>? expiresAt,
+      Value<Decimal>? unitCost,
+      Value<Decimal>? initialBaseQty,
+      Value<Decimal>? remainingBaseQty,
+      Value<String>? status,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
+      Value<DateTime?>? deletedAt,
+      Value<String>? syncStatus,
+      Value<DateTime?>? lastSyncedAt,
+      Value<int>? rowid}) {
+    return InventoryBatchesTableCompanion(
+      id: id ?? this.id,
+      tenantId: tenantId ?? this.tenantId,
+      productId: productId ?? this.productId,
+      lotNumber: lotNumber ?? this.lotNumber,
+      expiresAt: expiresAt ?? this.expiresAt,
+      unitCost: unitCost ?? this.unitCost,
+      initialBaseQty: initialBaseQty ?? this.initialBaseQty,
+      remainingBaseQty: remainingBaseQty ?? this.remainingBaseQty,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      syncStatus: syncStatus ?? this.syncStatus,
+      lastSyncedAt: lastSyncedAt ?? this.lastSyncedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (tenantId.present) {
+      map['tenant_id'] = Variable<String>(tenantId.value);
+    }
+    if (productId.present) {
+      map['product_id'] = Variable<String>(productId.value);
+    }
+    if (lotNumber.present) {
+      map['lot_number'] = Variable<String>(lotNumber.value);
+    }
+    if (expiresAt.present) {
+      map['expires_at'] = Variable<DateTime>(expiresAt.value);
+    }
+    if (unitCost.present) {
+      map['unit_cost'] = Variable<String>(
+          $InventoryBatchesTableTable.$converterunitCost.toSql(unitCost.value));
+    }
+    if (initialBaseQty.present) {
+      map['initial_base_qty'] = Variable<String>($InventoryBatchesTableTable
+          .$converterinitialBaseQty
+          .toSql(initialBaseQty.value));
+    }
+    if (remainingBaseQty.present) {
+      map['remaining_base_qty'] = Variable<String>($InventoryBatchesTableTable
+          .$converterremainingBaseQty
+          .toSql(remainingBaseQty.value));
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<String>(syncStatus.value);
+    }
+    if (lastSyncedAt.present) {
+      map['last_synced_at'] = Variable<DateTime>(lastSyncedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('InventoryBatchesTableCompanion(')
+          ..write('id: $id, ')
+          ..write('tenantId: $tenantId, ')
+          ..write('productId: $productId, ')
+          ..write('lotNumber: $lotNumber, ')
+          ..write('expiresAt: $expiresAt, ')
+          ..write('unitCost: $unitCost, ')
+          ..write('initialBaseQty: $initialBaseQty, ')
+          ..write('remainingBaseQty: $remainingBaseQty, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('lastSyncedAt: $lastSyncedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $InventoryContainersTableTable extends InventoryContainersTable
+    with TableInfo<$InventoryContainersTableTable, InventoryContainerData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $InventoryContainersTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _tenantIdMeta =
+      const VerificationMeta('tenantId');
+  @override
+  late final GeneratedColumn<String> tenantId = GeneratedColumn<String>(
+      'tenant_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _batchIdMeta =
+      const VerificationMeta('batchId');
+  @override
+  late final GeneratedColumn<String> batchId = GeneratedColumn<String>(
+      'batch_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES inventory_batches (id)'));
+  static const VerificationMeta _productIdMeta =
+      const VerificationMeta('productId');
+  @override
+  late final GeneratedColumn<String> productId = GeneratedColumn<String>(
+      'product_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES inventory_products (id)'));
+  static const VerificationMeta _barcodeMeta =
+      const VerificationMeta('barcode');
+  @override
+  late final GeneratedColumn<String> barcode = GeneratedColumn<String>(
+      'barcode', aliasedName, false,
+      additionalChecks:
+          GeneratedColumn.checkTextLength(minTextLength: 1, maxTextLength: 128),
+      type: DriftSqlType.string,
+      requiredDuringInsert: true);
+  @override
+  late final GeneratedColumnWithTypeConverter<Decimal, String> initialVolume =
+      GeneratedColumn<String>('initial_volume', aliasedName, false,
+              type: DriftSqlType.string, requiredDuringInsert: true)
+          .withConverter<Decimal>(
+              $InventoryContainersTableTable.$converterinitialVolume);
+  @override
+  late final GeneratedColumnWithTypeConverter<Decimal, String>
+      remainingBalance = GeneratedColumn<String>(
+              'remaining_balance', aliasedName, false,
+              type: DriftSqlType.string, requiredDuringInsert: true)
+          .withConverter<Decimal>(
+              $InventoryContainersTableTable.$converterremainingBalance);
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+      'status', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('sealed'));
+  static const VerificationMeta _openedAtMeta =
+      const VerificationMeta('openedAt');
+  @override
+  late final GeneratedColumn<DateTime> openedAt = GeneratedColumn<DateTime>(
+      'opened_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _openedByUserIdMeta =
+      const VerificationMeta('openedByUserId');
+  @override
+  late final GeneratedColumn<String> openedByUserId = GeneratedColumn<String>(
+      'opened_by_user_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _deletedAtMeta =
+      const VerificationMeta('deletedAt');
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+      'deleted_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _syncStatusMeta =
+      const VerificationMeta('syncStatus');
+  @override
+  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
+      'sync_status', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('synced'));
+  static const VerificationMeta _lastSyncedAtMeta =
+      const VerificationMeta('lastSyncedAt');
+  @override
+  late final GeneratedColumn<DateTime> lastSyncedAt = GeneratedColumn<DateTime>(
+      'last_synced_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        tenantId,
+        batchId,
+        productId,
+        barcode,
+        initialVolume,
+        remainingBalance,
+        status,
+        openedAt,
+        openedByUserId,
+        createdAt,
+        updatedAt,
+        deletedAt,
+        syncStatus,
+        lastSyncedAt
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'inventory_containers';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<InventoryContainerData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('tenant_id')) {
+      context.handle(_tenantIdMeta,
+          tenantId.isAcceptableOrUnknown(data['tenant_id']!, _tenantIdMeta));
+    } else if (isInserting) {
+      context.missing(_tenantIdMeta);
+    }
+    if (data.containsKey('batch_id')) {
+      context.handle(_batchIdMeta,
+          batchId.isAcceptableOrUnknown(data['batch_id']!, _batchIdMeta));
+    } else if (isInserting) {
+      context.missing(_batchIdMeta);
+    }
+    if (data.containsKey('product_id')) {
+      context.handle(_productIdMeta,
+          productId.isAcceptableOrUnknown(data['product_id']!, _productIdMeta));
+    } else if (isInserting) {
+      context.missing(_productIdMeta);
+    }
+    if (data.containsKey('barcode')) {
+      context.handle(_barcodeMeta,
+          barcode.isAcceptableOrUnknown(data['barcode']!, _barcodeMeta));
+    } else if (isInserting) {
+      context.missing(_barcodeMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(_statusMeta,
+          status.isAcceptableOrUnknown(data['status']!, _statusMeta));
+    }
+    if (data.containsKey('opened_at')) {
+      context.handle(_openedAtMeta,
+          openedAt.isAcceptableOrUnknown(data['opened_at']!, _openedAtMeta));
+    }
+    if (data.containsKey('opened_by_user_id')) {
+      context.handle(
+          _openedByUserIdMeta,
+          openedByUserId.isAcceptableOrUnknown(
+              data['opened_by_user_id']!, _openedByUserIdMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(_deletedAtMeta,
+          deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta));
+    }
+    if (data.containsKey('sync_status')) {
+      context.handle(
+          _syncStatusMeta,
+          syncStatus.isAcceptableOrUnknown(
+              data['sync_status']!, _syncStatusMeta));
+    }
+    if (data.containsKey('last_synced_at')) {
+      context.handle(
+          _lastSyncedAtMeta,
+          lastSyncedAt.isAcceptableOrUnknown(
+              data['last_synced_at']!, _lastSyncedAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  InventoryContainerData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return InventoryContainerData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      tenantId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}tenant_id'])!,
+      batchId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}batch_id'])!,
+      productId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}product_id'])!,
+      barcode: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}barcode'])!,
+      initialVolume: $InventoryContainersTableTable.$converterinitialVolume
+          .fromSql(attachedDatabase.typeMapping.read(
+              DriftSqlType.string, data['${effectivePrefix}initial_volume'])!),
+      remainingBalance: $InventoryContainersTableTable
+          .$converterremainingBalance
+          .fromSql(attachedDatabase.typeMapping.read(DriftSqlType.string,
+              data['${effectivePrefix}remaining_balance'])!),
+      status: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}status'])!,
+      openedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}opened_at']),
+      openedByUserId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}opened_by_user_id']),
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      deletedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}deleted_at']),
+      syncStatus: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}sync_status'])!,
+      lastSyncedAt: attachedDatabase.typeMapping.read(
+          DriftSqlType.dateTime, data['${effectivePrefix}last_synced_at']),
+    );
+  }
+
+  @override
+  $InventoryContainersTableTable createAlias(String alias) {
+    return $InventoryContainersTableTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<Decimal, String> $converterinitialVolume =
+      const DecimalConverter();
+  static TypeConverter<Decimal, String> $converterremainingBalance =
+      const DecimalConverter();
+}
+
+class InventoryContainerData extends DataClass
+    implements Insertable<InventoryContainerData> {
+  /// Primary UUID v7 identifier
+  final String id;
+
+  /// Multi-tenant clinical practice isolation key
+  final String tenantId;
+
+  /// Foreign key linking physical container to its manufacturer batch
+  final String batchId;
+
+  /// Foreign key linking physical container to product catalog item
+  final String productId;
+
+  /// Unique serialized barcode on the physical bottle/vial
+  final String barcode;
+
+  /// Total physical capacity or initial volume of this container
+  final Decimal initialVolume;
+
+  /// Current remaining volume or count inside this physical container
+  final Decimal remainingBalance;
+
+  /// Physical containment state: sealed, open, depleted
+  final String status;
+
+  /// Timestamp when container seal was pierced / opened
+  final DateTime? openedAt;
+
+  /// Attending veterinarian or technician who first unsealed the container
+  final String? openedByUserId;
+
+  /// Record creation timestamp
+  final DateTime createdAt;
+
+  /// Record modification timestamp
+  final DateTime updatedAt;
+
+  /// Soft deletion timestamp
+  final DateTime? deletedAt;
+
+  /// Offline synchronization lifecycle: synced, pending_create, pending_update, pending_delete
+  final String syncStatus;
+
+  /// Last server sync timestamp
+  final DateTime? lastSyncedAt;
+  const InventoryContainerData(
+      {required this.id,
+      required this.tenantId,
+      required this.batchId,
+      required this.productId,
+      required this.barcode,
+      required this.initialVolume,
+      required this.remainingBalance,
+      required this.status,
+      this.openedAt,
+      this.openedByUserId,
+      required this.createdAt,
+      required this.updatedAt,
+      this.deletedAt,
+      required this.syncStatus,
+      this.lastSyncedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['tenant_id'] = Variable<String>(tenantId);
+    map['batch_id'] = Variable<String>(batchId);
+    map['product_id'] = Variable<String>(productId);
+    map['barcode'] = Variable<String>(barcode);
+    {
+      map['initial_volume'] = Variable<String>($InventoryContainersTableTable
+          .$converterinitialVolume
+          .toSql(initialVolume));
+    }
+    {
+      map['remaining_balance'] = Variable<String>($InventoryContainersTableTable
+          .$converterremainingBalance
+          .toSql(remainingBalance));
+    }
+    map['status'] = Variable<String>(status);
+    if (!nullToAbsent || openedAt != null) {
+      map['opened_at'] = Variable<DateTime>(openedAt);
+    }
+    if (!nullToAbsent || openedByUserId != null) {
+      map['opened_by_user_id'] = Variable<String>(openedByUserId);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['sync_status'] = Variable<String>(syncStatus);
+    if (!nullToAbsent || lastSyncedAt != null) {
+      map['last_synced_at'] = Variable<DateTime>(lastSyncedAt);
+    }
+    return map;
+  }
+
+  InventoryContainersTableCompanion toCompanion(bool nullToAbsent) {
+    return InventoryContainersTableCompanion(
+      id: Value(id),
+      tenantId: Value(tenantId),
+      batchId: Value(batchId),
+      productId: Value(productId),
+      barcode: Value(barcode),
+      initialVolume: Value(initialVolume),
+      remainingBalance: Value(remainingBalance),
+      status: Value(status),
+      openedAt: openedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(openedAt),
+      openedByUserId: openedByUserId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(openedByUserId),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      syncStatus: Value(syncStatus),
+      lastSyncedAt: lastSyncedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastSyncedAt),
+    );
+  }
+
+  factory InventoryContainerData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return InventoryContainerData(
+      id: serializer.fromJson<String>(json['id']),
+      tenantId: serializer.fromJson<String>(json['tenantId']),
+      batchId: serializer.fromJson<String>(json['batchId']),
+      productId: serializer.fromJson<String>(json['productId']),
+      barcode: serializer.fromJson<String>(json['barcode']),
+      initialVolume: serializer.fromJson<Decimal>(json['initialVolume']),
+      remainingBalance: serializer.fromJson<Decimal>(json['remainingBalance']),
+      status: serializer.fromJson<String>(json['status']),
+      openedAt: serializer.fromJson<DateTime?>(json['openedAt']),
+      openedByUserId: serializer.fromJson<String?>(json['openedByUserId']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      syncStatus: serializer.fromJson<String>(json['syncStatus']),
+      lastSyncedAt: serializer.fromJson<DateTime?>(json['lastSyncedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'tenantId': serializer.toJson<String>(tenantId),
+      'batchId': serializer.toJson<String>(batchId),
+      'productId': serializer.toJson<String>(productId),
+      'barcode': serializer.toJson<String>(barcode),
+      'initialVolume': serializer.toJson<Decimal>(initialVolume),
+      'remainingBalance': serializer.toJson<Decimal>(remainingBalance),
+      'status': serializer.toJson<String>(status),
+      'openedAt': serializer.toJson<DateTime?>(openedAt),
+      'openedByUserId': serializer.toJson<String?>(openedByUserId),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'syncStatus': serializer.toJson<String>(syncStatus),
+      'lastSyncedAt': serializer.toJson<DateTime?>(lastSyncedAt),
+    };
+  }
+
+  InventoryContainerData copyWith(
+          {String? id,
+          String? tenantId,
+          String? batchId,
+          String? productId,
+          String? barcode,
+          Decimal? initialVolume,
+          Decimal? remainingBalance,
+          String? status,
+          Value<DateTime?> openedAt = const Value.absent(),
+          Value<String?> openedByUserId = const Value.absent(),
+          DateTime? createdAt,
+          DateTime? updatedAt,
+          Value<DateTime?> deletedAt = const Value.absent(),
+          String? syncStatus,
+          Value<DateTime?> lastSyncedAt = const Value.absent()}) =>
+      InventoryContainerData(
+        id: id ?? this.id,
+        tenantId: tenantId ?? this.tenantId,
+        batchId: batchId ?? this.batchId,
+        productId: productId ?? this.productId,
+        barcode: barcode ?? this.barcode,
+        initialVolume: initialVolume ?? this.initialVolume,
+        remainingBalance: remainingBalance ?? this.remainingBalance,
+        status: status ?? this.status,
+        openedAt: openedAt.present ? openedAt.value : this.openedAt,
+        openedByUserId:
+            openedByUserId.present ? openedByUserId.value : this.openedByUserId,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+        syncStatus: syncStatus ?? this.syncStatus,
+        lastSyncedAt:
+            lastSyncedAt.present ? lastSyncedAt.value : this.lastSyncedAt,
+      );
+  InventoryContainerData copyWithCompanion(
+      InventoryContainersTableCompanion data) {
+    return InventoryContainerData(
+      id: data.id.present ? data.id.value : this.id,
+      tenantId: data.tenantId.present ? data.tenantId.value : this.tenantId,
+      batchId: data.batchId.present ? data.batchId.value : this.batchId,
+      productId: data.productId.present ? data.productId.value : this.productId,
+      barcode: data.barcode.present ? data.barcode.value : this.barcode,
+      initialVolume: data.initialVolume.present
+          ? data.initialVolume.value
+          : this.initialVolume,
+      remainingBalance: data.remainingBalance.present
+          ? data.remainingBalance.value
+          : this.remainingBalance,
+      status: data.status.present ? data.status.value : this.status,
+      openedAt: data.openedAt.present ? data.openedAt.value : this.openedAt,
+      openedByUserId: data.openedByUserId.present
+          ? data.openedByUserId.value
+          : this.openedByUserId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      syncStatus:
+          data.syncStatus.present ? data.syncStatus.value : this.syncStatus,
+      lastSyncedAt: data.lastSyncedAt.present
+          ? data.lastSyncedAt.value
+          : this.lastSyncedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('InventoryContainerData(')
+          ..write('id: $id, ')
+          ..write('tenantId: $tenantId, ')
+          ..write('batchId: $batchId, ')
+          ..write('productId: $productId, ')
+          ..write('barcode: $barcode, ')
+          ..write('initialVolume: $initialVolume, ')
+          ..write('remainingBalance: $remainingBalance, ')
+          ..write('status: $status, ')
+          ..write('openedAt: $openedAt, ')
+          ..write('openedByUserId: $openedByUserId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('lastSyncedAt: $lastSyncedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id,
+      tenantId,
+      batchId,
+      productId,
+      barcode,
+      initialVolume,
+      remainingBalance,
+      status,
+      openedAt,
+      openedByUserId,
+      createdAt,
+      updatedAt,
+      deletedAt,
+      syncStatus,
+      lastSyncedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is InventoryContainerData &&
+          other.id == this.id &&
+          other.tenantId == this.tenantId &&
+          other.batchId == this.batchId &&
+          other.productId == this.productId &&
+          other.barcode == this.barcode &&
+          other.initialVolume == this.initialVolume &&
+          other.remainingBalance == this.remainingBalance &&
+          other.status == this.status &&
+          other.openedAt == this.openedAt &&
+          other.openedByUserId == this.openedByUserId &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.syncStatus == this.syncStatus &&
+          other.lastSyncedAt == this.lastSyncedAt);
+}
+
+class InventoryContainersTableCompanion
+    extends UpdateCompanion<InventoryContainerData> {
+  final Value<String> id;
+  final Value<String> tenantId;
+  final Value<String> batchId;
+  final Value<String> productId;
+  final Value<String> barcode;
+  final Value<Decimal> initialVolume;
+  final Value<Decimal> remainingBalance;
+  final Value<String> status;
+  final Value<DateTime?> openedAt;
+  final Value<String?> openedByUserId;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<String> syncStatus;
+  final Value<DateTime?> lastSyncedAt;
+  final Value<int> rowid;
+  const InventoryContainersTableCompanion({
+    this.id = const Value.absent(),
+    this.tenantId = const Value.absent(),
+    this.batchId = const Value.absent(),
+    this.productId = const Value.absent(),
+    this.barcode = const Value.absent(),
+    this.initialVolume = const Value.absent(),
+    this.remainingBalance = const Value.absent(),
+    this.status = const Value.absent(),
+    this.openedAt = const Value.absent(),
+    this.openedByUserId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    this.lastSyncedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  InventoryContainersTableCompanion.insert({
+    required String id,
+    required String tenantId,
+    required String batchId,
+    required String productId,
+    required String barcode,
+    required Decimal initialVolume,
+    required Decimal remainingBalance,
+    this.status = const Value.absent(),
+    this.openedAt = const Value.absent(),
+    this.openedByUserId = const Value.absent(),
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.deletedAt = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    this.lastSyncedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        tenantId = Value(tenantId),
+        batchId = Value(batchId),
+        productId = Value(productId),
+        barcode = Value(barcode),
+        initialVolume = Value(initialVolume),
+        remainingBalance = Value(remainingBalance),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt);
+  static Insertable<InventoryContainerData> custom({
+    Expression<String>? id,
+    Expression<String>? tenantId,
+    Expression<String>? batchId,
+    Expression<String>? productId,
+    Expression<String>? barcode,
+    Expression<String>? initialVolume,
+    Expression<String>? remainingBalance,
+    Expression<String>? status,
+    Expression<DateTime>? openedAt,
+    Expression<String>? openedByUserId,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<String>? syncStatus,
+    Expression<DateTime>? lastSyncedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (tenantId != null) 'tenant_id': tenantId,
+      if (batchId != null) 'batch_id': batchId,
+      if (productId != null) 'product_id': productId,
+      if (barcode != null) 'barcode': barcode,
+      if (initialVolume != null) 'initial_volume': initialVolume,
+      if (remainingBalance != null) 'remaining_balance': remainingBalance,
+      if (status != null) 'status': status,
+      if (openedAt != null) 'opened_at': openedAt,
+      if (openedByUserId != null) 'opened_by_user_id': openedByUserId,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (syncStatus != null) 'sync_status': syncStatus,
+      if (lastSyncedAt != null) 'last_synced_at': lastSyncedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  InventoryContainersTableCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? tenantId,
+      Value<String>? batchId,
+      Value<String>? productId,
+      Value<String>? barcode,
+      Value<Decimal>? initialVolume,
+      Value<Decimal>? remainingBalance,
+      Value<String>? status,
+      Value<DateTime?>? openedAt,
+      Value<String?>? openedByUserId,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
+      Value<DateTime?>? deletedAt,
+      Value<String>? syncStatus,
+      Value<DateTime?>? lastSyncedAt,
+      Value<int>? rowid}) {
+    return InventoryContainersTableCompanion(
+      id: id ?? this.id,
+      tenantId: tenantId ?? this.tenantId,
+      batchId: batchId ?? this.batchId,
+      productId: productId ?? this.productId,
+      barcode: barcode ?? this.barcode,
+      initialVolume: initialVolume ?? this.initialVolume,
+      remainingBalance: remainingBalance ?? this.remainingBalance,
+      status: status ?? this.status,
+      openedAt: openedAt ?? this.openedAt,
+      openedByUserId: openedByUserId ?? this.openedByUserId,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      syncStatus: syncStatus ?? this.syncStatus,
+      lastSyncedAt: lastSyncedAt ?? this.lastSyncedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (tenantId.present) {
+      map['tenant_id'] = Variable<String>(tenantId.value);
+    }
+    if (batchId.present) {
+      map['batch_id'] = Variable<String>(batchId.value);
+    }
+    if (productId.present) {
+      map['product_id'] = Variable<String>(productId.value);
+    }
+    if (barcode.present) {
+      map['barcode'] = Variable<String>(barcode.value);
+    }
+    if (initialVolume.present) {
+      map['initial_volume'] = Variable<String>($InventoryContainersTableTable
+          .$converterinitialVolume
+          .toSql(initialVolume.value));
+    }
+    if (remainingBalance.present) {
+      map['remaining_balance'] = Variable<String>($InventoryContainersTableTable
+          .$converterremainingBalance
+          .toSql(remainingBalance.value));
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (openedAt.present) {
+      map['opened_at'] = Variable<DateTime>(openedAt.value);
+    }
+    if (openedByUserId.present) {
+      map['opened_by_user_id'] = Variable<String>(openedByUserId.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<String>(syncStatus.value);
+    }
+    if (lastSyncedAt.present) {
+      map['last_synced_at'] = Variable<DateTime>(lastSyncedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('InventoryContainersTableCompanion(')
+          ..write('id: $id, ')
+          ..write('tenantId: $tenantId, ')
+          ..write('batchId: $batchId, ')
+          ..write('productId: $productId, ')
+          ..write('barcode: $barcode, ')
+          ..write('initialVolume: $initialVolume, ')
+          ..write('remainingBalance: $remainingBalance, ')
+          ..write('status: $status, ')
+          ..write('openedAt: $openedAt, ')
+          ..write('openedByUserId: $openedByUserId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('lastSyncedAt: $lastSyncedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $InventoryMovementLedgerTableTable extends InventoryMovementLedgerTable
+    with
+        TableInfo<$InventoryMovementLedgerTableTable,
+            InventoryMovementLedgerData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $InventoryMovementLedgerTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _tenantIdMeta =
+      const VerificationMeta('tenantId');
+  @override
+  late final GeneratedColumn<String> tenantId = GeneratedColumn<String>(
+      'tenant_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _productIdMeta =
+      const VerificationMeta('productId');
+  @override
+  late final GeneratedColumn<String> productId = GeneratedColumn<String>(
+      'product_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES inventory_products (id)'));
+  static const VerificationMeta _batchIdMeta =
+      const VerificationMeta('batchId');
+  @override
+  late final GeneratedColumn<String> batchId = GeneratedColumn<String>(
+      'batch_id', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES inventory_batches (id)'));
+  static const VerificationMeta _containerIdMeta =
+      const VerificationMeta('containerId');
+  @override
+  late final GeneratedColumn<String> containerId = GeneratedColumn<String>(
+      'container_id', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES inventory_containers (id)'));
+  static const VerificationMeta _movementTypeMeta =
+      const VerificationMeta('movementType');
+  @override
+  late final GeneratedColumn<String> movementType = GeneratedColumn<String>(
+      'movement_type', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  late final GeneratedColumnWithTypeConverter<Decimal, String> quantity =
+      GeneratedColumn<String>('quantity', aliasedName, false,
+              type: DriftSqlType.string, requiredDuringInsert: true)
+          .withConverter<Decimal>(
+              $InventoryMovementLedgerTableTable.$converterquantity);
+  @override
+  late final GeneratedColumnWithTypeConverter<Decimal, String> balanceAfter =
+      GeneratedColumn<String>('balance_after', aliasedName, false,
+              type: DriftSqlType.string, requiredDuringInsert: true)
+          .withConverter<Decimal>(
+              $InventoryMovementLedgerTableTable.$converterbalanceAfter);
+  static const VerificationMeta _idempotencyKeyMeta =
+      const VerificationMeta('idempotencyKey');
+  @override
+  late final GeneratedColumn<String> idempotencyKey = GeneratedColumn<String>(
+      'idempotency_key', aliasedName, false,
+      additionalChecks:
+          GeneratedColumn.checkTextLength(minTextLength: 36, maxTextLength: 36),
+      type: DriftSqlType.string,
+      requiredDuringInsert: true);
+  static const VerificationMeta _recordedByUserIdMeta =
+      const VerificationMeta('recordedByUserId');
+  @override
+  late final GeneratedColumn<String> recordedByUserId = GeneratedColumn<String>(
+      'recorded_by_user_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _witnessedByUserIdMeta =
+      const VerificationMeta('witnessedByUserId');
+  @override
+  late final GeneratedColumn<String> witnessedByUserId =
+      GeneratedColumn<String>('witnessed_by_user_id', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _witnessPinVerifiedMeta =
+      const VerificationMeta('witnessPinVerified');
+  @override
+  late final GeneratedColumn<bool> witnessPinVerified = GeneratedColumn<bool>(
+      'witness_pin_verified', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("witness_pin_verified" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _clinicalCaseIdMeta =
+      const VerificationMeta('clinicalCaseId');
+  @override
+  late final GeneratedColumn<String> clinicalCaseId = GeneratedColumn<String>(
+      'clinical_case_id', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('REFERENCES cases (id)'));
+  static const VerificationMeta _patientIdMeta =
+      const VerificationMeta('patientId');
+  @override
+  late final GeneratedColumn<String> patientId = GeneratedColumn<String>(
+      'patient_id', aliasedName, true,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('REFERENCES patients (id)'));
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+      'notes', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _syncStatusMeta =
+      const VerificationMeta('syncStatus');
+  @override
+  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
+      'sync_status', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('synced'));
+  static const VerificationMeta _lastSyncedAtMeta =
+      const VerificationMeta('lastSyncedAt');
+  @override
+  late final GeneratedColumn<DateTime> lastSyncedAt = GeneratedColumn<DateTime>(
+      'last_synced_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        tenantId,
+        productId,
+        batchId,
+        containerId,
+        movementType,
+        quantity,
+        balanceAfter,
+        idempotencyKey,
+        recordedByUserId,
+        witnessedByUserId,
+        witnessPinVerified,
+        clinicalCaseId,
+        patientId,
+        notes,
+        createdAt,
+        syncStatus,
+        lastSyncedAt
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'inventory_movement_ledger';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<InventoryMovementLedgerData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('tenant_id')) {
+      context.handle(_tenantIdMeta,
+          tenantId.isAcceptableOrUnknown(data['tenant_id']!, _tenantIdMeta));
+    } else if (isInserting) {
+      context.missing(_tenantIdMeta);
+    }
+    if (data.containsKey('product_id')) {
+      context.handle(_productIdMeta,
+          productId.isAcceptableOrUnknown(data['product_id']!, _productIdMeta));
+    } else if (isInserting) {
+      context.missing(_productIdMeta);
+    }
+    if (data.containsKey('batch_id')) {
+      context.handle(_batchIdMeta,
+          batchId.isAcceptableOrUnknown(data['batch_id']!, _batchIdMeta));
+    }
+    if (data.containsKey('container_id')) {
+      context.handle(
+          _containerIdMeta,
+          containerId.isAcceptableOrUnknown(
+              data['container_id']!, _containerIdMeta));
+    }
+    if (data.containsKey('movement_type')) {
+      context.handle(
+          _movementTypeMeta,
+          movementType.isAcceptableOrUnknown(
+              data['movement_type']!, _movementTypeMeta));
+    } else if (isInserting) {
+      context.missing(_movementTypeMeta);
+    }
+    if (data.containsKey('idempotency_key')) {
+      context.handle(
+          _idempotencyKeyMeta,
+          idempotencyKey.isAcceptableOrUnknown(
+              data['idempotency_key']!, _idempotencyKeyMeta));
+    } else if (isInserting) {
+      context.missing(_idempotencyKeyMeta);
+    }
+    if (data.containsKey('recorded_by_user_id')) {
+      context.handle(
+          _recordedByUserIdMeta,
+          recordedByUserId.isAcceptableOrUnknown(
+              data['recorded_by_user_id']!, _recordedByUserIdMeta));
+    } else if (isInserting) {
+      context.missing(_recordedByUserIdMeta);
+    }
+    if (data.containsKey('witnessed_by_user_id')) {
+      context.handle(
+          _witnessedByUserIdMeta,
+          witnessedByUserId.isAcceptableOrUnknown(
+              data['witnessed_by_user_id']!, _witnessedByUserIdMeta));
+    }
+    if (data.containsKey('witness_pin_verified')) {
+      context.handle(
+          _witnessPinVerifiedMeta,
+          witnessPinVerified.isAcceptableOrUnknown(
+              data['witness_pin_verified']!, _witnessPinVerifiedMeta));
+    }
+    if (data.containsKey('clinical_case_id')) {
+      context.handle(
+          _clinicalCaseIdMeta,
+          clinicalCaseId.isAcceptableOrUnknown(
+              data['clinical_case_id']!, _clinicalCaseIdMeta));
+    }
+    if (data.containsKey('patient_id')) {
+      context.handle(_patientIdMeta,
+          patientId.isAcceptableOrUnknown(data['patient_id']!, _patientIdMeta));
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+          _notesMeta, notes.isAcceptableOrUnknown(data['notes']!, _notesMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('sync_status')) {
+      context.handle(
+          _syncStatusMeta,
+          syncStatus.isAcceptableOrUnknown(
+              data['sync_status']!, _syncStatusMeta));
+    }
+    if (data.containsKey('last_synced_at')) {
+      context.handle(
+          _lastSyncedAtMeta,
+          lastSyncedAt.isAcceptableOrUnknown(
+              data['last_synced_at']!, _lastSyncedAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  InventoryMovementLedgerData map(Map<String, dynamic> data,
+      {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return InventoryMovementLedgerData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      tenantId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}tenant_id'])!,
+      productId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}product_id'])!,
+      batchId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}batch_id']),
+      containerId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}container_id']),
+      movementType: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}movement_type'])!,
+      quantity: $InventoryMovementLedgerTableTable.$converterquantity.fromSql(
+          attachedDatabase.typeMapping
+              .read(DriftSqlType.string, data['${effectivePrefix}quantity'])!),
+      balanceAfter: $InventoryMovementLedgerTableTable.$converterbalanceAfter
+          .fromSql(attachedDatabase.typeMapping.read(
+              DriftSqlType.string, data['${effectivePrefix}balance_after'])!),
+      idempotencyKey: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}idempotency_key'])!,
+      recordedByUserId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}recorded_by_user_id'])!,
+      witnessedByUserId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}witnessed_by_user_id']),
+      witnessPinVerified: attachedDatabase.typeMapping.read(
+          DriftSqlType.bool, data['${effectivePrefix}witness_pin_verified'])!,
+      clinicalCaseId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}clinical_case_id']),
+      patientId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}patient_id']),
+      notes: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}notes']),
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      syncStatus: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}sync_status'])!,
+      lastSyncedAt: attachedDatabase.typeMapping.read(
+          DriftSqlType.dateTime, data['${effectivePrefix}last_synced_at']),
+    );
+  }
+
+  @override
+  $InventoryMovementLedgerTableTable createAlias(String alias) {
+    return $InventoryMovementLedgerTableTable(attachedDatabase, alias);
+  }
+
+  static TypeConverter<Decimal, String> $converterquantity =
+      const DecimalConverter();
+  static TypeConverter<Decimal, String> $converterbalanceAfter =
+      const DecimalConverter();
+}
+
+class InventoryMovementLedgerData extends DataClass
+    implements Insertable<InventoryMovementLedgerData> {
+  /// Primary UUID v7 identifier
+  final String id;
+
+  /// Multi-tenant clinical practice isolation key
+  final String tenantId;
+
+  /// Foreign key referencing affected product catalog item
+  final String productId;
+
+  /// Foreign key referencing affected batch/lot (nullable for global adjustments)
+  final String? batchId;
+
+  /// Foreign key referencing physical container/vial (nullable if not containerized)
+  final String? containerId;
+
+  /// Immutable transaction classification: received, consumed, wasted, reversal_void, adjustment, expired_writeoff
+  final String movementType;
+
+  /// Quantity moved, administered, or wasted (strictly positive Decimal)
+  final Decimal quantity;
+
+  /// Balance remaining in container or batch immediately following this transaction
+  final Decimal balanceAfter;
+
+  /// Client-side UUID v7 idempotency token to prevent duplicate sync commits
+  final String idempotencyKey;
+
+  /// Identifier of practitioner who administered or recorded the transaction
+  final String recordedByUserId;
+
+  /// Identifier of secondary practitioner who co-signed/witnessed (required for Schedule II-V)
+  final String? witnessedByUserId;
+
+  /// Indicates whether the witness 4-digit PIN verification succeeded
+  final bool witnessPinVerified;
+
+  /// Optional clinical encounter associated with this dose administration
+  final String? clinicalCaseId;
+
+  /// Optional animal patient that received the medication
+  final String? patientId;
+
+  /// Transaction narrative, dosage justification, or void reason
+  final String? notes;
+
+  /// Timestamp when event occurred (immutable append-only; no updatedAt or deletedAt)
+  final DateTime createdAt;
+
+  /// Offline synchronization lifecycle: synced, pending_push
+  final String syncStatus;
+
+  /// Last server sync timestamp
+  final DateTime? lastSyncedAt;
+  const InventoryMovementLedgerData(
+      {required this.id,
+      required this.tenantId,
+      required this.productId,
+      this.batchId,
+      this.containerId,
+      required this.movementType,
+      required this.quantity,
+      required this.balanceAfter,
+      required this.idempotencyKey,
+      required this.recordedByUserId,
+      this.witnessedByUserId,
+      required this.witnessPinVerified,
+      this.clinicalCaseId,
+      this.patientId,
+      this.notes,
+      required this.createdAt,
+      required this.syncStatus,
+      this.lastSyncedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['tenant_id'] = Variable<String>(tenantId);
+    map['product_id'] = Variable<String>(productId);
+    if (!nullToAbsent || batchId != null) {
+      map['batch_id'] = Variable<String>(batchId);
+    }
+    if (!nullToAbsent || containerId != null) {
+      map['container_id'] = Variable<String>(containerId);
+    }
+    map['movement_type'] = Variable<String>(movementType);
+    {
+      map['quantity'] = Variable<String>($InventoryMovementLedgerTableTable
+          .$converterquantity
+          .toSql(quantity));
+    }
+    {
+      map['balance_after'] = Variable<String>($InventoryMovementLedgerTableTable
+          .$converterbalanceAfter
+          .toSql(balanceAfter));
+    }
+    map['idempotency_key'] = Variable<String>(idempotencyKey);
+    map['recorded_by_user_id'] = Variable<String>(recordedByUserId);
+    if (!nullToAbsent || witnessedByUserId != null) {
+      map['witnessed_by_user_id'] = Variable<String>(witnessedByUserId);
+    }
+    map['witness_pin_verified'] = Variable<bool>(witnessPinVerified);
+    if (!nullToAbsent || clinicalCaseId != null) {
+      map['clinical_case_id'] = Variable<String>(clinicalCaseId);
+    }
+    if (!nullToAbsent || patientId != null) {
+      map['patient_id'] = Variable<String>(patientId);
+    }
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['sync_status'] = Variable<String>(syncStatus);
+    if (!nullToAbsent || lastSyncedAt != null) {
+      map['last_synced_at'] = Variable<DateTime>(lastSyncedAt);
+    }
+    return map;
+  }
+
+  InventoryMovementLedgerTableCompanion toCompanion(bool nullToAbsent) {
+    return InventoryMovementLedgerTableCompanion(
+      id: Value(id),
+      tenantId: Value(tenantId),
+      productId: Value(productId),
+      batchId: batchId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(batchId),
+      containerId: containerId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(containerId),
+      movementType: Value(movementType),
+      quantity: Value(quantity),
+      balanceAfter: Value(balanceAfter),
+      idempotencyKey: Value(idempotencyKey),
+      recordedByUserId: Value(recordedByUserId),
+      witnessedByUserId: witnessedByUserId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(witnessedByUserId),
+      witnessPinVerified: Value(witnessPinVerified),
+      clinicalCaseId: clinicalCaseId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(clinicalCaseId),
+      patientId: patientId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(patientId),
+      notes:
+          notes == null && nullToAbsent ? const Value.absent() : Value(notes),
+      createdAt: Value(createdAt),
+      syncStatus: Value(syncStatus),
+      lastSyncedAt: lastSyncedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastSyncedAt),
+    );
+  }
+
+  factory InventoryMovementLedgerData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return InventoryMovementLedgerData(
+      id: serializer.fromJson<String>(json['id']),
+      tenantId: serializer.fromJson<String>(json['tenantId']),
+      productId: serializer.fromJson<String>(json['productId']),
+      batchId: serializer.fromJson<String?>(json['batchId']),
+      containerId: serializer.fromJson<String?>(json['containerId']),
+      movementType: serializer.fromJson<String>(json['movementType']),
+      quantity: serializer.fromJson<Decimal>(json['quantity']),
+      balanceAfter: serializer.fromJson<Decimal>(json['balanceAfter']),
+      idempotencyKey: serializer.fromJson<String>(json['idempotencyKey']),
+      recordedByUserId: serializer.fromJson<String>(json['recordedByUserId']),
+      witnessedByUserId:
+          serializer.fromJson<String?>(json['witnessedByUserId']),
+      witnessPinVerified: serializer.fromJson<bool>(json['witnessPinVerified']),
+      clinicalCaseId: serializer.fromJson<String?>(json['clinicalCaseId']),
+      patientId: serializer.fromJson<String?>(json['patientId']),
+      notes: serializer.fromJson<String?>(json['notes']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      syncStatus: serializer.fromJson<String>(json['syncStatus']),
+      lastSyncedAt: serializer.fromJson<DateTime?>(json['lastSyncedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'tenantId': serializer.toJson<String>(tenantId),
+      'productId': serializer.toJson<String>(productId),
+      'batchId': serializer.toJson<String?>(batchId),
+      'containerId': serializer.toJson<String?>(containerId),
+      'movementType': serializer.toJson<String>(movementType),
+      'quantity': serializer.toJson<Decimal>(quantity),
+      'balanceAfter': serializer.toJson<Decimal>(balanceAfter),
+      'idempotencyKey': serializer.toJson<String>(idempotencyKey),
+      'recordedByUserId': serializer.toJson<String>(recordedByUserId),
+      'witnessedByUserId': serializer.toJson<String?>(witnessedByUserId),
+      'witnessPinVerified': serializer.toJson<bool>(witnessPinVerified),
+      'clinicalCaseId': serializer.toJson<String?>(clinicalCaseId),
+      'patientId': serializer.toJson<String?>(patientId),
+      'notes': serializer.toJson<String?>(notes),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'syncStatus': serializer.toJson<String>(syncStatus),
+      'lastSyncedAt': serializer.toJson<DateTime?>(lastSyncedAt),
+    };
+  }
+
+  InventoryMovementLedgerData copyWith(
+          {String? id,
+          String? tenantId,
+          String? productId,
+          Value<String?> batchId = const Value.absent(),
+          Value<String?> containerId = const Value.absent(),
+          String? movementType,
+          Decimal? quantity,
+          Decimal? balanceAfter,
+          String? idempotencyKey,
+          String? recordedByUserId,
+          Value<String?> witnessedByUserId = const Value.absent(),
+          bool? witnessPinVerified,
+          Value<String?> clinicalCaseId = const Value.absent(),
+          Value<String?> patientId = const Value.absent(),
+          Value<String?> notes = const Value.absent(),
+          DateTime? createdAt,
+          String? syncStatus,
+          Value<DateTime?> lastSyncedAt = const Value.absent()}) =>
+      InventoryMovementLedgerData(
+        id: id ?? this.id,
+        tenantId: tenantId ?? this.tenantId,
+        productId: productId ?? this.productId,
+        batchId: batchId.present ? batchId.value : this.batchId,
+        containerId: containerId.present ? containerId.value : this.containerId,
+        movementType: movementType ?? this.movementType,
+        quantity: quantity ?? this.quantity,
+        balanceAfter: balanceAfter ?? this.balanceAfter,
+        idempotencyKey: idempotencyKey ?? this.idempotencyKey,
+        recordedByUserId: recordedByUserId ?? this.recordedByUserId,
+        witnessedByUserId: witnessedByUserId.present
+            ? witnessedByUserId.value
+            : this.witnessedByUserId,
+        witnessPinVerified: witnessPinVerified ?? this.witnessPinVerified,
+        clinicalCaseId:
+            clinicalCaseId.present ? clinicalCaseId.value : this.clinicalCaseId,
+        patientId: patientId.present ? patientId.value : this.patientId,
+        notes: notes.present ? notes.value : this.notes,
+        createdAt: createdAt ?? this.createdAt,
+        syncStatus: syncStatus ?? this.syncStatus,
+        lastSyncedAt:
+            lastSyncedAt.present ? lastSyncedAt.value : this.lastSyncedAt,
+      );
+  InventoryMovementLedgerData copyWithCompanion(
+      InventoryMovementLedgerTableCompanion data) {
+    return InventoryMovementLedgerData(
+      id: data.id.present ? data.id.value : this.id,
+      tenantId: data.tenantId.present ? data.tenantId.value : this.tenantId,
+      productId: data.productId.present ? data.productId.value : this.productId,
+      batchId: data.batchId.present ? data.batchId.value : this.batchId,
+      containerId:
+          data.containerId.present ? data.containerId.value : this.containerId,
+      movementType: data.movementType.present
+          ? data.movementType.value
+          : this.movementType,
+      quantity: data.quantity.present ? data.quantity.value : this.quantity,
+      balanceAfter: data.balanceAfter.present
+          ? data.balanceAfter.value
+          : this.balanceAfter,
+      idempotencyKey: data.idempotencyKey.present
+          ? data.idempotencyKey.value
+          : this.idempotencyKey,
+      recordedByUserId: data.recordedByUserId.present
+          ? data.recordedByUserId.value
+          : this.recordedByUserId,
+      witnessedByUserId: data.witnessedByUserId.present
+          ? data.witnessedByUserId.value
+          : this.witnessedByUserId,
+      witnessPinVerified: data.witnessPinVerified.present
+          ? data.witnessPinVerified.value
+          : this.witnessPinVerified,
+      clinicalCaseId: data.clinicalCaseId.present
+          ? data.clinicalCaseId.value
+          : this.clinicalCaseId,
+      patientId: data.patientId.present ? data.patientId.value : this.patientId,
+      notes: data.notes.present ? data.notes.value : this.notes,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      syncStatus:
+          data.syncStatus.present ? data.syncStatus.value : this.syncStatus,
+      lastSyncedAt: data.lastSyncedAt.present
+          ? data.lastSyncedAt.value
+          : this.lastSyncedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('InventoryMovementLedgerData(')
+          ..write('id: $id, ')
+          ..write('tenantId: $tenantId, ')
+          ..write('productId: $productId, ')
+          ..write('batchId: $batchId, ')
+          ..write('containerId: $containerId, ')
+          ..write('movementType: $movementType, ')
+          ..write('quantity: $quantity, ')
+          ..write('balanceAfter: $balanceAfter, ')
+          ..write('idempotencyKey: $idempotencyKey, ')
+          ..write('recordedByUserId: $recordedByUserId, ')
+          ..write('witnessedByUserId: $witnessedByUserId, ')
+          ..write('witnessPinVerified: $witnessPinVerified, ')
+          ..write('clinicalCaseId: $clinicalCaseId, ')
+          ..write('patientId: $patientId, ')
+          ..write('notes: $notes, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('lastSyncedAt: $lastSyncedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id,
+      tenantId,
+      productId,
+      batchId,
+      containerId,
+      movementType,
+      quantity,
+      balanceAfter,
+      idempotencyKey,
+      recordedByUserId,
+      witnessedByUserId,
+      witnessPinVerified,
+      clinicalCaseId,
+      patientId,
+      notes,
+      createdAt,
+      syncStatus,
+      lastSyncedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is InventoryMovementLedgerData &&
+          other.id == this.id &&
+          other.tenantId == this.tenantId &&
+          other.productId == this.productId &&
+          other.batchId == this.batchId &&
+          other.containerId == this.containerId &&
+          other.movementType == this.movementType &&
+          other.quantity == this.quantity &&
+          other.balanceAfter == this.balanceAfter &&
+          other.idempotencyKey == this.idempotencyKey &&
+          other.recordedByUserId == this.recordedByUserId &&
+          other.witnessedByUserId == this.witnessedByUserId &&
+          other.witnessPinVerified == this.witnessPinVerified &&
+          other.clinicalCaseId == this.clinicalCaseId &&
+          other.patientId == this.patientId &&
+          other.notes == this.notes &&
+          other.createdAt == this.createdAt &&
+          other.syncStatus == this.syncStatus &&
+          other.lastSyncedAt == this.lastSyncedAt);
+}
+
+class InventoryMovementLedgerTableCompanion
+    extends UpdateCompanion<InventoryMovementLedgerData> {
+  final Value<String> id;
+  final Value<String> tenantId;
+  final Value<String> productId;
+  final Value<String?> batchId;
+  final Value<String?> containerId;
+  final Value<String> movementType;
+  final Value<Decimal> quantity;
+  final Value<Decimal> balanceAfter;
+  final Value<String> idempotencyKey;
+  final Value<String> recordedByUserId;
+  final Value<String?> witnessedByUserId;
+  final Value<bool> witnessPinVerified;
+  final Value<String?> clinicalCaseId;
+  final Value<String?> patientId;
+  final Value<String?> notes;
+  final Value<DateTime> createdAt;
+  final Value<String> syncStatus;
+  final Value<DateTime?> lastSyncedAt;
+  final Value<int> rowid;
+  const InventoryMovementLedgerTableCompanion({
+    this.id = const Value.absent(),
+    this.tenantId = const Value.absent(),
+    this.productId = const Value.absent(),
+    this.batchId = const Value.absent(),
+    this.containerId = const Value.absent(),
+    this.movementType = const Value.absent(),
+    this.quantity = const Value.absent(),
+    this.balanceAfter = const Value.absent(),
+    this.idempotencyKey = const Value.absent(),
+    this.recordedByUserId = const Value.absent(),
+    this.witnessedByUserId = const Value.absent(),
+    this.witnessPinVerified = const Value.absent(),
+    this.clinicalCaseId = const Value.absent(),
+    this.patientId = const Value.absent(),
+    this.notes = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    this.lastSyncedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  InventoryMovementLedgerTableCompanion.insert({
+    required String id,
+    required String tenantId,
+    required String productId,
+    this.batchId = const Value.absent(),
+    this.containerId = const Value.absent(),
+    required String movementType,
+    required Decimal quantity,
+    required Decimal balanceAfter,
+    required String idempotencyKey,
+    required String recordedByUserId,
+    this.witnessedByUserId = const Value.absent(),
+    this.witnessPinVerified = const Value.absent(),
+    this.clinicalCaseId = const Value.absent(),
+    this.patientId = const Value.absent(),
+    this.notes = const Value.absent(),
+    required DateTime createdAt,
+    this.syncStatus = const Value.absent(),
+    this.lastSyncedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        tenantId = Value(tenantId),
+        productId = Value(productId),
+        movementType = Value(movementType),
+        quantity = Value(quantity),
+        balanceAfter = Value(balanceAfter),
+        idempotencyKey = Value(idempotencyKey),
+        recordedByUserId = Value(recordedByUserId),
+        createdAt = Value(createdAt);
+  static Insertable<InventoryMovementLedgerData> custom({
+    Expression<String>? id,
+    Expression<String>? tenantId,
+    Expression<String>? productId,
+    Expression<String>? batchId,
+    Expression<String>? containerId,
+    Expression<String>? movementType,
+    Expression<String>? quantity,
+    Expression<String>? balanceAfter,
+    Expression<String>? idempotencyKey,
+    Expression<String>? recordedByUserId,
+    Expression<String>? witnessedByUserId,
+    Expression<bool>? witnessPinVerified,
+    Expression<String>? clinicalCaseId,
+    Expression<String>? patientId,
+    Expression<String>? notes,
+    Expression<DateTime>? createdAt,
+    Expression<String>? syncStatus,
+    Expression<DateTime>? lastSyncedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (tenantId != null) 'tenant_id': tenantId,
+      if (productId != null) 'product_id': productId,
+      if (batchId != null) 'batch_id': batchId,
+      if (containerId != null) 'container_id': containerId,
+      if (movementType != null) 'movement_type': movementType,
+      if (quantity != null) 'quantity': quantity,
+      if (balanceAfter != null) 'balance_after': balanceAfter,
+      if (idempotencyKey != null) 'idempotency_key': idempotencyKey,
+      if (recordedByUserId != null) 'recorded_by_user_id': recordedByUserId,
+      if (witnessedByUserId != null) 'witnessed_by_user_id': witnessedByUserId,
+      if (witnessPinVerified != null)
+        'witness_pin_verified': witnessPinVerified,
+      if (clinicalCaseId != null) 'clinical_case_id': clinicalCaseId,
+      if (patientId != null) 'patient_id': patientId,
+      if (notes != null) 'notes': notes,
+      if (createdAt != null) 'created_at': createdAt,
+      if (syncStatus != null) 'sync_status': syncStatus,
+      if (lastSyncedAt != null) 'last_synced_at': lastSyncedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  InventoryMovementLedgerTableCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? tenantId,
+      Value<String>? productId,
+      Value<String?>? batchId,
+      Value<String?>? containerId,
+      Value<String>? movementType,
+      Value<Decimal>? quantity,
+      Value<Decimal>? balanceAfter,
+      Value<String>? idempotencyKey,
+      Value<String>? recordedByUserId,
+      Value<String?>? witnessedByUserId,
+      Value<bool>? witnessPinVerified,
+      Value<String?>? clinicalCaseId,
+      Value<String?>? patientId,
+      Value<String?>? notes,
+      Value<DateTime>? createdAt,
+      Value<String>? syncStatus,
+      Value<DateTime?>? lastSyncedAt,
+      Value<int>? rowid}) {
+    return InventoryMovementLedgerTableCompanion(
+      id: id ?? this.id,
+      tenantId: tenantId ?? this.tenantId,
+      productId: productId ?? this.productId,
+      batchId: batchId ?? this.batchId,
+      containerId: containerId ?? this.containerId,
+      movementType: movementType ?? this.movementType,
+      quantity: quantity ?? this.quantity,
+      balanceAfter: balanceAfter ?? this.balanceAfter,
+      idempotencyKey: idempotencyKey ?? this.idempotencyKey,
+      recordedByUserId: recordedByUserId ?? this.recordedByUserId,
+      witnessedByUserId: witnessedByUserId ?? this.witnessedByUserId,
+      witnessPinVerified: witnessPinVerified ?? this.witnessPinVerified,
+      clinicalCaseId: clinicalCaseId ?? this.clinicalCaseId,
+      patientId: patientId ?? this.patientId,
+      notes: notes ?? this.notes,
+      createdAt: createdAt ?? this.createdAt,
+      syncStatus: syncStatus ?? this.syncStatus,
+      lastSyncedAt: lastSyncedAt ?? this.lastSyncedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (tenantId.present) {
+      map['tenant_id'] = Variable<String>(tenantId.value);
+    }
+    if (productId.present) {
+      map['product_id'] = Variable<String>(productId.value);
+    }
+    if (batchId.present) {
+      map['batch_id'] = Variable<String>(batchId.value);
+    }
+    if (containerId.present) {
+      map['container_id'] = Variable<String>(containerId.value);
+    }
+    if (movementType.present) {
+      map['movement_type'] = Variable<String>(movementType.value);
+    }
+    if (quantity.present) {
+      map['quantity'] = Variable<String>($InventoryMovementLedgerTableTable
+          .$converterquantity
+          .toSql(quantity.value));
+    }
+    if (balanceAfter.present) {
+      map['balance_after'] = Variable<String>($InventoryMovementLedgerTableTable
+          .$converterbalanceAfter
+          .toSql(balanceAfter.value));
+    }
+    if (idempotencyKey.present) {
+      map['idempotency_key'] = Variable<String>(idempotencyKey.value);
+    }
+    if (recordedByUserId.present) {
+      map['recorded_by_user_id'] = Variable<String>(recordedByUserId.value);
+    }
+    if (witnessedByUserId.present) {
+      map['witnessed_by_user_id'] = Variable<String>(witnessedByUserId.value);
+    }
+    if (witnessPinVerified.present) {
+      map['witness_pin_verified'] = Variable<bool>(witnessPinVerified.value);
+    }
+    if (clinicalCaseId.present) {
+      map['clinical_case_id'] = Variable<String>(clinicalCaseId.value);
+    }
+    if (patientId.present) {
+      map['patient_id'] = Variable<String>(patientId.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<String>(syncStatus.value);
+    }
+    if (lastSyncedAt.present) {
+      map['last_synced_at'] = Variable<DateTime>(lastSyncedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('InventoryMovementLedgerTableCompanion(')
+          ..write('id: $id, ')
+          ..write('tenantId: $tenantId, ')
+          ..write('productId: $productId, ')
+          ..write('batchId: $batchId, ')
+          ..write('containerId: $containerId, ')
+          ..write('movementType: $movementType, ')
+          ..write('quantity: $quantity, ')
+          ..write('balanceAfter: $balanceAfter, ')
+          ..write('idempotencyKey: $idempotencyKey, ')
+          ..write('recordedByUserId: $recordedByUserId, ')
+          ..write('witnessedByUserId: $witnessedByUserId, ')
+          ..write('witnessPinVerified: $witnessPinVerified, ')
+          ..write('clinicalCaseId: $clinicalCaseId, ')
+          ..write('patientId: $patientId, ')
+          ..write('notes: $notes, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('lastSyncedAt: $lastSyncedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -5936,8 +9163,17 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $MediaUploadQueueTableTable mediaUploadQueueTable =
       $MediaUploadQueueTableTable(this);
   late final $SyncQueueTableTable syncQueueTable = $SyncQueueTableTable(this);
+  late final $InventoryProductsTableTable inventoryProductsTable =
+      $InventoryProductsTableTable(this);
+  late final $InventoryBatchesTableTable inventoryBatchesTable =
+      $InventoryBatchesTableTable(this);
+  late final $InventoryContainersTableTable inventoryContainersTable =
+      $InventoryContainersTableTable(this);
+  late final $InventoryMovementLedgerTableTable inventoryMovementLedgerTable =
+      $InventoryMovementLedgerTableTable(this);
   late final ClinicalCaseDao clinicalCaseDao =
       ClinicalCaseDao(this as AppDatabase);
+  late final InventoryDao inventoryDao = InventoryDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -5949,7 +9185,11 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         clinicalProgressNotesTable,
         diagnosesTable,
         mediaUploadQueueTable,
-        syncQueueTable
+        syncQueueTable,
+        inventoryProductsTable,
+        inventoryBatchesTable,
+        inventoryContainersTable,
+        inventoryMovementLedgerTable
       ];
 }
 
@@ -6481,6 +9721,25 @@ final class $$PatientsTableTableReferences
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: cache));
   }
+
+  static MultiTypedResultKey<$InventoryMovementLedgerTableTable,
+      List<InventoryMovementLedgerData>> _inventoryMovementLedgerTableRefsTable(
+          _$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(db.inventoryMovementLedgerTable,
+          aliasName: $_aliasNameGenerator(
+              db.patientsTable.id, db.inventoryMovementLedgerTable.patientId));
+
+  $$InventoryMovementLedgerTableTableProcessedTableManager
+      get inventoryMovementLedgerTableRefs {
+    final manager = $$InventoryMovementLedgerTableTableTableManager(
+            $_db, $_db.inventoryMovementLedgerTable)
+        .filter((f) => f.patientId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult
+        .readTableOrNull(_inventoryMovementLedgerTableRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
 }
 
 class $$PatientsTableTableFilterComposer
@@ -6646,6 +9905,30 @@ class $$PatientsTableTableFilterComposer
                 $$MediaUploadQueueTableTableFilterComposer(
                   $db: $db,
                   $table: $db.mediaUploadQueueTable,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return f(composer);
+  }
+
+  Expression<bool> inventoryMovementLedgerTableRefs(
+      Expression<bool> Function(
+              $$InventoryMovementLedgerTableTableFilterComposer f)
+          f) {
+    final $$InventoryMovementLedgerTableTableFilterComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.id,
+            referencedTable: $db.inventoryMovementLedgerTable,
+            getReferencedColumn: (t) => t.patientId,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$InventoryMovementLedgerTableTableFilterComposer(
+                  $db: $db,
+                  $table: $db.inventoryMovementLedgerTable,
                   $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
                   joinBuilder: joinBuilder,
                   $removeJoinBuilderFromRootComposer:
@@ -6929,6 +10212,30 @@ class $$PatientsTableTableAnnotationComposer
                 ));
     return f(composer);
   }
+
+  Expression<T> inventoryMovementLedgerTableRefs<T extends Object>(
+      Expression<T> Function(
+              $$InventoryMovementLedgerTableTableAnnotationComposer a)
+          f) {
+    final $$InventoryMovementLedgerTableTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.id,
+            referencedTable: $db.inventoryMovementLedgerTable,
+            getReferencedColumn: (t) => t.patientId,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$InventoryMovementLedgerTableTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.inventoryMovementLedgerTable,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return f(composer);
+  }
 }
 
 class $$PatientsTableTableTableManager extends RootTableManager<
@@ -6946,7 +10253,8 @@ class $$PatientsTableTableTableManager extends RootTableManager<
         {bool clientId,
         bool clinicalCasesTableRefs,
         bool diagnosesTableRefs,
-        bool mediaUploadQueueTableRefs})> {
+        bool mediaUploadQueueTableRefs,
+        bool inventoryMovementLedgerTableRefs})> {
   $$PatientsTableTableTableManager(_$AppDatabase db, $PatientsTableTable table)
       : super(TableManagerState(
           db: db,
@@ -7079,13 +10387,16 @@ class $$PatientsTableTableTableManager extends RootTableManager<
               {clientId = false,
               clinicalCasesTableRefs = false,
               diagnosesTableRefs = false,
-              mediaUploadQueueTableRefs = false}) {
+              mediaUploadQueueTableRefs = false,
+              inventoryMovementLedgerTableRefs = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [
                 if (clinicalCasesTableRefs) db.clinicalCasesTable,
                 if (diagnosesTableRefs) db.diagnosesTable,
-                if (mediaUploadQueueTableRefs) db.mediaUploadQueueTable
+                if (mediaUploadQueueTableRefs) db.mediaUploadQueueTable,
+                if (inventoryMovementLedgerTableRefs)
+                  db.inventoryMovementLedgerTable
               ],
               addJoins: <
                   T extends TableManagerState<
@@ -7153,6 +10464,19 @@ class $$PatientsTableTableTableManager extends RootTableManager<
                         referencedItemsForCurrentItem:
                             (item, referencedItems) => referencedItems
                                 .where((e) => e.patientId == item.id),
+                        typedResults: items),
+                  if (inventoryMovementLedgerTableRefs)
+                    await $_getPrefetchedData<PatientData, $PatientsTableTable,
+                            InventoryMovementLedgerData>(
+                        currentTable: table,
+                        referencedTable: $$PatientsTableTableReferences
+                            ._inventoryMovementLedgerTableRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$PatientsTableTableReferences(db, table, p0)
+                                .inventoryMovementLedgerTableRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.patientId == item.id),
                         typedResults: items)
                 ];
               },
@@ -7176,7 +10500,8 @@ typedef $$PatientsTableTableProcessedTableManager = ProcessedTableManager<
         {bool clientId,
         bool clinicalCasesTableRefs,
         bool diagnosesTableRefs,
-        bool mediaUploadQueueTableRefs})>;
+        bool mediaUploadQueueTableRefs,
+        bool inventoryMovementLedgerTableRefs})>;
 typedef $$ClinicalCasesTableTableCreateCompanionBuilder
     = ClinicalCasesTableCompanion Function({
   required String id,
@@ -7293,6 +10618,26 @@ final class $$ClinicalCasesTableTableReferences extends BaseReferences<
 
     final cache =
         $_typedResult.readTableOrNull(_mediaUploadQueueTableRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+
+  static MultiTypedResultKey<$InventoryMovementLedgerTableTable,
+      List<InventoryMovementLedgerData>> _inventoryMovementLedgerTableRefsTable(
+          _$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(db.inventoryMovementLedgerTable,
+          aliasName: $_aliasNameGenerator(db.clinicalCasesTable.id,
+              db.inventoryMovementLedgerTable.clinicalCaseId));
+
+  $$InventoryMovementLedgerTableTableProcessedTableManager
+      get inventoryMovementLedgerTableRefs {
+    final manager = $$InventoryMovementLedgerTableTableTableManager(
+            $_db, $_db.inventoryMovementLedgerTable)
+        .filter(
+            (f) => f.clinicalCaseId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult
+        .readTableOrNull(_inventoryMovementLedgerTableRefsTable($_db));
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: cache));
   }
@@ -7446,6 +10791,30 @@ class $$ClinicalCasesTableTableFilterComposer
                 $$MediaUploadQueueTableTableFilterComposer(
                   $db: $db,
                   $table: $db.mediaUploadQueueTable,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return f(composer);
+  }
+
+  Expression<bool> inventoryMovementLedgerTableRefs(
+      Expression<bool> Function(
+              $$InventoryMovementLedgerTableTableFilterComposer f)
+          f) {
+    final $$InventoryMovementLedgerTableTableFilterComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.id,
+            referencedTable: $db.inventoryMovementLedgerTable,
+            getReferencedColumn: (t) => t.clinicalCaseId,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$InventoryMovementLedgerTableTableFilterComposer(
+                  $db: $db,
+                  $table: $db.inventoryMovementLedgerTable,
                   $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
                   joinBuilder: joinBuilder,
                   $removeJoinBuilderFromRootComposer:
@@ -7696,6 +11065,30 @@ class $$ClinicalCasesTableTableAnnotationComposer
                 ));
     return f(composer);
   }
+
+  Expression<T> inventoryMovementLedgerTableRefs<T extends Object>(
+      Expression<T> Function(
+              $$InventoryMovementLedgerTableTableAnnotationComposer a)
+          f) {
+    final $$InventoryMovementLedgerTableTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.id,
+            referencedTable: $db.inventoryMovementLedgerTable,
+            getReferencedColumn: (t) => t.clinicalCaseId,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$InventoryMovementLedgerTableTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.inventoryMovementLedgerTable,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return f(composer);
+  }
 }
 
 class $$ClinicalCasesTableTableTableManager extends RootTableManager<
@@ -7713,7 +11106,8 @@ class $$ClinicalCasesTableTableTableManager extends RootTableManager<
         {bool patientId,
         bool clinicalProgressNotesTableRefs,
         bool diagnosesTableRefs,
-        bool mediaUploadQueueTableRefs})> {
+        bool mediaUploadQueueTableRefs,
+        bool inventoryMovementLedgerTableRefs})> {
   $$ClinicalCasesTableTableTableManager(
       _$AppDatabase db, $ClinicalCasesTableTable table)
       : super(TableManagerState(
@@ -7824,14 +11218,17 @@ class $$ClinicalCasesTableTableTableManager extends RootTableManager<
               {patientId = false,
               clinicalProgressNotesTableRefs = false,
               diagnosesTableRefs = false,
-              mediaUploadQueueTableRefs = false}) {
+              mediaUploadQueueTableRefs = false,
+              inventoryMovementLedgerTableRefs = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [
                 if (clinicalProgressNotesTableRefs)
                   db.clinicalProgressNotesTable,
                 if (diagnosesTableRefs) db.diagnosesTable,
-                if (mediaUploadQueueTableRefs) db.mediaUploadQueueTable
+                if (mediaUploadQueueTableRefs) db.mediaUploadQueueTable,
+                if (inventoryMovementLedgerTableRefs)
+                  db.inventoryMovementLedgerTable
               ],
               addJoins: <
                   T extends TableManagerState<
@@ -7900,6 +11297,21 @@ class $$ClinicalCasesTableTableTableManager extends RootTableManager<
                         referencedItemsForCurrentItem: (item,
                                 referencedItems) =>
                             referencedItems.where((e) => e.caseId == item.id),
+                        typedResults: items),
+                  if (inventoryMovementLedgerTableRefs)
+                    await $_getPrefetchedData<
+                            ClinicalCaseData,
+                            $ClinicalCasesTableTable,
+                            InventoryMovementLedgerData>(
+                        currentTable: table,
+                        referencedTable: $$ClinicalCasesTableTableReferences
+                            ._inventoryMovementLedgerTableRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$ClinicalCasesTableTableReferences(db, table, p0)
+                                .inventoryMovementLedgerTableRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.clinicalCaseId == item.id),
                         typedResults: items)
                 ];
               },
@@ -7923,7 +11335,8 @@ typedef $$ClinicalCasesTableTableProcessedTableManager = ProcessedTableManager<
         {bool patientId,
         bool clinicalProgressNotesTableRefs,
         bool diagnosesTableRefs,
-        bool mediaUploadQueueTableRefs})>;
+        bool mediaUploadQueueTableRefs,
+        bool inventoryMovementLedgerTableRefs})>;
 typedef $$ClinicalProgressNotesTableTableCreateCompanionBuilder
     = ClinicalProgressNotesTableCompanion Function({
   required String id,
@@ -9689,6 +13102,2703 @@ typedef $$SyncQueueTableTableProcessedTableManager = ProcessedTableManager<
     ),
     SyncQueueData,
     PrefetchHooks Function()>;
+typedef $$InventoryProductsTableTableCreateCompanionBuilder
+    = InventoryProductsTableCompanion Function({
+  required String id,
+  required String tenantId,
+  required String sku,
+  required String name,
+  Value<String?> description,
+  Value<String> baseUnit,
+  Value<bool> isControlled,
+  Value<String?> controlledSchedule,
+  Value<Decimal> minThreshold,
+  Value<Decimal> currentStockQty,
+  required DateTime createdAt,
+  required DateTime updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<String> syncStatus,
+  Value<DateTime?> lastSyncedAt,
+  Value<int> rowid,
+});
+typedef $$InventoryProductsTableTableUpdateCompanionBuilder
+    = InventoryProductsTableCompanion Function({
+  Value<String> id,
+  Value<String> tenantId,
+  Value<String> sku,
+  Value<String> name,
+  Value<String?> description,
+  Value<String> baseUnit,
+  Value<bool> isControlled,
+  Value<String?> controlledSchedule,
+  Value<Decimal> minThreshold,
+  Value<Decimal> currentStockQty,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<String> syncStatus,
+  Value<DateTime?> lastSyncedAt,
+  Value<int> rowid,
+});
+
+final class $$InventoryProductsTableTableReferences extends BaseReferences<
+    _$AppDatabase, $InventoryProductsTableTable, InventoryProductData> {
+  $$InventoryProductsTableTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$InventoryBatchesTableTable,
+      List<InventoryBatchData>> _inventoryBatchesTableRefsTable(
+          _$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(db.inventoryBatchesTable,
+          aliasName: $_aliasNameGenerator(db.inventoryProductsTable.id,
+              db.inventoryBatchesTable.productId));
+
+  $$InventoryBatchesTableTableProcessedTableManager
+      get inventoryBatchesTableRefs {
+    final manager = $$InventoryBatchesTableTableTableManager(
+            $_db, $_db.inventoryBatchesTable)
+        .filter((f) => f.productId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache =
+        $_typedResult.readTableOrNull(_inventoryBatchesTableRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+
+  static MultiTypedResultKey<$InventoryContainersTableTable,
+      List<InventoryContainerData>> _inventoryContainersTableRefsTable(
+          _$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(db.inventoryContainersTable,
+          aliasName: $_aliasNameGenerator(db.inventoryProductsTable.id,
+              db.inventoryContainersTable.productId));
+
+  $$InventoryContainersTableTableProcessedTableManager
+      get inventoryContainersTableRefs {
+    final manager = $$InventoryContainersTableTableTableManager(
+            $_db, $_db.inventoryContainersTable)
+        .filter((f) => f.productId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache =
+        $_typedResult.readTableOrNull(_inventoryContainersTableRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+
+  static MultiTypedResultKey<$InventoryMovementLedgerTableTable,
+      List<InventoryMovementLedgerData>> _inventoryMovementLedgerTableRefsTable(
+          _$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(db.inventoryMovementLedgerTable,
+          aliasName: $_aliasNameGenerator(db.inventoryProductsTable.id,
+              db.inventoryMovementLedgerTable.productId));
+
+  $$InventoryMovementLedgerTableTableProcessedTableManager
+      get inventoryMovementLedgerTableRefs {
+    final manager = $$InventoryMovementLedgerTableTableTableManager(
+            $_db, $_db.inventoryMovementLedgerTable)
+        .filter((f) => f.productId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult
+        .readTableOrNull(_inventoryMovementLedgerTableRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+}
+
+class $$InventoryProductsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $InventoryProductsTableTable> {
+  $$InventoryProductsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get tenantId => $composableBuilder(
+      column: $table.tenantId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get sku => $composableBuilder(
+      column: $table.sku, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get description => $composableBuilder(
+      column: $table.description, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get baseUnit => $composableBuilder(
+      column: $table.baseUnit, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isControlled => $composableBuilder(
+      column: $table.isControlled, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get controlledSchedule => $composableBuilder(
+      column: $table.controlledSchedule,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<Decimal, Decimal, String> get minThreshold =>
+      $composableBuilder(
+          column: $table.minThreshold,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnWithTypeConverterFilters<Decimal, Decimal, String>
+      get currentStockQty => $composableBuilder(
+          column: $table.currentStockQty,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get syncStatus => $composableBuilder(
+      column: $table.syncStatus, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get lastSyncedAt => $composableBuilder(
+      column: $table.lastSyncedAt, builder: (column) => ColumnFilters(column));
+
+  Expression<bool> inventoryBatchesTableRefs(
+      Expression<bool> Function($$InventoryBatchesTableTableFilterComposer f)
+          f) {
+    final $$InventoryBatchesTableTableFilterComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.id,
+            referencedTable: $db.inventoryBatchesTable,
+            getReferencedColumn: (t) => t.productId,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$InventoryBatchesTableTableFilterComposer(
+                  $db: $db,
+                  $table: $db.inventoryBatchesTable,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return f(composer);
+  }
+
+  Expression<bool> inventoryContainersTableRefs(
+      Expression<bool> Function($$InventoryContainersTableTableFilterComposer f)
+          f) {
+    final $$InventoryContainersTableTableFilterComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.id,
+            referencedTable: $db.inventoryContainersTable,
+            getReferencedColumn: (t) => t.productId,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$InventoryContainersTableTableFilterComposer(
+                  $db: $db,
+                  $table: $db.inventoryContainersTable,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return f(composer);
+  }
+
+  Expression<bool> inventoryMovementLedgerTableRefs(
+      Expression<bool> Function(
+              $$InventoryMovementLedgerTableTableFilterComposer f)
+          f) {
+    final $$InventoryMovementLedgerTableTableFilterComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.id,
+            referencedTable: $db.inventoryMovementLedgerTable,
+            getReferencedColumn: (t) => t.productId,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$InventoryMovementLedgerTableTableFilterComposer(
+                  $db: $db,
+                  $table: $db.inventoryMovementLedgerTable,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return f(composer);
+  }
+}
+
+class $$InventoryProductsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $InventoryProductsTableTable> {
+  $$InventoryProductsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get tenantId => $composableBuilder(
+      column: $table.tenantId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get sku => $composableBuilder(
+      column: $table.sku, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get description => $composableBuilder(
+      column: $table.description, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get baseUnit => $composableBuilder(
+      column: $table.baseUnit, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isControlled => $composableBuilder(
+      column: $table.isControlled,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get controlledSchedule => $composableBuilder(
+      column: $table.controlledSchedule,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get minThreshold => $composableBuilder(
+      column: $table.minThreshold,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get currentStockQty => $composableBuilder(
+      column: $table.currentStockQty,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get syncStatus => $composableBuilder(
+      column: $table.syncStatus, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get lastSyncedAt => $composableBuilder(
+      column: $table.lastSyncedAt,
+      builder: (column) => ColumnOrderings(column));
+}
+
+class $$InventoryProductsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $InventoryProductsTableTable> {
+  $$InventoryProductsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get tenantId =>
+      $composableBuilder(column: $table.tenantId, builder: (column) => column);
+
+  GeneratedColumn<String> get sku =>
+      $composableBuilder(column: $table.sku, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get description => $composableBuilder(
+      column: $table.description, builder: (column) => column);
+
+  GeneratedColumn<String> get baseUnit =>
+      $composableBuilder(column: $table.baseUnit, builder: (column) => column);
+
+  GeneratedColumn<bool> get isControlled => $composableBuilder(
+      column: $table.isControlled, builder: (column) => column);
+
+  GeneratedColumn<String> get controlledSchedule => $composableBuilder(
+      column: $table.controlledSchedule, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<Decimal, String> get minThreshold =>
+      $composableBuilder(
+          column: $table.minThreshold, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<Decimal, String> get currentStockQty =>
+      $composableBuilder(
+          column: $table.currentStockQty, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get syncStatus => $composableBuilder(
+      column: $table.syncStatus, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get lastSyncedAt => $composableBuilder(
+      column: $table.lastSyncedAt, builder: (column) => column);
+
+  Expression<T> inventoryBatchesTableRefs<T extends Object>(
+      Expression<T> Function($$InventoryBatchesTableTableAnnotationComposer a)
+          f) {
+    final $$InventoryBatchesTableTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.id,
+            referencedTable: $db.inventoryBatchesTable,
+            getReferencedColumn: (t) => t.productId,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$InventoryBatchesTableTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.inventoryBatchesTable,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return f(composer);
+  }
+
+  Expression<T> inventoryContainersTableRefs<T extends Object>(
+      Expression<T> Function(
+              $$InventoryContainersTableTableAnnotationComposer a)
+          f) {
+    final $$InventoryContainersTableTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.id,
+            referencedTable: $db.inventoryContainersTable,
+            getReferencedColumn: (t) => t.productId,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$InventoryContainersTableTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.inventoryContainersTable,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return f(composer);
+  }
+
+  Expression<T> inventoryMovementLedgerTableRefs<T extends Object>(
+      Expression<T> Function(
+              $$InventoryMovementLedgerTableTableAnnotationComposer a)
+          f) {
+    final $$InventoryMovementLedgerTableTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.id,
+            referencedTable: $db.inventoryMovementLedgerTable,
+            getReferencedColumn: (t) => t.productId,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$InventoryMovementLedgerTableTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.inventoryMovementLedgerTable,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return f(composer);
+  }
+}
+
+class $$InventoryProductsTableTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $InventoryProductsTableTable,
+    InventoryProductData,
+    $$InventoryProductsTableTableFilterComposer,
+    $$InventoryProductsTableTableOrderingComposer,
+    $$InventoryProductsTableTableAnnotationComposer,
+    $$InventoryProductsTableTableCreateCompanionBuilder,
+    $$InventoryProductsTableTableUpdateCompanionBuilder,
+    (InventoryProductData, $$InventoryProductsTableTableReferences),
+    InventoryProductData,
+    PrefetchHooks Function(
+        {bool inventoryBatchesTableRefs,
+        bool inventoryContainersTableRefs,
+        bool inventoryMovementLedgerTableRefs})> {
+  $$InventoryProductsTableTableTableManager(
+      _$AppDatabase db, $InventoryProductsTableTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$InventoryProductsTableTableFilterComposer(
+                  $db: db, $table: table),
+          createOrderingComposer: () =>
+              $$InventoryProductsTableTableOrderingComposer(
+                  $db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$InventoryProductsTableTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> tenantId = const Value.absent(),
+            Value<String> sku = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<String?> description = const Value.absent(),
+            Value<String> baseUnit = const Value.absent(),
+            Value<bool> isControlled = const Value.absent(),
+            Value<String?> controlledSchedule = const Value.absent(),
+            Value<Decimal> minThreshold = const Value.absent(),
+            Value<Decimal> currentStockQty = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<DateTime?> deletedAt = const Value.absent(),
+            Value<String> syncStatus = const Value.absent(),
+            Value<DateTime?> lastSyncedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              InventoryProductsTableCompanion(
+            id: id,
+            tenantId: tenantId,
+            sku: sku,
+            name: name,
+            description: description,
+            baseUnit: baseUnit,
+            isControlled: isControlled,
+            controlledSchedule: controlledSchedule,
+            minThreshold: minThreshold,
+            currentStockQty: currentStockQty,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            syncStatus: syncStatus,
+            lastSyncedAt: lastSyncedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String tenantId,
+            required String sku,
+            required String name,
+            Value<String?> description = const Value.absent(),
+            Value<String> baseUnit = const Value.absent(),
+            Value<bool> isControlled = const Value.absent(),
+            Value<String?> controlledSchedule = const Value.absent(),
+            Value<Decimal> minThreshold = const Value.absent(),
+            Value<Decimal> currentStockQty = const Value.absent(),
+            required DateTime createdAt,
+            required DateTime updatedAt,
+            Value<DateTime?> deletedAt = const Value.absent(),
+            Value<String> syncStatus = const Value.absent(),
+            Value<DateTime?> lastSyncedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              InventoryProductsTableCompanion.insert(
+            id: id,
+            tenantId: tenantId,
+            sku: sku,
+            name: name,
+            description: description,
+            baseUnit: baseUnit,
+            isControlled: isControlled,
+            controlledSchedule: controlledSchedule,
+            minThreshold: minThreshold,
+            currentStockQty: currentStockQty,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            syncStatus: syncStatus,
+            lastSyncedAt: lastSyncedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$InventoryProductsTableTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: (
+              {inventoryBatchesTableRefs = false,
+              inventoryContainersTableRefs = false,
+              inventoryMovementLedgerTableRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (inventoryBatchesTableRefs) db.inventoryBatchesTable,
+                if (inventoryContainersTableRefs) db.inventoryContainersTable,
+                if (inventoryMovementLedgerTableRefs)
+                  db.inventoryMovementLedgerTable
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (inventoryBatchesTableRefs)
+                    await $_getPrefetchedData<InventoryProductData,
+                            $InventoryProductsTableTable, InventoryBatchData>(
+                        currentTable: table,
+                        referencedTable: $$InventoryProductsTableTableReferences
+                            ._inventoryBatchesTableRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$InventoryProductsTableTableReferences(
+                                    db, table, p0)
+                                .inventoryBatchesTableRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.productId == item.id),
+                        typedResults: items),
+                  if (inventoryContainersTableRefs)
+                    await $_getPrefetchedData<
+                            InventoryProductData,
+                            $InventoryProductsTableTable,
+                            InventoryContainerData>(
+                        currentTable: table,
+                        referencedTable: $$InventoryProductsTableTableReferences
+                            ._inventoryContainersTableRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$InventoryProductsTableTableReferences(
+                                    db, table, p0)
+                                .inventoryContainersTableRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.productId == item.id),
+                        typedResults: items),
+                  if (inventoryMovementLedgerTableRefs)
+                    await $_getPrefetchedData<
+                            InventoryProductData,
+                            $InventoryProductsTableTable,
+                            InventoryMovementLedgerData>(
+                        currentTable: table,
+                        referencedTable: $$InventoryProductsTableTableReferences
+                            ._inventoryMovementLedgerTableRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$InventoryProductsTableTableReferences(
+                                    db, table, p0)
+                                .inventoryMovementLedgerTableRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.productId == item.id),
+                        typedResults: items)
+                ];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$InventoryProductsTableTableProcessedTableManager
+    = ProcessedTableManager<
+        _$AppDatabase,
+        $InventoryProductsTableTable,
+        InventoryProductData,
+        $$InventoryProductsTableTableFilterComposer,
+        $$InventoryProductsTableTableOrderingComposer,
+        $$InventoryProductsTableTableAnnotationComposer,
+        $$InventoryProductsTableTableCreateCompanionBuilder,
+        $$InventoryProductsTableTableUpdateCompanionBuilder,
+        (InventoryProductData, $$InventoryProductsTableTableReferences),
+        InventoryProductData,
+        PrefetchHooks Function(
+            {bool inventoryBatchesTableRefs,
+            bool inventoryContainersTableRefs,
+            bool inventoryMovementLedgerTableRefs})>;
+typedef $$InventoryBatchesTableTableCreateCompanionBuilder
+    = InventoryBatchesTableCompanion Function({
+  required String id,
+  required String tenantId,
+  required String productId,
+  required String lotNumber,
+  required DateTime expiresAt,
+  Value<Decimal> unitCost,
+  required Decimal initialBaseQty,
+  required Decimal remainingBaseQty,
+  Value<String> status,
+  required DateTime createdAt,
+  required DateTime updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<String> syncStatus,
+  Value<DateTime?> lastSyncedAt,
+  Value<int> rowid,
+});
+typedef $$InventoryBatchesTableTableUpdateCompanionBuilder
+    = InventoryBatchesTableCompanion Function({
+  Value<String> id,
+  Value<String> tenantId,
+  Value<String> productId,
+  Value<String> lotNumber,
+  Value<DateTime> expiresAt,
+  Value<Decimal> unitCost,
+  Value<Decimal> initialBaseQty,
+  Value<Decimal> remainingBaseQty,
+  Value<String> status,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<String> syncStatus,
+  Value<DateTime?> lastSyncedAt,
+  Value<int> rowid,
+});
+
+final class $$InventoryBatchesTableTableReferences extends BaseReferences<
+    _$AppDatabase, $InventoryBatchesTableTable, InventoryBatchData> {
+  $$InventoryBatchesTableTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static $InventoryProductsTableTable _productIdTable(_$AppDatabase db) =>
+      db.inventoryProductsTable.createAlias($_aliasNameGenerator(
+          db.inventoryBatchesTable.productId, db.inventoryProductsTable.id));
+
+  $$InventoryProductsTableTableProcessedTableManager get productId {
+    final $_column = $_itemColumn<String>('product_id')!;
+
+    final manager = $$InventoryProductsTableTableTableManager(
+            $_db, $_db.inventoryProductsTable)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_productIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static MultiTypedResultKey<$InventoryContainersTableTable,
+      List<InventoryContainerData>> _inventoryContainersTableRefsTable(
+          _$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(db.inventoryContainersTable,
+          aliasName: $_aliasNameGenerator(db.inventoryBatchesTable.id,
+              db.inventoryContainersTable.batchId));
+
+  $$InventoryContainersTableTableProcessedTableManager
+      get inventoryContainersTableRefs {
+    final manager = $$InventoryContainersTableTableTableManager(
+            $_db, $_db.inventoryContainersTable)
+        .filter((f) => f.batchId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache =
+        $_typedResult.readTableOrNull(_inventoryContainersTableRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+
+  static MultiTypedResultKey<$InventoryMovementLedgerTableTable,
+      List<InventoryMovementLedgerData>> _inventoryMovementLedgerTableRefsTable(
+          _$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(db.inventoryMovementLedgerTable,
+          aliasName: $_aliasNameGenerator(db.inventoryBatchesTable.id,
+              db.inventoryMovementLedgerTable.batchId));
+
+  $$InventoryMovementLedgerTableTableProcessedTableManager
+      get inventoryMovementLedgerTableRefs {
+    final manager = $$InventoryMovementLedgerTableTableTableManager(
+            $_db, $_db.inventoryMovementLedgerTable)
+        .filter((f) => f.batchId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult
+        .readTableOrNull(_inventoryMovementLedgerTableRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+}
+
+class $$InventoryBatchesTableTableFilterComposer
+    extends Composer<_$AppDatabase, $InventoryBatchesTableTable> {
+  $$InventoryBatchesTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get tenantId => $composableBuilder(
+      column: $table.tenantId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get lotNumber => $composableBuilder(
+      column: $table.lotNumber, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get expiresAt => $composableBuilder(
+      column: $table.expiresAt, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<Decimal, Decimal, String> get unitCost =>
+      $composableBuilder(
+          column: $table.unitCost,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnWithTypeConverterFilters<Decimal, Decimal, String> get initialBaseQty =>
+      $composableBuilder(
+          column: $table.initialBaseQty,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnWithTypeConverterFilters<Decimal, Decimal, String>
+      get remainingBaseQty => $composableBuilder(
+          column: $table.remainingBaseQty,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnFilters<String> get status => $composableBuilder(
+      column: $table.status, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get syncStatus => $composableBuilder(
+      column: $table.syncStatus, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get lastSyncedAt => $composableBuilder(
+      column: $table.lastSyncedAt, builder: (column) => ColumnFilters(column));
+
+  $$InventoryProductsTableTableFilterComposer get productId {
+    final $$InventoryProductsTableTableFilterComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.productId,
+            referencedTable: $db.inventoryProductsTable,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$InventoryProductsTableTableFilterComposer(
+                  $db: $db,
+                  $table: $db.inventoryProductsTable,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+
+  Expression<bool> inventoryContainersTableRefs(
+      Expression<bool> Function($$InventoryContainersTableTableFilterComposer f)
+          f) {
+    final $$InventoryContainersTableTableFilterComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.id,
+            referencedTable: $db.inventoryContainersTable,
+            getReferencedColumn: (t) => t.batchId,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$InventoryContainersTableTableFilterComposer(
+                  $db: $db,
+                  $table: $db.inventoryContainersTable,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return f(composer);
+  }
+
+  Expression<bool> inventoryMovementLedgerTableRefs(
+      Expression<bool> Function(
+              $$InventoryMovementLedgerTableTableFilterComposer f)
+          f) {
+    final $$InventoryMovementLedgerTableTableFilterComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.id,
+            referencedTable: $db.inventoryMovementLedgerTable,
+            getReferencedColumn: (t) => t.batchId,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$InventoryMovementLedgerTableTableFilterComposer(
+                  $db: $db,
+                  $table: $db.inventoryMovementLedgerTable,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return f(composer);
+  }
+}
+
+class $$InventoryBatchesTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $InventoryBatchesTableTable> {
+  $$InventoryBatchesTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get tenantId => $composableBuilder(
+      column: $table.tenantId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get lotNumber => $composableBuilder(
+      column: $table.lotNumber, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get expiresAt => $composableBuilder(
+      column: $table.expiresAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get unitCost => $composableBuilder(
+      column: $table.unitCost, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get initialBaseQty => $composableBuilder(
+      column: $table.initialBaseQty,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get remainingBaseQty => $composableBuilder(
+      column: $table.remainingBaseQty,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get status => $composableBuilder(
+      column: $table.status, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get syncStatus => $composableBuilder(
+      column: $table.syncStatus, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get lastSyncedAt => $composableBuilder(
+      column: $table.lastSyncedAt,
+      builder: (column) => ColumnOrderings(column));
+
+  $$InventoryProductsTableTableOrderingComposer get productId {
+    final $$InventoryProductsTableTableOrderingComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.productId,
+            referencedTable: $db.inventoryProductsTable,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$InventoryProductsTableTableOrderingComposer(
+                  $db: $db,
+                  $table: $db.inventoryProductsTable,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+}
+
+class $$InventoryBatchesTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $InventoryBatchesTableTable> {
+  $$InventoryBatchesTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get tenantId =>
+      $composableBuilder(column: $table.tenantId, builder: (column) => column);
+
+  GeneratedColumn<String> get lotNumber =>
+      $composableBuilder(column: $table.lotNumber, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get expiresAt =>
+      $composableBuilder(column: $table.expiresAt, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<Decimal, String> get unitCost =>
+      $composableBuilder(column: $table.unitCost, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<Decimal, String> get initialBaseQty =>
+      $composableBuilder(
+          column: $table.initialBaseQty, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<Decimal, String> get remainingBaseQty =>
+      $composableBuilder(
+          column: $table.remainingBaseQty, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get syncStatus => $composableBuilder(
+      column: $table.syncStatus, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get lastSyncedAt => $composableBuilder(
+      column: $table.lastSyncedAt, builder: (column) => column);
+
+  $$InventoryProductsTableTableAnnotationComposer get productId {
+    final $$InventoryProductsTableTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.productId,
+            referencedTable: $db.inventoryProductsTable,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$InventoryProductsTableTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.inventoryProductsTable,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+
+  Expression<T> inventoryContainersTableRefs<T extends Object>(
+      Expression<T> Function(
+              $$InventoryContainersTableTableAnnotationComposer a)
+          f) {
+    final $$InventoryContainersTableTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.id,
+            referencedTable: $db.inventoryContainersTable,
+            getReferencedColumn: (t) => t.batchId,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$InventoryContainersTableTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.inventoryContainersTable,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return f(composer);
+  }
+
+  Expression<T> inventoryMovementLedgerTableRefs<T extends Object>(
+      Expression<T> Function(
+              $$InventoryMovementLedgerTableTableAnnotationComposer a)
+          f) {
+    final $$InventoryMovementLedgerTableTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.id,
+            referencedTable: $db.inventoryMovementLedgerTable,
+            getReferencedColumn: (t) => t.batchId,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$InventoryMovementLedgerTableTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.inventoryMovementLedgerTable,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return f(composer);
+  }
+}
+
+class $$InventoryBatchesTableTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $InventoryBatchesTableTable,
+    InventoryBatchData,
+    $$InventoryBatchesTableTableFilterComposer,
+    $$InventoryBatchesTableTableOrderingComposer,
+    $$InventoryBatchesTableTableAnnotationComposer,
+    $$InventoryBatchesTableTableCreateCompanionBuilder,
+    $$InventoryBatchesTableTableUpdateCompanionBuilder,
+    (InventoryBatchData, $$InventoryBatchesTableTableReferences),
+    InventoryBatchData,
+    PrefetchHooks Function(
+        {bool productId,
+        bool inventoryContainersTableRefs,
+        bool inventoryMovementLedgerTableRefs})> {
+  $$InventoryBatchesTableTableTableManager(
+      _$AppDatabase db, $InventoryBatchesTableTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$InventoryBatchesTableTableFilterComposer(
+                  $db: db, $table: table),
+          createOrderingComposer: () =>
+              $$InventoryBatchesTableTableOrderingComposer(
+                  $db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$InventoryBatchesTableTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> tenantId = const Value.absent(),
+            Value<String> productId = const Value.absent(),
+            Value<String> lotNumber = const Value.absent(),
+            Value<DateTime> expiresAt = const Value.absent(),
+            Value<Decimal> unitCost = const Value.absent(),
+            Value<Decimal> initialBaseQty = const Value.absent(),
+            Value<Decimal> remainingBaseQty = const Value.absent(),
+            Value<String> status = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<DateTime?> deletedAt = const Value.absent(),
+            Value<String> syncStatus = const Value.absent(),
+            Value<DateTime?> lastSyncedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              InventoryBatchesTableCompanion(
+            id: id,
+            tenantId: tenantId,
+            productId: productId,
+            lotNumber: lotNumber,
+            expiresAt: expiresAt,
+            unitCost: unitCost,
+            initialBaseQty: initialBaseQty,
+            remainingBaseQty: remainingBaseQty,
+            status: status,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            syncStatus: syncStatus,
+            lastSyncedAt: lastSyncedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String tenantId,
+            required String productId,
+            required String lotNumber,
+            required DateTime expiresAt,
+            Value<Decimal> unitCost = const Value.absent(),
+            required Decimal initialBaseQty,
+            required Decimal remainingBaseQty,
+            Value<String> status = const Value.absent(),
+            required DateTime createdAt,
+            required DateTime updatedAt,
+            Value<DateTime?> deletedAt = const Value.absent(),
+            Value<String> syncStatus = const Value.absent(),
+            Value<DateTime?> lastSyncedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              InventoryBatchesTableCompanion.insert(
+            id: id,
+            tenantId: tenantId,
+            productId: productId,
+            lotNumber: lotNumber,
+            expiresAt: expiresAt,
+            unitCost: unitCost,
+            initialBaseQty: initialBaseQty,
+            remainingBaseQty: remainingBaseQty,
+            status: status,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            syncStatus: syncStatus,
+            lastSyncedAt: lastSyncedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$InventoryBatchesTableTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: (
+              {productId = false,
+              inventoryContainersTableRefs = false,
+              inventoryMovementLedgerTableRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (inventoryContainersTableRefs) db.inventoryContainersTable,
+                if (inventoryMovementLedgerTableRefs)
+                  db.inventoryMovementLedgerTable
+              ],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (productId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.productId,
+                    referencedTable: $$InventoryBatchesTableTableReferences
+                        ._productIdTable(db),
+                    referencedColumn: $$InventoryBatchesTableTableReferences
+                        ._productIdTable(db)
+                        .id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (inventoryContainersTableRefs)
+                    await $_getPrefetchedData<
+                            InventoryBatchData,
+                            $InventoryBatchesTableTable,
+                            InventoryContainerData>(
+                        currentTable: table,
+                        referencedTable: $$InventoryBatchesTableTableReferences
+                            ._inventoryContainersTableRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$InventoryBatchesTableTableReferences(
+                                    db, table, p0)
+                                .inventoryContainersTableRefs,
+                        referencedItemsForCurrentItem: (item,
+                                referencedItems) =>
+                            referencedItems.where((e) => e.batchId == item.id),
+                        typedResults: items),
+                  if (inventoryMovementLedgerTableRefs)
+                    await $_getPrefetchedData<
+                            InventoryBatchData,
+                            $InventoryBatchesTableTable,
+                            InventoryMovementLedgerData>(
+                        currentTable: table,
+                        referencedTable: $$InventoryBatchesTableTableReferences
+                            ._inventoryMovementLedgerTableRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$InventoryBatchesTableTableReferences(
+                                    db, table, p0)
+                                .inventoryMovementLedgerTableRefs,
+                        referencedItemsForCurrentItem: (item,
+                                referencedItems) =>
+                            referencedItems.where((e) => e.batchId == item.id),
+                        typedResults: items)
+                ];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$InventoryBatchesTableTableProcessedTableManager
+    = ProcessedTableManager<
+        _$AppDatabase,
+        $InventoryBatchesTableTable,
+        InventoryBatchData,
+        $$InventoryBatchesTableTableFilterComposer,
+        $$InventoryBatchesTableTableOrderingComposer,
+        $$InventoryBatchesTableTableAnnotationComposer,
+        $$InventoryBatchesTableTableCreateCompanionBuilder,
+        $$InventoryBatchesTableTableUpdateCompanionBuilder,
+        (InventoryBatchData, $$InventoryBatchesTableTableReferences),
+        InventoryBatchData,
+        PrefetchHooks Function(
+            {bool productId,
+            bool inventoryContainersTableRefs,
+            bool inventoryMovementLedgerTableRefs})>;
+typedef $$InventoryContainersTableTableCreateCompanionBuilder
+    = InventoryContainersTableCompanion Function({
+  required String id,
+  required String tenantId,
+  required String batchId,
+  required String productId,
+  required String barcode,
+  required Decimal initialVolume,
+  required Decimal remainingBalance,
+  Value<String> status,
+  Value<DateTime?> openedAt,
+  Value<String?> openedByUserId,
+  required DateTime createdAt,
+  required DateTime updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<String> syncStatus,
+  Value<DateTime?> lastSyncedAt,
+  Value<int> rowid,
+});
+typedef $$InventoryContainersTableTableUpdateCompanionBuilder
+    = InventoryContainersTableCompanion Function({
+  Value<String> id,
+  Value<String> tenantId,
+  Value<String> batchId,
+  Value<String> productId,
+  Value<String> barcode,
+  Value<Decimal> initialVolume,
+  Value<Decimal> remainingBalance,
+  Value<String> status,
+  Value<DateTime?> openedAt,
+  Value<String?> openedByUserId,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<String> syncStatus,
+  Value<DateTime?> lastSyncedAt,
+  Value<int> rowid,
+});
+
+final class $$InventoryContainersTableTableReferences extends BaseReferences<
+    _$AppDatabase, $InventoryContainersTableTable, InventoryContainerData> {
+  $$InventoryContainersTableTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static $InventoryBatchesTableTable _batchIdTable(_$AppDatabase db) =>
+      db.inventoryBatchesTable.createAlias($_aliasNameGenerator(
+          db.inventoryContainersTable.batchId, db.inventoryBatchesTable.id));
+
+  $$InventoryBatchesTableTableProcessedTableManager get batchId {
+    final $_column = $_itemColumn<String>('batch_id')!;
+
+    final manager = $$InventoryBatchesTableTableTableManager(
+            $_db, $_db.inventoryBatchesTable)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_batchIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static $InventoryProductsTableTable _productIdTable(_$AppDatabase db) =>
+      db.inventoryProductsTable.createAlias($_aliasNameGenerator(
+          db.inventoryContainersTable.productId, db.inventoryProductsTable.id));
+
+  $$InventoryProductsTableTableProcessedTableManager get productId {
+    final $_column = $_itemColumn<String>('product_id')!;
+
+    final manager = $$InventoryProductsTableTableTableManager(
+            $_db, $_db.inventoryProductsTable)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_productIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static MultiTypedResultKey<$InventoryMovementLedgerTableTable,
+      List<InventoryMovementLedgerData>> _inventoryMovementLedgerTableRefsTable(
+          _$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(db.inventoryMovementLedgerTable,
+          aliasName: $_aliasNameGenerator(db.inventoryContainersTable.id,
+              db.inventoryMovementLedgerTable.containerId));
+
+  $$InventoryMovementLedgerTableTableProcessedTableManager
+      get inventoryMovementLedgerTableRefs {
+    final manager = $$InventoryMovementLedgerTableTableTableManager(
+            $_db, $_db.inventoryMovementLedgerTable)
+        .filter((f) => f.containerId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult
+        .readTableOrNull(_inventoryMovementLedgerTableRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+}
+
+class $$InventoryContainersTableTableFilterComposer
+    extends Composer<_$AppDatabase, $InventoryContainersTableTable> {
+  $$InventoryContainersTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get tenantId => $composableBuilder(
+      column: $table.tenantId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get barcode => $composableBuilder(
+      column: $table.barcode, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<Decimal, Decimal, String> get initialVolume =>
+      $composableBuilder(
+          column: $table.initialVolume,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnWithTypeConverterFilters<Decimal, Decimal, String>
+      get remainingBalance => $composableBuilder(
+          column: $table.remainingBalance,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnFilters<String> get status => $composableBuilder(
+      column: $table.status, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get openedAt => $composableBuilder(
+      column: $table.openedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get openedByUserId => $composableBuilder(
+      column: $table.openedByUserId,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get syncStatus => $composableBuilder(
+      column: $table.syncStatus, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get lastSyncedAt => $composableBuilder(
+      column: $table.lastSyncedAt, builder: (column) => ColumnFilters(column));
+
+  $$InventoryBatchesTableTableFilterComposer get batchId {
+    final $$InventoryBatchesTableTableFilterComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.batchId,
+            referencedTable: $db.inventoryBatchesTable,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$InventoryBatchesTableTableFilterComposer(
+                  $db: $db,
+                  $table: $db.inventoryBatchesTable,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+
+  $$InventoryProductsTableTableFilterComposer get productId {
+    final $$InventoryProductsTableTableFilterComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.productId,
+            referencedTable: $db.inventoryProductsTable,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$InventoryProductsTableTableFilterComposer(
+                  $db: $db,
+                  $table: $db.inventoryProductsTable,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+
+  Expression<bool> inventoryMovementLedgerTableRefs(
+      Expression<bool> Function(
+              $$InventoryMovementLedgerTableTableFilterComposer f)
+          f) {
+    final $$InventoryMovementLedgerTableTableFilterComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.id,
+            referencedTable: $db.inventoryMovementLedgerTable,
+            getReferencedColumn: (t) => t.containerId,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$InventoryMovementLedgerTableTableFilterComposer(
+                  $db: $db,
+                  $table: $db.inventoryMovementLedgerTable,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return f(composer);
+  }
+}
+
+class $$InventoryContainersTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $InventoryContainersTableTable> {
+  $$InventoryContainersTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get tenantId => $composableBuilder(
+      column: $table.tenantId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get barcode => $composableBuilder(
+      column: $table.barcode, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get initialVolume => $composableBuilder(
+      column: $table.initialVolume,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get remainingBalance => $composableBuilder(
+      column: $table.remainingBalance,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get status => $composableBuilder(
+      column: $table.status, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get openedAt => $composableBuilder(
+      column: $table.openedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get openedByUserId => $composableBuilder(
+      column: $table.openedByUserId,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get syncStatus => $composableBuilder(
+      column: $table.syncStatus, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get lastSyncedAt => $composableBuilder(
+      column: $table.lastSyncedAt,
+      builder: (column) => ColumnOrderings(column));
+
+  $$InventoryBatchesTableTableOrderingComposer get batchId {
+    final $$InventoryBatchesTableTableOrderingComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.batchId,
+            referencedTable: $db.inventoryBatchesTable,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$InventoryBatchesTableTableOrderingComposer(
+                  $db: $db,
+                  $table: $db.inventoryBatchesTable,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+
+  $$InventoryProductsTableTableOrderingComposer get productId {
+    final $$InventoryProductsTableTableOrderingComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.productId,
+            referencedTable: $db.inventoryProductsTable,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$InventoryProductsTableTableOrderingComposer(
+                  $db: $db,
+                  $table: $db.inventoryProductsTable,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+}
+
+class $$InventoryContainersTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $InventoryContainersTableTable> {
+  $$InventoryContainersTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get tenantId =>
+      $composableBuilder(column: $table.tenantId, builder: (column) => column);
+
+  GeneratedColumn<String> get barcode =>
+      $composableBuilder(column: $table.barcode, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<Decimal, String> get initialVolume =>
+      $composableBuilder(
+          column: $table.initialVolume, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<Decimal, String> get remainingBalance =>
+      $composableBuilder(
+          column: $table.remainingBalance, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get openedAt =>
+      $composableBuilder(column: $table.openedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get openedByUserId => $composableBuilder(
+      column: $table.openedByUserId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get syncStatus => $composableBuilder(
+      column: $table.syncStatus, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get lastSyncedAt => $composableBuilder(
+      column: $table.lastSyncedAt, builder: (column) => column);
+
+  $$InventoryBatchesTableTableAnnotationComposer get batchId {
+    final $$InventoryBatchesTableTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.batchId,
+            referencedTable: $db.inventoryBatchesTable,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$InventoryBatchesTableTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.inventoryBatchesTable,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+
+  $$InventoryProductsTableTableAnnotationComposer get productId {
+    final $$InventoryProductsTableTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.productId,
+            referencedTable: $db.inventoryProductsTable,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$InventoryProductsTableTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.inventoryProductsTable,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+
+  Expression<T> inventoryMovementLedgerTableRefs<T extends Object>(
+      Expression<T> Function(
+              $$InventoryMovementLedgerTableTableAnnotationComposer a)
+          f) {
+    final $$InventoryMovementLedgerTableTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.id,
+            referencedTable: $db.inventoryMovementLedgerTable,
+            getReferencedColumn: (t) => t.containerId,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$InventoryMovementLedgerTableTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.inventoryMovementLedgerTable,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return f(composer);
+  }
+}
+
+class $$InventoryContainersTableTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $InventoryContainersTableTable,
+    InventoryContainerData,
+    $$InventoryContainersTableTableFilterComposer,
+    $$InventoryContainersTableTableOrderingComposer,
+    $$InventoryContainersTableTableAnnotationComposer,
+    $$InventoryContainersTableTableCreateCompanionBuilder,
+    $$InventoryContainersTableTableUpdateCompanionBuilder,
+    (InventoryContainerData, $$InventoryContainersTableTableReferences),
+    InventoryContainerData,
+    PrefetchHooks Function(
+        {bool batchId,
+        bool productId,
+        bool inventoryMovementLedgerTableRefs})> {
+  $$InventoryContainersTableTableTableManager(
+      _$AppDatabase db, $InventoryContainersTableTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$InventoryContainersTableTableFilterComposer(
+                  $db: db, $table: table),
+          createOrderingComposer: () =>
+              $$InventoryContainersTableTableOrderingComposer(
+                  $db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$InventoryContainersTableTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> tenantId = const Value.absent(),
+            Value<String> batchId = const Value.absent(),
+            Value<String> productId = const Value.absent(),
+            Value<String> barcode = const Value.absent(),
+            Value<Decimal> initialVolume = const Value.absent(),
+            Value<Decimal> remainingBalance = const Value.absent(),
+            Value<String> status = const Value.absent(),
+            Value<DateTime?> openedAt = const Value.absent(),
+            Value<String?> openedByUserId = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<DateTime?> deletedAt = const Value.absent(),
+            Value<String> syncStatus = const Value.absent(),
+            Value<DateTime?> lastSyncedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              InventoryContainersTableCompanion(
+            id: id,
+            tenantId: tenantId,
+            batchId: batchId,
+            productId: productId,
+            barcode: barcode,
+            initialVolume: initialVolume,
+            remainingBalance: remainingBalance,
+            status: status,
+            openedAt: openedAt,
+            openedByUserId: openedByUserId,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            syncStatus: syncStatus,
+            lastSyncedAt: lastSyncedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String tenantId,
+            required String batchId,
+            required String productId,
+            required String barcode,
+            required Decimal initialVolume,
+            required Decimal remainingBalance,
+            Value<String> status = const Value.absent(),
+            Value<DateTime?> openedAt = const Value.absent(),
+            Value<String?> openedByUserId = const Value.absent(),
+            required DateTime createdAt,
+            required DateTime updatedAt,
+            Value<DateTime?> deletedAt = const Value.absent(),
+            Value<String> syncStatus = const Value.absent(),
+            Value<DateTime?> lastSyncedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              InventoryContainersTableCompanion.insert(
+            id: id,
+            tenantId: tenantId,
+            batchId: batchId,
+            productId: productId,
+            barcode: barcode,
+            initialVolume: initialVolume,
+            remainingBalance: remainingBalance,
+            status: status,
+            openedAt: openedAt,
+            openedByUserId: openedByUserId,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            deletedAt: deletedAt,
+            syncStatus: syncStatus,
+            lastSyncedAt: lastSyncedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$InventoryContainersTableTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: (
+              {batchId = false,
+              productId = false,
+              inventoryMovementLedgerTableRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (inventoryMovementLedgerTableRefs)
+                  db.inventoryMovementLedgerTable
+              ],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (batchId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.batchId,
+                    referencedTable: $$InventoryContainersTableTableReferences
+                        ._batchIdTable(db),
+                    referencedColumn: $$InventoryContainersTableTableReferences
+                        ._batchIdTable(db)
+                        .id,
+                  ) as T;
+                }
+                if (productId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.productId,
+                    referencedTable: $$InventoryContainersTableTableReferences
+                        ._productIdTable(db),
+                    referencedColumn: $$InventoryContainersTableTableReferences
+                        ._productIdTable(db)
+                        .id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (inventoryMovementLedgerTableRefs)
+                    await $_getPrefetchedData<
+                            InventoryContainerData,
+                            $InventoryContainersTableTable,
+                            InventoryMovementLedgerData>(
+                        currentTable: table,
+                        referencedTable:
+                            $$InventoryContainersTableTableReferences
+                                ._inventoryMovementLedgerTableRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$InventoryContainersTableTableReferences(
+                                    db, table, p0)
+                                .inventoryMovementLedgerTableRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.containerId == item.id),
+                        typedResults: items)
+                ];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$InventoryContainersTableTableProcessedTableManager
+    = ProcessedTableManager<
+        _$AppDatabase,
+        $InventoryContainersTableTable,
+        InventoryContainerData,
+        $$InventoryContainersTableTableFilterComposer,
+        $$InventoryContainersTableTableOrderingComposer,
+        $$InventoryContainersTableTableAnnotationComposer,
+        $$InventoryContainersTableTableCreateCompanionBuilder,
+        $$InventoryContainersTableTableUpdateCompanionBuilder,
+        (InventoryContainerData, $$InventoryContainersTableTableReferences),
+        InventoryContainerData,
+        PrefetchHooks Function(
+            {bool batchId,
+            bool productId,
+            bool inventoryMovementLedgerTableRefs})>;
+typedef $$InventoryMovementLedgerTableTableCreateCompanionBuilder
+    = InventoryMovementLedgerTableCompanion Function({
+  required String id,
+  required String tenantId,
+  required String productId,
+  Value<String?> batchId,
+  Value<String?> containerId,
+  required String movementType,
+  required Decimal quantity,
+  required Decimal balanceAfter,
+  required String idempotencyKey,
+  required String recordedByUserId,
+  Value<String?> witnessedByUserId,
+  Value<bool> witnessPinVerified,
+  Value<String?> clinicalCaseId,
+  Value<String?> patientId,
+  Value<String?> notes,
+  required DateTime createdAt,
+  Value<String> syncStatus,
+  Value<DateTime?> lastSyncedAt,
+  Value<int> rowid,
+});
+typedef $$InventoryMovementLedgerTableTableUpdateCompanionBuilder
+    = InventoryMovementLedgerTableCompanion Function({
+  Value<String> id,
+  Value<String> tenantId,
+  Value<String> productId,
+  Value<String?> batchId,
+  Value<String?> containerId,
+  Value<String> movementType,
+  Value<Decimal> quantity,
+  Value<Decimal> balanceAfter,
+  Value<String> idempotencyKey,
+  Value<String> recordedByUserId,
+  Value<String?> witnessedByUserId,
+  Value<bool> witnessPinVerified,
+  Value<String?> clinicalCaseId,
+  Value<String?> patientId,
+  Value<String?> notes,
+  Value<DateTime> createdAt,
+  Value<String> syncStatus,
+  Value<DateTime?> lastSyncedAt,
+  Value<int> rowid,
+});
+
+final class $$InventoryMovementLedgerTableTableReferences
+    extends BaseReferences<_$AppDatabase, $InventoryMovementLedgerTableTable,
+        InventoryMovementLedgerData> {
+  $$InventoryMovementLedgerTableTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static $InventoryProductsTableTable _productIdTable(_$AppDatabase db) =>
+      db.inventoryProductsTable.createAlias($_aliasNameGenerator(
+          db.inventoryMovementLedgerTable.productId,
+          db.inventoryProductsTable.id));
+
+  $$InventoryProductsTableTableProcessedTableManager get productId {
+    final $_column = $_itemColumn<String>('product_id')!;
+
+    final manager = $$InventoryProductsTableTableTableManager(
+            $_db, $_db.inventoryProductsTable)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_productIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static $InventoryBatchesTableTable _batchIdTable(_$AppDatabase db) =>
+      db.inventoryBatchesTable.createAlias($_aliasNameGenerator(
+          db.inventoryMovementLedgerTable.batchId,
+          db.inventoryBatchesTable.id));
+
+  $$InventoryBatchesTableTableProcessedTableManager? get batchId {
+    final $_column = $_itemColumn<String>('batch_id');
+    if ($_column == null) return null;
+    final manager = $$InventoryBatchesTableTableTableManager(
+            $_db, $_db.inventoryBatchesTable)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_batchIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static $InventoryContainersTableTable _containerIdTable(_$AppDatabase db) =>
+      db.inventoryContainersTable.createAlias($_aliasNameGenerator(
+          db.inventoryMovementLedgerTable.containerId,
+          db.inventoryContainersTable.id));
+
+  $$InventoryContainersTableTableProcessedTableManager? get containerId {
+    final $_column = $_itemColumn<String>('container_id');
+    if ($_column == null) return null;
+    final manager = $$InventoryContainersTableTableTableManager(
+            $_db, $_db.inventoryContainersTable)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_containerIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static $ClinicalCasesTableTable _clinicalCaseIdTable(_$AppDatabase db) =>
+      db.clinicalCasesTable.createAlias($_aliasNameGenerator(
+          db.inventoryMovementLedgerTable.clinicalCaseId,
+          db.clinicalCasesTable.id));
+
+  $$ClinicalCasesTableTableProcessedTableManager? get clinicalCaseId {
+    final $_column = $_itemColumn<String>('clinical_case_id');
+    if ($_column == null) return null;
+    final manager =
+        $$ClinicalCasesTableTableTableManager($_db, $_db.clinicalCasesTable)
+            .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_clinicalCaseIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static $PatientsTableTable _patientIdTable(_$AppDatabase db) =>
+      db.patientsTable.createAlias($_aliasNameGenerator(
+          db.inventoryMovementLedgerTable.patientId, db.patientsTable.id));
+
+  $$PatientsTableTableProcessedTableManager? get patientId {
+    final $_column = $_itemColumn<String>('patient_id');
+    if ($_column == null) return null;
+    final manager = $$PatientsTableTableTableManager($_db, $_db.patientsTable)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_patientIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$InventoryMovementLedgerTableTableFilterComposer
+    extends Composer<_$AppDatabase, $InventoryMovementLedgerTableTable> {
+  $$InventoryMovementLedgerTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get tenantId => $composableBuilder(
+      column: $table.tenantId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get movementType => $composableBuilder(
+      column: $table.movementType, builder: (column) => ColumnFilters(column));
+
+  ColumnWithTypeConverterFilters<Decimal, Decimal, String> get quantity =>
+      $composableBuilder(
+          column: $table.quantity,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnWithTypeConverterFilters<Decimal, Decimal, String> get balanceAfter =>
+      $composableBuilder(
+          column: $table.balanceAfter,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnFilters<String> get idempotencyKey => $composableBuilder(
+      column: $table.idempotencyKey,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get recordedByUserId => $composableBuilder(
+      column: $table.recordedByUserId,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get witnessedByUserId => $composableBuilder(
+      column: $table.witnessedByUserId,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get witnessPinVerified => $composableBuilder(
+      column: $table.witnessPinVerified,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get notes => $composableBuilder(
+      column: $table.notes, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get syncStatus => $composableBuilder(
+      column: $table.syncStatus, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get lastSyncedAt => $composableBuilder(
+      column: $table.lastSyncedAt, builder: (column) => ColumnFilters(column));
+
+  $$InventoryProductsTableTableFilterComposer get productId {
+    final $$InventoryProductsTableTableFilterComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.productId,
+            referencedTable: $db.inventoryProductsTable,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$InventoryProductsTableTableFilterComposer(
+                  $db: $db,
+                  $table: $db.inventoryProductsTable,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+
+  $$InventoryBatchesTableTableFilterComposer get batchId {
+    final $$InventoryBatchesTableTableFilterComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.batchId,
+            referencedTable: $db.inventoryBatchesTable,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$InventoryBatchesTableTableFilterComposer(
+                  $db: $db,
+                  $table: $db.inventoryBatchesTable,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+
+  $$InventoryContainersTableTableFilterComposer get containerId {
+    final $$InventoryContainersTableTableFilterComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.containerId,
+            referencedTable: $db.inventoryContainersTable,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$InventoryContainersTableTableFilterComposer(
+                  $db: $db,
+                  $table: $db.inventoryContainersTable,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+
+  $$ClinicalCasesTableTableFilterComposer get clinicalCaseId {
+    final $$ClinicalCasesTableTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.clinicalCaseId,
+        referencedTable: $db.clinicalCasesTable,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ClinicalCasesTableTableFilterComposer(
+              $db: $db,
+              $table: $db.clinicalCasesTable,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$PatientsTableTableFilterComposer get patientId {
+    final $$PatientsTableTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.patientId,
+        referencedTable: $db.patientsTable,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$PatientsTableTableFilterComposer(
+              $db: $db,
+              $table: $db.patientsTable,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$InventoryMovementLedgerTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $InventoryMovementLedgerTableTable> {
+  $$InventoryMovementLedgerTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get tenantId => $composableBuilder(
+      column: $table.tenantId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get movementType => $composableBuilder(
+      column: $table.movementType,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get quantity => $composableBuilder(
+      column: $table.quantity, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get balanceAfter => $composableBuilder(
+      column: $table.balanceAfter,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get idempotencyKey => $composableBuilder(
+      column: $table.idempotencyKey,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get recordedByUserId => $composableBuilder(
+      column: $table.recordedByUserId,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get witnessedByUserId => $composableBuilder(
+      column: $table.witnessedByUserId,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get witnessPinVerified => $composableBuilder(
+      column: $table.witnessPinVerified,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+      column: $table.notes, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get syncStatus => $composableBuilder(
+      column: $table.syncStatus, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get lastSyncedAt => $composableBuilder(
+      column: $table.lastSyncedAt,
+      builder: (column) => ColumnOrderings(column));
+
+  $$InventoryProductsTableTableOrderingComposer get productId {
+    final $$InventoryProductsTableTableOrderingComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.productId,
+            referencedTable: $db.inventoryProductsTable,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$InventoryProductsTableTableOrderingComposer(
+                  $db: $db,
+                  $table: $db.inventoryProductsTable,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+
+  $$InventoryBatchesTableTableOrderingComposer get batchId {
+    final $$InventoryBatchesTableTableOrderingComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.batchId,
+            referencedTable: $db.inventoryBatchesTable,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$InventoryBatchesTableTableOrderingComposer(
+                  $db: $db,
+                  $table: $db.inventoryBatchesTable,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+
+  $$InventoryContainersTableTableOrderingComposer get containerId {
+    final $$InventoryContainersTableTableOrderingComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.containerId,
+            referencedTable: $db.inventoryContainersTable,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$InventoryContainersTableTableOrderingComposer(
+                  $db: $db,
+                  $table: $db.inventoryContainersTable,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+
+  $$ClinicalCasesTableTableOrderingComposer get clinicalCaseId {
+    final $$ClinicalCasesTableTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.clinicalCaseId,
+        referencedTable: $db.clinicalCasesTable,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$ClinicalCasesTableTableOrderingComposer(
+              $db: $db,
+              $table: $db.clinicalCasesTable,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$PatientsTableTableOrderingComposer get patientId {
+    final $$PatientsTableTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.patientId,
+        referencedTable: $db.patientsTable,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$PatientsTableTableOrderingComposer(
+              $db: $db,
+              $table: $db.patientsTable,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$InventoryMovementLedgerTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $InventoryMovementLedgerTableTable> {
+  $$InventoryMovementLedgerTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get tenantId =>
+      $composableBuilder(column: $table.tenantId, builder: (column) => column);
+
+  GeneratedColumn<String> get movementType => $composableBuilder(
+      column: $table.movementType, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<Decimal, String> get quantity =>
+      $composableBuilder(column: $table.quantity, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<Decimal, String> get balanceAfter =>
+      $composableBuilder(
+          column: $table.balanceAfter, builder: (column) => column);
+
+  GeneratedColumn<String> get idempotencyKey => $composableBuilder(
+      column: $table.idempotencyKey, builder: (column) => column);
+
+  GeneratedColumn<String> get recordedByUserId => $composableBuilder(
+      column: $table.recordedByUserId, builder: (column) => column);
+
+  GeneratedColumn<String> get witnessedByUserId => $composableBuilder(
+      column: $table.witnessedByUserId, builder: (column) => column);
+
+  GeneratedColumn<bool> get witnessPinVerified => $composableBuilder(
+      column: $table.witnessPinVerified, builder: (column) => column);
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get syncStatus => $composableBuilder(
+      column: $table.syncStatus, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get lastSyncedAt => $composableBuilder(
+      column: $table.lastSyncedAt, builder: (column) => column);
+
+  $$InventoryProductsTableTableAnnotationComposer get productId {
+    final $$InventoryProductsTableTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.productId,
+            referencedTable: $db.inventoryProductsTable,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$InventoryProductsTableTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.inventoryProductsTable,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+
+  $$InventoryBatchesTableTableAnnotationComposer get batchId {
+    final $$InventoryBatchesTableTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.batchId,
+            referencedTable: $db.inventoryBatchesTable,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$InventoryBatchesTableTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.inventoryBatchesTable,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+
+  $$InventoryContainersTableTableAnnotationComposer get containerId {
+    final $$InventoryContainersTableTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.containerId,
+            referencedTable: $db.inventoryContainersTable,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$InventoryContainersTableTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.inventoryContainersTable,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+
+  $$ClinicalCasesTableTableAnnotationComposer get clinicalCaseId {
+    final $$ClinicalCasesTableTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.clinicalCaseId,
+            referencedTable: $db.clinicalCasesTable,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$ClinicalCasesTableTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.clinicalCasesTable,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+
+  $$PatientsTableTableAnnotationComposer get patientId {
+    final $$PatientsTableTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.patientId,
+        referencedTable: $db.patientsTable,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$PatientsTableTableAnnotationComposer(
+              $db: $db,
+              $table: $db.patientsTable,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$InventoryMovementLedgerTableTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $InventoryMovementLedgerTableTable,
+    InventoryMovementLedgerData,
+    $$InventoryMovementLedgerTableTableFilterComposer,
+    $$InventoryMovementLedgerTableTableOrderingComposer,
+    $$InventoryMovementLedgerTableTableAnnotationComposer,
+    $$InventoryMovementLedgerTableTableCreateCompanionBuilder,
+    $$InventoryMovementLedgerTableTableUpdateCompanionBuilder,
+    (
+      InventoryMovementLedgerData,
+      $$InventoryMovementLedgerTableTableReferences
+    ),
+    InventoryMovementLedgerData,
+    PrefetchHooks Function(
+        {bool productId,
+        bool batchId,
+        bool containerId,
+        bool clinicalCaseId,
+        bool patientId})> {
+  $$InventoryMovementLedgerTableTableTableManager(
+      _$AppDatabase db, $InventoryMovementLedgerTableTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$InventoryMovementLedgerTableTableFilterComposer(
+                  $db: db, $table: table),
+          createOrderingComposer: () =>
+              $$InventoryMovementLedgerTableTableOrderingComposer(
+                  $db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$InventoryMovementLedgerTableTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> tenantId = const Value.absent(),
+            Value<String> productId = const Value.absent(),
+            Value<String?> batchId = const Value.absent(),
+            Value<String?> containerId = const Value.absent(),
+            Value<String> movementType = const Value.absent(),
+            Value<Decimal> quantity = const Value.absent(),
+            Value<Decimal> balanceAfter = const Value.absent(),
+            Value<String> idempotencyKey = const Value.absent(),
+            Value<String> recordedByUserId = const Value.absent(),
+            Value<String?> witnessedByUserId = const Value.absent(),
+            Value<bool> witnessPinVerified = const Value.absent(),
+            Value<String?> clinicalCaseId = const Value.absent(),
+            Value<String?> patientId = const Value.absent(),
+            Value<String?> notes = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<String> syncStatus = const Value.absent(),
+            Value<DateTime?> lastSyncedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              InventoryMovementLedgerTableCompanion(
+            id: id,
+            tenantId: tenantId,
+            productId: productId,
+            batchId: batchId,
+            containerId: containerId,
+            movementType: movementType,
+            quantity: quantity,
+            balanceAfter: balanceAfter,
+            idempotencyKey: idempotencyKey,
+            recordedByUserId: recordedByUserId,
+            witnessedByUserId: witnessedByUserId,
+            witnessPinVerified: witnessPinVerified,
+            clinicalCaseId: clinicalCaseId,
+            patientId: patientId,
+            notes: notes,
+            createdAt: createdAt,
+            syncStatus: syncStatus,
+            lastSyncedAt: lastSyncedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String tenantId,
+            required String productId,
+            Value<String?> batchId = const Value.absent(),
+            Value<String?> containerId = const Value.absent(),
+            required String movementType,
+            required Decimal quantity,
+            required Decimal balanceAfter,
+            required String idempotencyKey,
+            required String recordedByUserId,
+            Value<String?> witnessedByUserId = const Value.absent(),
+            Value<bool> witnessPinVerified = const Value.absent(),
+            Value<String?> clinicalCaseId = const Value.absent(),
+            Value<String?> patientId = const Value.absent(),
+            Value<String?> notes = const Value.absent(),
+            required DateTime createdAt,
+            Value<String> syncStatus = const Value.absent(),
+            Value<DateTime?> lastSyncedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              InventoryMovementLedgerTableCompanion.insert(
+            id: id,
+            tenantId: tenantId,
+            productId: productId,
+            batchId: batchId,
+            containerId: containerId,
+            movementType: movementType,
+            quantity: quantity,
+            balanceAfter: balanceAfter,
+            idempotencyKey: idempotencyKey,
+            recordedByUserId: recordedByUserId,
+            witnessedByUserId: witnessedByUserId,
+            witnessPinVerified: witnessPinVerified,
+            clinicalCaseId: clinicalCaseId,
+            patientId: patientId,
+            notes: notes,
+            createdAt: createdAt,
+            syncStatus: syncStatus,
+            lastSyncedAt: lastSyncedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$InventoryMovementLedgerTableTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: (
+              {productId = false,
+              batchId = false,
+              containerId = false,
+              clinicalCaseId = false,
+              patientId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (productId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.productId,
+                    referencedTable:
+                        $$InventoryMovementLedgerTableTableReferences
+                            ._productIdTable(db),
+                    referencedColumn:
+                        $$InventoryMovementLedgerTableTableReferences
+                            ._productIdTable(db)
+                            .id,
+                  ) as T;
+                }
+                if (batchId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.batchId,
+                    referencedTable:
+                        $$InventoryMovementLedgerTableTableReferences
+                            ._batchIdTable(db),
+                    referencedColumn:
+                        $$InventoryMovementLedgerTableTableReferences
+                            ._batchIdTable(db)
+                            .id,
+                  ) as T;
+                }
+                if (containerId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.containerId,
+                    referencedTable:
+                        $$InventoryMovementLedgerTableTableReferences
+                            ._containerIdTable(db),
+                    referencedColumn:
+                        $$InventoryMovementLedgerTableTableReferences
+                            ._containerIdTable(db)
+                            .id,
+                  ) as T;
+                }
+                if (clinicalCaseId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.clinicalCaseId,
+                    referencedTable:
+                        $$InventoryMovementLedgerTableTableReferences
+                            ._clinicalCaseIdTable(db),
+                    referencedColumn:
+                        $$InventoryMovementLedgerTableTableReferences
+                            ._clinicalCaseIdTable(db)
+                            .id,
+                  ) as T;
+                }
+                if (patientId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.patientId,
+                    referencedTable:
+                        $$InventoryMovementLedgerTableTableReferences
+                            ._patientIdTable(db),
+                    referencedColumn:
+                        $$InventoryMovementLedgerTableTableReferences
+                            ._patientIdTable(db)
+                            .id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$InventoryMovementLedgerTableTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $InventoryMovementLedgerTableTable,
+    InventoryMovementLedgerData,
+    $$InventoryMovementLedgerTableTableFilterComposer,
+    $$InventoryMovementLedgerTableTableOrderingComposer,
+    $$InventoryMovementLedgerTableTableAnnotationComposer,
+    $$InventoryMovementLedgerTableTableCreateCompanionBuilder,
+    $$InventoryMovementLedgerTableTableUpdateCompanionBuilder,
+    (
+      InventoryMovementLedgerData,
+      $$InventoryMovementLedgerTableTableReferences
+    ),
+    InventoryMovementLedgerData,
+    PrefetchHooks Function(
+        {bool productId,
+        bool batchId,
+        bool containerId,
+        bool clinicalCaseId,
+        bool patientId})>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -9709,4 +15819,16 @@ class $AppDatabaseManager {
       $$MediaUploadQueueTableTableTableManager(_db, _db.mediaUploadQueueTable);
   $$SyncQueueTableTableTableManager get syncQueueTable =>
       $$SyncQueueTableTableTableManager(_db, _db.syncQueueTable);
+  $$InventoryProductsTableTableTableManager get inventoryProductsTable =>
+      $$InventoryProductsTableTableTableManager(
+          _db, _db.inventoryProductsTable);
+  $$InventoryBatchesTableTableTableManager get inventoryBatchesTable =>
+      $$InventoryBatchesTableTableTableManager(_db, _db.inventoryBatchesTable);
+  $$InventoryContainersTableTableTableManager get inventoryContainersTable =>
+      $$InventoryContainersTableTableTableManager(
+          _db, _db.inventoryContainersTable);
+  $$InventoryMovementLedgerTableTableTableManager
+      get inventoryMovementLedgerTable =>
+          $$InventoryMovementLedgerTableTableTableManager(
+              _db, _db.inventoryMovementLedgerTable);
 }

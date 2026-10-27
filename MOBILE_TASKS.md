@@ -13,8 +13,8 @@
 | **03** | `mobile/03-core-network-tenancy` | Dio client, tenant interceptor, secure storage & errors | 🟢 **Completed** |
 | **04** | `mobile/04-auth-smart-login` | Two-step email discovery, clinic cards & biometric unlock | 🟢 **Completed** |
 | **05** | `mobile/05-drift-clinical-database` | Drift SQLite setup, clinical tables (Clients, Patients, Cases) | 🟢 **Completed** |
-| **06** | `mobile/06-drift-pharmacy-tables` | 4-tier pharmacy tables (Products, Batches, Containers, Ledger) | 🟡 **Ready to Start** |
-| **07** | `mobile/07-offline-sync-engine` | FIFO mutation queue & Force-Reconcile conflict protocol | ⚪ Pending |
+| **06** | `mobile/06-drift-pharmacy-tables` | 4-tier pharmacy tables (Products, Batches, Containers, Ledger) | 🟢 **Completed** |
+| **07** | `mobile/07-offline-sync-engine` | FIFO mutation queue & Force-Reconcile conflict protocol | 🟡 **Ready to Start** |
 | **08** | `mobile/08-clients-patients-module` | Client/Patient lists, search, and `OpenContainer` hero morph | ⚪ Pending |
 | **09** | `mobile/09-cases-triage-board` | Triage board (Routine/Urgent/Critical), SOAP notes & addenda | ⚪ Pending |
 | **10** | `mobile/10-case-study-pdf-export` | Case study PDF generator with owner anonymization toggle | ⚪ Pending |
@@ -110,13 +110,15 @@
 
 #### Part 06: Drift 4-Tier Pharmacy Schema
 * **Branch**: `mobile/06-drift-pharmacy-tables`
-* **Status**: 🟡 **Ready to Start**
-* **Files to Create**:
+* **Status**: 🟢 **Completed**
+* **Files Created**:
+  - `lib/database/converters/decimal_converter.dart`
   - `lib/database/tables/inventory_products_table.dart`
   - `lib/database/tables/inventory_batches_table.dart` (FEFO lot tracking)
   - `lib/database/tables/inventory_containers_table.dart` (Physical vial tracking)
   - `lib/database/tables/inventory_movement_ledger_table.dart` (Immutable audit log)
   - `lib/database/daos/inventory_dao.dart` (FEFO queries, open vial checks)
+  - `test/database/inventory_dao_test.dart` (FEFO and open vial priority integration tests)
 * **Definition of Done**:
   - Integration tests verifying open vial priority and FEFO expiration ordering.
 
@@ -124,7 +126,7 @@
 
 #### Part 07: Offline Sync Engine & Force-Reconcile Protocol
 * **Branch**: `mobile/07-offline-sync-engine`
-* **Status**: ⚪ Pending
+* **Status**: 🟡 **Ready to Start**
 * **Files to Create**:
   - `lib/sync/sync_manager.dart` (Connectivity listener)
   - `lib/sync/sync_queue_dispatcher.dart` (Flushes FIFO queue to `POST /api/v1/sync/push`)
