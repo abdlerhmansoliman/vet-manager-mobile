@@ -17,6 +17,7 @@ import 'tables/inventory_products_table.dart';
 import 'tables/inventory_batches_table.dart';
 import 'tables/inventory_containers_table.dart';
 import 'tables/inventory_movement_ledger_table.dart';
+import 'daos/client_patient_dao.dart';
 import 'daos/clinical_case_dao.dart';
 import 'daos/inventory_dao.dart';
 
@@ -44,6 +45,7 @@ part 'app_database.g.dart';
     InventoryMovementLedgerTable,
   ],
   daos: [
+    ClientPatientDao,
     ClinicalCaseDao,
     InventoryDao,
   ],

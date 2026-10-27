@@ -9171,6 +9171,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $InventoryContainersTableTable(this);
   late final $InventoryMovementLedgerTableTable inventoryMovementLedgerTable =
       $InventoryMovementLedgerTableTable(this);
+  late final ClientPatientDao clientPatientDao =
+      ClientPatientDao(this as AppDatabase);
   late final ClinicalCaseDao clinicalCaseDao =
       ClinicalCaseDao(this as AppDatabase);
   late final InventoryDao inventoryDao = InventoryDao(this as AppDatabase);
