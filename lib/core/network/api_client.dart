@@ -13,7 +13,7 @@ import 'tenant_interceptor.dart';
 /// - [IdempotencyInterceptor] for UUID v7 idempotency protection on state changes
 /// - [ErrorInterceptor] for mapping HTTP errors to domain exceptions
 class ApiClient {
-  static const String defaultBaseUrl = 'http://10.0.2.2:8000/api/v1';
+  static const String defaultBaseUrl = String.fromEnvironment('API_BASE_URL', defaultValue: 'http://10.0.3.2:8000/api/v1');
   static const Duration defaultTimeout = Duration(seconds: 15);
 
   final Dio _dio;

@@ -21,11 +21,21 @@ class AuthSession extends Equatable {
       token: json['token'] as String,
       user: AuthUser.fromJson(json['user'] as Map<String, dynamic>),
       tenant: ClinicTenant.fromJson(json['tenant'] as Map<String, dynamic>),
-      capabilities: (json['capabilities'] as List<dynamic>?)
-              ?.map((e) => e.toString())
-              .toList() ??
-          [],
+      capabilities: _parseCapabilities(json['capabilities']),
     );
+  }
+
+  static List<String> _parseCapabilities(dynamic raw) {
+    if (raw is List) {
+      return raw.map((e) => e.toString()).toList();
+    }
+    if (raw is Map) {
+      return raw.entries
+          .where((e) => e.value == true || e.value == 1 || e.value == 'true')
+          .map((e) => e.key.toString())
+          .toList();
+    }
+    return const [];
   }
 
   Map<String, dynamic> toJson() {
