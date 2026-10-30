@@ -9,23 +9,32 @@ import '../../features/showcase/presentation/screens/ui_showcase_screen.dart';
 import '../../features/clients_patients/domain/repositories/patient_repository.dart';
 import '../../features/clients_patients/presentation/screens/patient_list_screen.dart';
 
+import '../../features/clinical_cases/domain/repositories/case_repository.dart';
+import '../../features/clinical_cases/presentation/screens/cases_board_screen.dart';
+import '../../features/clinical_cases/presentation/screens/case_detail_screen.dart';
+
 abstract class AppRoutes {
   static const String login = '/login';
   static const String biometricUnlock = '/biometric-unlock';
   static const String showcase = '/showcase';
   static const String patients = '/patients';
+  static const String cases = '/cases';
+  static const String caseDetail = '/cases/:id';
   static const String home = '/';
 }
 
 class AppRouter {
   final AuthBloc _authBloc;
   final IPatientRepository? _patientRepository;
+  final ICaseRepository? _caseRepository;
 
   AppRouter({
     required AuthBloc authBloc,
     IPatientRepository? patientRepository,
+    ICaseRepository? caseRepository,
   })  : _authBloc = authBloc,
-        _patientRepository = patientRepository;
+        _patientRepository = patientRepository,
+        _caseRepository = caseRepository;
 
   late final GoRouter router = GoRouter(
     initialLocation: AppRoutes.login,
@@ -45,6 +54,9 @@ class AppRouter {
 
       if (authState is AuthAuthenticated) {
         if (isLoggingIn || isBiometric) {
+          if (_caseRepository != null) {
+            return AppRoutes.cases;
+          }
           return _patientRepository != null
               ? AppRoutes.patients
               : AppRoutes.showcase;
@@ -85,6 +97,19 @@ class AppRouter {
             return PatientListScreen(repository: _patientRepository);
           }
           return const UiShowcaseScreen();
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.cases,
+        builder: (context, state) {
+          return CasesBoardScreen(repository: _caseRepository);
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.caseDetail,
+        builder: (context, state) {
+          final caseId = state.pathParameters['id'] ?? '';
+          return CaseDetailScreen(caseId: caseId, repository: _caseRepository);
         },
       ),
     ],
