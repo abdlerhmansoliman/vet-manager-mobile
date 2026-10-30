@@ -1,3 +1,4 @@
+import '../../sync/sync_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
@@ -26,14 +27,17 @@ class AppRouter {
   final AuthBloc _authBloc;
   final IPatientRepository? _patientRepository;
   final ICaseRepository? _caseRepository;
+  final SyncManager? _syncManager;
 
   AppRouter({
     required AuthBloc authBloc,
     IPatientRepository? patientRepository,
     ICaseRepository? caseRepository,
+    SyncManager? syncManager,
   })  : _authBloc = authBloc,
         _patientRepository = patientRepository,
-        _caseRepository = caseRepository;
+        _caseRepository = caseRepository,
+        _syncManager = syncManager;
 
   late final GoRouter router = GoRouter(
     initialLocation: AppRoutes.login,
@@ -101,6 +105,7 @@ class AppRouter {
             initialIndex: 1,
             caseRepository: _caseRepository,
             patientRepository: _patientRepository,
+            syncManager: _syncManager,
           );
         },
       ),
@@ -111,6 +116,7 @@ class AppRouter {
             initialIndex: 0,
             caseRepository: _caseRepository,
             patientRepository: _patientRepository,
+            syncManager: _syncManager,
           );
         },
       ),

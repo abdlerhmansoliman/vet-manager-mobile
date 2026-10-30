@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/text_styles.dart';
+import '../../../../sync/sync_manager.dart';
 import '../../../clients_patients/domain/repositories/patient_repository.dart';
 import '../../../clients_patients/presentation/screens/patient_list_screen.dart';
 import '../../domain/repositories/case_repository.dart';
@@ -11,12 +12,14 @@ import 'cases_board_screen.dart';
 class ClinicHomeScreen extends StatefulWidget {
   final ICaseRepository? caseRepository;
   final IPatientRepository? patientRepository;
+  final SyncManager? syncManager;
   final int initialIndex;
 
   const ClinicHomeScreen({
     super.key,
     this.caseRepository,
     this.patientRepository,
+    this.syncManager,
     this.initialIndex = 0,
   });
 
@@ -31,6 +34,8 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
+    // Automatically trigger cloud delta sync on workspace ingress
+    widget.syncManager?.syncNow();
   }
 
   @override

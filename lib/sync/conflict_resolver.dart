@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:decimal/decimal.dart';
 import 'package:drift/drift.dart';
 import '../database/app_database.dart';
@@ -220,6 +221,24 @@ class ConflictResolver {
       if (deltas['patients'] is List) {
         for (final item in deltas['patients'] as List) {
           if (item is Map<String, dynamic>) {
+            final weightRaw = item['current_weight_kg'];
+            double? parsedWeight;
+            if (weightRaw is num) {
+              parsedWeight = weightRaw.toDouble();
+            } else if (weightRaw is String) {
+              parsedWeight = double.tryParse(weightRaw);
+            }
+
+            final ageRaw = item['age'];
+            int? parsedAge;
+            if (ageRaw is int) {
+              parsedAge = ageRaw;
+            } else if (ageRaw is num) {
+              parsedAge = ageRaw.toInt();
+            } else if (ageRaw is String) {
+              parsedAge = int.tryParse(ageRaw);
+            }
+
             await db.into(db.patientsTable).insertOnConflictUpdate(
                   PatientsTableCompanion(
                     id: Value(item['id'] as String),
@@ -228,6 +247,19 @@ class ConflictResolver {
                     nameOrTag: Value(item['name_or_tag'] as String),
                     species: Value(item['species'] as String),
                     breed: Value(item['breed'] as String?),
+                    gender: Value(item['gender']?.toString() ?? 'unknown'),
+                    age: Value(parsedAge),
+                    dateOfBirth: Value(DateTime.tryParse(item['date_of_birth']?.toString() ?? '')),
+                    isApproximateAge: Value(item['is_approximate_age'] == 1 || item['is_approximate_age'] == true),
+                    microchipNumber: Value(item['microchip_number'] as String?),
+                    earTagId: Value(item['ear_tag_id'] as String?),
+                    coatColorMarkings: Value(item['coat_color_markings'] as String?),
+                    currentWeightKg: Value(parsedWeight),
+                    weightRecordedAt: Value(DateTime.tryParse(item['weight_recorded_at']?.toString() ?? '')),
+                    history: Value(item['history'] as String?),
+                    notes: Value(item['notes'] as String?),
+                    allergies: Value(item['allergies'] != null ? jsonEncode(item['allergies']) : null),
+                    status: Value(item['status']?.toString() ?? 'active'),
                     createdAt: Value(DateTime.tryParse(item['created_at']?.toString() ?? '') ?? now),
                     updatedAt: Value(DateTime.tryParse(item['updated_at']?.toString() ?? '') ?? now),
                     syncStatus: const Value('synced'),

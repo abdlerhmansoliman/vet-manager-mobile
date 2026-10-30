@@ -1,3 +1,4 @@
+import '../sync/sync_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../features/auth/data/auth_repository.dart';
@@ -15,6 +16,7 @@ class VetManagerApp extends StatefulWidget {
   final AuthBloc? authBloc;
   final IPatientRepository? patientRepository;
   final ICaseRepository? caseRepository;
+  final SyncManager? syncManager;
 
   const VetManagerApp({
     super.key,
@@ -22,6 +24,7 @@ class VetManagerApp extends StatefulWidget {
     this.authBloc,
     this.patientRepository,
     this.caseRepository,
+    this.syncManager,
   });
 
   @override
@@ -44,6 +47,7 @@ class _VetManagerAppState extends State<VetManagerApp> {
       authBloc: _authBloc,
       patientRepository: widget.patientRepository,
       caseRepository: widget.caseRepository,
+      syncManager: widget.syncManager,
     );
     _authBloc.add(const AuthCheckRequested());
   }
