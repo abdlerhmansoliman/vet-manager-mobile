@@ -1,3 +1,5 @@
+import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../auth/presentation/bloc/auth_event.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../app/theme/app_colors.dart';
@@ -140,6 +142,17 @@ class _CasesBoardViewState extends State<_CasesBoardView> {
                       _isSearching = true;
                     }
                   });
+                },
+              ),
+              IconButton(
+                icon: const Icon(
+                  Icons.logout_rounded,
+                  color: AppColors.textMuted,
+                  size: 22,
+                ),
+                tooltip: 'Sign Out',
+                onPressed: () {
+                  context.read<AuthBloc?>()?.add(const AuthLogoutRequested());
                 },
               ),
             ],

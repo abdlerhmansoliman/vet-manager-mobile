@@ -1,3 +1,5 @@
+import 'package:go_router/go_router.dart';
+import '../../../../app/router/app_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -102,6 +104,7 @@ class BiometricUnlockScreen extends StatelessWidget {
                 TextButton(
                   onPressed: () {
                     context.read<AuthBloc>().add(const AuthLogoutRequested());
+                    context.go(AppRoutes.login);
                   },
                   child: Text(
                     'Sign in with password or switch account',

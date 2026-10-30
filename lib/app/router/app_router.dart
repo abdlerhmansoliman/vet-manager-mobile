@@ -7,10 +7,9 @@ import '../../features/auth/presentation/screens/smart_login_screen.dart';
 import '../../features/showcase/presentation/screens/ui_showcase_screen.dart';
 
 import '../../features/clients_patients/domain/repositories/patient_repository.dart';
-import '../../features/clients_patients/presentation/screens/patient_list_screen.dart';
 
 import '../../features/clinical_cases/domain/repositories/case_repository.dart';
-import '../../features/clinical_cases/presentation/screens/cases_board_screen.dart';
+import '../../features/clinical_cases/presentation/screens/clinic_home_screen.dart';
 import '../../features/clinical_cases/presentation/screens/case_detail_screen.dart';
 
 abstract class AppRoutes {
@@ -48,18 +47,23 @@ class AppRouter {
       // Allow developer/user to explore showcase screen freely
       if (isShowcase) return null;
 
-      if (authState is AuthBiometricUnlockRequired && !isBiometric) {
-        return AppRoutes.biometricUnlock;
+      // Unauthenticated users are directed to password sign-in
+      if (authState is AuthUnauthenticated || authState is AuthInitial) {
+        if (!isLoggingIn) {
+          return AppRoutes.login;
+        }
+        return null;
       }
 
+      // Biometric lock screen is bypassed per user request; route to login
+      if (isBiometric) {
+        return AppRoutes.login;
+      }
+
+      // Authenticated users go directly to the main Clinic workspace
       if (authState is AuthAuthenticated) {
-        if (isLoggingIn || isBiometric) {
-          if (_caseRepository != null) {
-            return AppRoutes.cases;
-          }
-          return _patientRepository != null
-              ? AppRoutes.patients
-              : AppRoutes.showcase;
+        if (isLoggingIn || isBiometric || state.matchedLocation == AppRoutes.home) {
+          return AppRoutes.cases;
         }
       }
 
@@ -93,16 +97,21 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.patients,
         builder: (context, state) {
-          if (_patientRepository != null) {
-            return PatientListScreen(repository: _patientRepository);
-          }
-          return const UiShowcaseScreen();
+          return ClinicHomeScreen(
+            initialIndex: 1,
+            caseRepository: _caseRepository,
+            patientRepository: _patientRepository,
+          );
         },
       ),
       GoRoute(
         path: AppRoutes.cases,
         builder: (context, state) {
-          return CasesBoardScreen(repository: _caseRepository);
+          return ClinicHomeScreen(
+            initialIndex: 0,
+            caseRepository: _caseRepository,
+            patientRepository: _patientRepository,
+          );
         },
       ),
       GoRoute(

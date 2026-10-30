@@ -24,7 +24,7 @@ class _SmartLoginScreenState extends State<SmartLoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscurePassword = true;
-  bool _rememberBiometrics = true;
+  bool _rememberBiometrics = false;
 
   @override
   void dispose() {

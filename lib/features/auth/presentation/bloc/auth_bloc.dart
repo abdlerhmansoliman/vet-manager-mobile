@@ -32,23 +32,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       return;
     }
 
-    final isBiometricEnabled = await _authRepository.isBiometricUnlockEnabled();
-    if (isBiometricEnabled) {
-      final user = await _authRepository.getCurrentUser();
-      emit(AuthBiometricUnlockRequired(
-        doctorName: user?.name,
-      ));
-      return;
-    }
-
-    // Attempt to verify session against backend
-    final user = await _authRepository.getCurrentUser();
-    if (user != null) {
-      // In production, session can be re-composed or user marked active
-      emit(const AuthUnauthenticated());
-    } else {
-      emit(const AuthUnauthenticated());
-    }
+    // Default to password login as requested and bypass biometric lock
+    emit(const AuthUnauthenticated());
   }
 
   Future<void> _onEmailSubmitted(
@@ -199,6 +184,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     emit(const AuthLoading(message: 'Signing out...'));
+    try {
+      await _authRepository.setBiometricUnlockEnabled(false);
+    } catch (_) {}
     await _authRepository.logout();
     emit(const AuthUnauthenticated());
   }
