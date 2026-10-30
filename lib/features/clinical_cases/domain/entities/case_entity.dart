@@ -58,7 +58,7 @@ class CaseSummaryEntity extends Equatable {
     this.syncStatus = 'synced',
   });
 
-  bool get isCritical => priority.toLowerCase() == 'critical';
+  bool get isCritical => priority.toLowerCase() == 'critical' || priority.toLowerCase() == 'emergency_critical' || priority.toLowerCase() == 'emergency';
   bool get isUrgent => priority.toLowerCase() == 'urgent';
   bool get isRoutine => priority.toLowerCase() == 'routine';
 

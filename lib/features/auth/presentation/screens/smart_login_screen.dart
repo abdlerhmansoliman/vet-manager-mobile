@@ -151,6 +151,10 @@ class _SmartLoginScreenState extends State<SmartLoginScreen> {
           controller: _emailController,
           keyboardType: TextInputType.emailAddress,
           autocorrect: false,
+          textInputAction: TextInputAction.go,
+          onSubmitted: (value) {
+            context.read<AuthBloc>().add(AuthEmailSubmitted(value));
+          },
           decoration: const InputDecoration(
             hintText: 'doctor@veterinaryclinic.com',
             labelText: 'Staff Email Address',
@@ -289,6 +293,17 @@ class _SmartLoginScreenState extends State<SmartLoginScreen> {
         TextField(
           controller: _passwordController,
           obscureText: _obscurePassword,
+          textInputAction: TextInputAction.done,
+          onSubmitted: (_) {
+            context.read<AuthBloc>().add(
+                  AuthLoginSubmitted(
+                    email: state.email,
+                    password: _passwordController.text,
+                    tenantId: state.tenant.id,
+                    enableBiometrics: _rememberBiometrics,
+                  ),
+                );
+          },
           decoration: InputDecoration(
             labelText: 'Account Password',
             hintText: 'Enter your password',

@@ -13,10 +13,12 @@ import 'create_patient_screen.dart';
 /// Main Patient and Client Directory Screen.
 class PatientListScreen extends StatefulWidget {
   final IPatientRepository repository;
+  final VoidCallback? onSync;
 
   const PatientListScreen({
     super.key,
     required this.repository,
+    this.onSync,
   });
 
   @override
@@ -110,18 +112,35 @@ class _PatientListScreenState extends State<PatientListScreen> {
               ),
             ],
           ),
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppColors.surfaceWhite,
-              shape: BoxShape.circle,
-              border: Border.all(color: AppColors.borderWarm),
-            ),
-            child: const Icon(
-              Icons.pets_rounded,
-              color: AppColors.primaryEmerald,
-              size: 22,
-            ),
+          Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.sync_rounded, color: AppColors.primaryEmerald, size: 22),
+                tooltip: 'Sync with Cloud',
+                onPressed: () {
+                  widget.onSync?.call();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Syncing patient directory...'),
+                      duration: Duration(seconds: 1),
+                    ),
+                  );
+                },
+              ),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceWhite,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppColors.borderWarm),
+                ),
+                child: const Icon(
+                  Icons.pets_rounded,
+                  color: AppColors.primaryEmerald,
+                  size: 20,
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -305,15 +324,23 @@ class _PatientListScreenState extends State<PatientListScreen> {
           ).animate().fadeIn(duration: 300.ms);
         }
 
-        return ListView.builder(
-          padding: const EdgeInsets.fromLTRB(16, 4, 16, 80),
-          itemCount: state.patients.length,
-          itemBuilder: (context, index) {
-            return PatientCard(
-              patient: state.patients[index],
-              index: index,
-            );
+        return RefreshIndicator(
+          color: AppColors.primaryEmerald,
+          onRefresh: () async {
+            widget.onSync?.call();
+            await Future<void>.delayed(const Duration(milliseconds: 600));
           },
+          child: ListView.builder(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 80),
+            itemCount: state.patients.length,
+            itemBuilder: (context, index) {
+              return PatientCard(
+                patient: state.patients[index],
+                index: index,
+              );
+            },
+          ),
         );
       },
     );

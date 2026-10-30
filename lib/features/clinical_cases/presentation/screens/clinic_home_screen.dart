@@ -45,9 +45,15 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
       body: IndexedStack(
         index: _currentIndex,
         children: [
-          CasesBoardScreen(repository: widget.caseRepository),
+          CasesBoardScreen(
+            repository: widget.caseRepository,
+            onSync: () => widget.syncManager?.syncNow(),
+          ),
           if (widget.patientRepository != null)
-            PatientListScreen(repository: widget.patientRepository!)
+            PatientListScreen(
+              repository: widget.patientRepository!,
+              onSync: () => widget.syncManager?.syncNow(),
+            )
           else
             const Scaffold(
               backgroundColor: AppColors.backgroundCream,

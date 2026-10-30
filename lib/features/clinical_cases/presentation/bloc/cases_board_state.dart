@@ -27,6 +27,9 @@ class CasesBoardState extends Equatable {
     if (activePriority.toLowerCase() == 'all') {
       return cases;
     }
+    if (activePriority.toLowerCase() == 'critical') {
+      return cases.where((c) => c.isCritical).toList();
+    }
     return cases
         .where((c) => c.priority.toLowerCase() == activePriority.toLowerCase())
         .toList();

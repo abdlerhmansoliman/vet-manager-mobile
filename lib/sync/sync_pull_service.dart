@@ -45,7 +45,9 @@ class SyncPullService {
       final queryParams = <String, dynamic>{
         'tenant_id': tenantId,
       };
-      if (lastPulledAt != null && lastPulledAt.isNotEmpty) {
+      // Only use incremental cursor if local database already contains patients
+      final existingPatients = await (db.select(db.patientsTable)..limit(1)).get();
+      if (existingPatients.isNotEmpty && lastPulledAt != null && lastPulledAt.isNotEmpty) {
         queryParams['since'] = lastPulledAt;
       }
 

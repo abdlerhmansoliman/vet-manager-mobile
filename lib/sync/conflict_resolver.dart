@@ -202,13 +202,15 @@ class ConflictResolver {
                   ClientsTableCompanion(
                     id: Value(item['id'] as String),
                     tenantId: Value(tenantId),
-                    name: Value(item['name'] as String),
-                    phonePrimary: Value(item['phone_primary'] as String),
-                    phoneSecondary: Value(item['phone_secondary'] as String?),
-                    clientType: Value(item['client_type'] as String? ?? 'individual'),
-                    physicalAddress: Value(item['physical_address'] as String?),
+                    name: Value(item['name']?.toString() ?? 'Client'),
+                    phonePrimary: Value(item['phone_primary']?.toString() ?? '000-000-0000'),
+                    phoneSecondary: Value(item['phone_secondary']?.toString()),
+                    clientType: Value(item['client_type']?.toString() ?? 'individual'),
+                    physicalAddress: Value(item['physical_address']?.toString()),
+                    notes: Value(item['notes']?.toString()),
                     createdAt: Value(DateTime.tryParse(item['created_at']?.toString() ?? '') ?? now),
                     updatedAt: Value(DateTime.tryParse(item['updated_at']?.toString() ?? '') ?? now),
+                    deletedAt: Value(DateTime.tryParse(item['deleted_at']?.toString() ?? '')),
                     syncStatus: const Value('synced'),
                     lastSyncedAt: Value(now),
                   ),
@@ -221,6 +223,27 @@ class ConflictResolver {
       if (deltas['patients'] is List) {
         for (final item in deltas['patients'] as List) {
           if (item is Map<String, dynamic>) {
+            final clientId = item['client_id']?.toString() ?? '';
+            if (clientId.isEmpty) continue;
+
+            final clientExists = await (db.select(db.clientsTable)..where((c) => c.id.equals(clientId))).getSingleOrNull();
+            if (clientExists == null) {
+              await db.into(db.clientsTable).insert(
+                ClientsTableCompanion(
+                  id: Value(clientId),
+                  tenantId: Value(tenantId),
+                  name: const Value('Unknown Client'),
+                  phonePrimary: const Value('000-000-0000'),
+                  clientType: const Value('individual'),
+                  createdAt: Value(now),
+                  updatedAt: Value(now),
+                  syncStatus: const Value('synced'),
+                  lastSyncedAt: Value(now),
+                ),
+                mode: InsertMode.insertOrIgnore,
+              );
+            }
+
             final weightRaw = item['current_weight_kg'];
             double? parsedWeight;
             if (weightRaw is num) {
@@ -243,25 +266,27 @@ class ConflictResolver {
                   PatientsTableCompanion(
                     id: Value(item['id'] as String),
                     tenantId: Value(tenantId),
-                    clientId: Value(item['client_id'] as String),
-                    nameOrTag: Value(item['name_or_tag'] as String),
-                    species: Value(item['species'] as String),
-                    breed: Value(item['breed'] as String?),
+                    clientId: Value(clientId),
+                    nameOrTag: Value(item['name_or_tag']?.toString() ?? 'Unknown'),
+                    species: Value(item['species']?.toString() ?? 'Canine'),
+                    breed: Value(item['breed']?.toString()),
                     gender: Value(item['gender']?.toString() ?? 'unknown'),
                     age: Value(parsedAge),
                     dateOfBirth: Value(DateTime.tryParse(item['date_of_birth']?.toString() ?? '')),
                     isApproximateAge: Value(item['is_approximate_age'] == 1 || item['is_approximate_age'] == true),
-                    microchipNumber: Value(item['microchip_number'] as String?),
-                    earTagId: Value(item['ear_tag_id'] as String?),
-                    coatColorMarkings: Value(item['coat_color_markings'] as String?),
+                    microchipNumber: Value(item['microchip_number']?.toString()),
+                    earTagId: Value(item['ear_tag_id']?.toString()),
+                    coatColorMarkings: Value(item['coat_color_markings']?.toString()),
                     currentWeightKg: Value(parsedWeight),
                     weightRecordedAt: Value(DateTime.tryParse(item['weight_recorded_at']?.toString() ?? '')),
-                    history: Value(item['history'] as String?),
-                    notes: Value(item['notes'] as String?),
+                    history: Value(item['history']?.toString()),
+                    notes: Value(item['notes']?.toString()),
                     allergies: Value(item['allergies'] != null ? jsonEncode(item['allergies']) : null),
                     status: Value(item['status']?.toString() ?? 'active'),
+                    deceasedAt: Value(DateTime.tryParse(item['deceased_at']?.toString() ?? '')),
                     createdAt: Value(DateTime.tryParse(item['created_at']?.toString() ?? '') ?? now),
                     updatedAt: Value(DateTime.tryParse(item['updated_at']?.toString() ?? '') ?? now),
+                    deletedAt: Value(DateTime.tryParse(item['deleted_at']?.toString() ?? '')),
                     syncStatus: const Value('synced'),
                     lastSyncedAt: Value(now),
                   ),
@@ -274,19 +299,65 @@ class ConflictResolver {
       if (deltas['cases'] is List) {
         for (final item in deltas['cases'] as List) {
           if (item is Map<String, dynamic>) {
+            final patientId = item['patient_id']?.toString() ?? '';
+            if (patientId.isEmpty) continue;
+
+            final patientExists = await (db.select(db.patientsTable)..where((p) => p.id.equals(patientId))).getSingleOrNull();
+            if (patientExists == null) {
+              const fallbackClientId = '00000000-0000-0000-0000-000000000000';
+              await db.into(db.clientsTable).insert(
+                ClientsTableCompanion(
+                  id: const Value(fallbackClientId),
+                  tenantId: Value(tenantId),
+                  name: const Value('Unknown Client'),
+                  phonePrimary: const Value('000-000-0000'),
+                  clientType: const Value('individual'),
+                  createdAt: Value(now),
+                  updatedAt: Value(now),
+                  syncStatus: const Value('synced'),
+                  lastSyncedAt: Value(now),
+                ),
+                mode: InsertMode.insertOrIgnore,
+              );
+              await db.into(db.patientsTable).insert(
+                PatientsTableCompanion(
+                  id: Value(patientId),
+                  tenantId: Value(tenantId),
+                  clientId: const Value(fallbackClientId),
+                  nameOrTag: const Value('Unknown Patient'),
+                  species: const Value('Canine'),
+                  createdAt: Value(now),
+                  updatedAt: Value(now),
+                  syncStatus: const Value('synced'),
+                  lastSyncedAt: Value(now),
+                ),
+                mode: InsertMode.insertOrIgnore,
+              );
+            }
+
             await db.into(db.clinicalCasesTable).insertOnConflictUpdate(
                   ClinicalCasesTableCompanion(
                     id: Value(item['id'] as String),
                     tenantId: Value(tenantId),
-                    caseNumber: Value(item['case_number'] as String),
-                    patientId: Value(item['patient_id'] as String),
-                    primaryVeterinarianId: Value(item['primary_veterinarian_id'] as String),
-                    chiefComplaint: Value(item['chief_complaint'] as String),
-                    priority: Value(item['priority'] as String? ?? 'routine'),
-                    status: Value(item['status'] as String? ?? 'open'),
+                    caseNumber: Value(item['case_number']?.toString() ?? 'CAS-UNKNOWN'),
+                    patientId: Value(patientId),
+                    primaryVeterinarianId: Value(item['primary_veterinarian_id']?.toString() ?? ''),
+                    primaryVeterinarianName: Value(item['primary_veterinarian_name']?.toString()),
+                    caseType: Value(item['case_type']?.toString() ?? 'outpatient'),
+                    chiefComplaint: Value(item['chief_complaint']?.toString() ?? 'General Consultation'),
+                    provisionalDiagnosis: Value(item['provisional_diagnosis']?.toString()),
+                    finalDiagnosis: Value(item['final_diagnosis']?.toString()),
+                    priority: Value(
+                      (item['priority']?.toString() ?? 'routine').toLowerCase() == 'emergency_critical'
+                          ? 'critical'
+                          : (item['priority']?.toString() ?? 'routine'),
+                    ),
+                    status: Value(item['status']?.toString() ?? 'open'),
                     admittedAt: Value(DateTime.tryParse(item['admitted_at']?.toString() ?? '') ?? now),
+                    dischargedAt: Value(DateTime.tryParse(item['discharged_at']?.toString() ?? '')),
                     createdAt: Value(DateTime.tryParse(item['created_at']?.toString() ?? '') ?? now),
                     updatedAt: Value(DateTime.tryParse(item['updated_at']?.toString() ?? '') ?? now),
+                    deletedAt: Value(DateTime.tryParse(item['deleted_at']?.toString() ?? '')),
                     syncStatus: const Value('synced'),
                     lastSyncedAt: Value(now),
                   ),
@@ -299,25 +370,74 @@ class ConflictResolver {
       if (deltas['progress_notes'] is List) {
         for (final item in deltas['progress_notes'] as List) {
           if (item is Map<String, dynamic>) {
-            final noteId = item['id'] as String;
+            final noteId = item['id']?.toString();
+            if (noteId == null || noteId.isEmpty) continue;
+
+            final caseId = (item['case_id'] ?? item['clinical_case_id'])?.toString() ?? '';
+            if (caseId.isEmpty) continue;
+
+            final caseRow = await (db.select(db.clinicalCasesTable)..where((c) => c.id.equals(caseId))).getSingleOrNull();
+            if (caseRow == null) continue;
+
             final existing = await (db.select(db.clinicalProgressNotesTable)
                   ..where((n) => n.id.equals(noteId)))
                 .getSingleOrNull();
 
             if (existing == null) {
+              final patientId = item['patient_id']?.toString() ?? caseRow.patientId;
+              final vetId = (item['veterinarian_id'] ?? item['vet_id'])?.toString() ?? caseRow.primaryVeterinarianId;
+              final vetName = item['veterinarian_name']?.toString() ?? 'Attending Clinician';
+              final noteType = item['note_type']?.toString() ?? 'soap';
+
+              final subjective = item['subjective']?.toString() ?? item['subjective_notes']?.toString();
+              final objective = item['objective']?.toString() ?? item['objective_notes']?.toString();
+              final assessment = item['assessment']?.toString() ?? item['assessment_notes']?.toString();
+              final plan = item['plan']?.toString() ?? item['plan_notes']?.toString();
+
+              double? tempC;
+              final tempRaw = item['temperature_c'] ?? item['temperature_celsius'];
+              if (tempRaw is num) {
+                tempC = tempRaw.toDouble();
+              } else if (tempRaw is String) {
+                tempC = double.tryParse(tempRaw);
+              }
+
+              int? hr;
+              final hrRaw = item['heart_rate_bpm'];
+              if (hrRaw is int) {
+                hr = hrRaw;
+              } else if (hrRaw is num) {
+                hr = hrRaw.toInt();
+              } else if (hrRaw is String) {
+                hr = int.tryParse(hrRaw);
+              }
+
+              int? rr;
+              final rrRaw = item['respiratory_rate'] ?? item['respiratory_rate_bpm'];
+              if (rrRaw is int) {
+                rr = rrRaw;
+              } else if (rrRaw is num) {
+                rr = rrRaw.toInt();
+              } else if (rrRaw is String) {
+                rr = int.tryParse(rrRaw);
+              }
+
               await db.into(db.clinicalProgressNotesTable).insert(
                     ClinicalProgressNotesTableCompanion(
                       id: Value(noteId),
-                      caseId: Value(item['case_id'] as String),
-                      patientId: Value(item['patient_id'] as String),
-                      veterinarianId: Value(item['veterinarian_id'] as String),
-                      veterinarianName: Value(item['veterinarian_name'] as String? ?? 'Attending Clinician'),
-                      noteType: Value(item['note_type'] as String? ?? 'soap'),
-                      subjective: Value(item['subjective'] as String?),
-                      objective: Value(item['objective'] as String?),
-                      assessment: Value(item['assessment'] as String?),
-                      plan: Value(item['plan'] as String?),
-                      recordedAt: Value(DateTime.tryParse(item['recorded_at']?.toString() ?? '') ?? now),
+                      caseId: Value(caseId),
+                      patientId: Value(patientId),
+                      veterinarianId: Value(vetId),
+                      veterinarianName: Value(vetName),
+                      noteType: Value(noteType),
+                      subjective: Value(subjective),
+                      objective: Value(objective),
+                      assessment: Value(assessment),
+                      plan: Value(plan),
+                      temperatureCelsius: Value(tempC),
+                      heartRateBpm: Value(hr),
+                      respiratoryRateBpm: Value(rr),
+                      recordedAt: Value(DateTime.tryParse(item['recorded_at']?.toString() ?? '') ?? DateTime.tryParse(item['created_at']?.toString() ?? '') ?? now),
                       createdAt: Value(DateTime.tryParse(item['created_at']?.toString() ?? '') ?? now),
                       updatedAt: Value(DateTime.tryParse(item['updated_at']?.toString() ?? '') ?? now),
                       syncStatus: const Value('synced'),
@@ -332,20 +452,24 @@ class ConflictResolver {
       if (deltas['inventory_products'] is List) {
         for (final item in deltas['inventory_products'] as List) {
           if (item is Map<String, dynamic>) {
+            final productId = item['id']?.toString() ?? '';
+            if (productId.isEmpty) continue;
+
             await db.into(db.inventoryProductsTable).insertOnConflictUpdate(
                   InventoryProductsTableCompanion(
-                    id: Value(item['id'] as String),
+                    id: Value(productId),
                     tenantId: Value(tenantId),
-                    sku: Value(item['sku'] as String),
-                    name: Value(item['name'] as String),
-                    description: Value(item['description'] as String?),
-                    baseUnit: Value(item['base_unit'] as String? ?? 'ml'),
-                    isControlled: Value(item['is_controlled'] == true),
-                    controlledSchedule: Value(item['controlled_schedule'] as String?),
+                    sku: Value(item['sku']?.toString() ?? 'SKU-UNKNOWN'),
+                    name: Value(item['name']?.toString() ?? 'Product'),
+                    description: Value(item['description']?.toString() ?? item['package_description']?.toString()),
+                    baseUnit: Value(item['base_unit']?.toString() ?? 'ml'),
+                    isControlled: Value(item['is_controlled'] == 1 || item['is_controlled'] == true),
+                    controlledSchedule: Value(item['controlled_schedule']?.toString()),
                     currentStockQty: Value(Decimal.tryParse(item['current_stock_qty']?.toString() ?? '0') ?? Decimal.zero),
-                    minThreshold: Value(Decimal.tryParse(item['min_threshold']?.toString() ?? '0') ?? Decimal.zero),
+                    minThreshold: Value(Decimal.tryParse((item['min_threshold'] ?? item['reorder_threshold'])?.toString() ?? '0') ?? Decimal.zero),
                     createdAt: Value(DateTime.tryParse(item['created_at']?.toString() ?? '') ?? now),
                     updatedAt: Value(DateTime.tryParse(item['updated_at']?.toString() ?? '') ?? now),
+                    deletedAt: Value(DateTime.tryParse(item['deleted_at']?.toString() ?? '')),
                     syncStatus: const Value('synced'),
                     lastSyncedAt: Value(now),
                   ),
@@ -358,18 +482,44 @@ class ConflictResolver {
       if (deltas['inventory_batches'] is List) {
         for (final item in deltas['inventory_batches'] as List) {
           if (item is Map<String, dynamic>) {
+            final batchId = item['id']?.toString() ?? '';
+            final productId = item['product_id']?.toString() ?? '';
+            if (batchId.isEmpty || productId.isEmpty) continue;
+
+            final productExists = await (db.select(db.inventoryProductsTable)..where((p) => p.id.equals(productId))).getSingleOrNull();
+            if (productExists == null) {
+              await db.into(db.inventoryProductsTable).insert(
+                InventoryProductsTableCompanion(
+                  id: Value(productId),
+                  tenantId: Value(tenantId),
+                  sku: const Value('SKU-AUTO'),
+                  name: const Value('Unknown Product'),
+                  createdAt: Value(now),
+                  updatedAt: Value(now),
+                  syncStatus: const Value('synced'),
+                  lastSyncedAt: Value(now),
+                ),
+                mode: InsertMode.insertOrIgnore,
+              );
+            }
+
+            final lotNumber = (item['lot_number'] ?? item['batch_number'])?.toString() ?? 'BATCH-001';
+            final expiresAt = DateTime.tryParse((item['expires_at'] ?? item['expiration_date'])?.toString() ?? '') ?? now.add(const Duration(days: 365));
+
             await db.into(db.inventoryBatchesTable).insertOnConflictUpdate(
                   InventoryBatchesTableCompanion(
-                    id: Value(item['id'] as String),
+                    id: Value(batchId),
                     tenantId: Value(tenantId),
-                    productId: Value(item['product_id'] as String),
-                    lotNumber: Value(item['lot_number'] as String),
-                    expiresAt: Value(DateTime.tryParse(item['expires_at']?.toString() ?? '') ?? now),
-                    initialBaseQty: Value(Decimal.tryParse(item['initial_base_qty']?.toString() ?? '0') ?? Decimal.zero),
-                    remainingBaseQty: Value(Decimal.tryParse(item['remaining_base_qty']?.toString() ?? '0') ?? Decimal.zero),
-                    status: Value(item['status'] as String? ?? 'active'),
+                    productId: Value(productId),
+                    lotNumber: Value(lotNumber),
+                    expiresAt: Value(expiresAt),
+                    unitCost: Value(Decimal.tryParse((item['unit_cost'] ?? item['cost_per_base_unit'])?.toString() ?? '0') ?? Decimal.zero),
+                    initialBaseQty: Value(Decimal.tryParse((item['initial_base_qty'] ?? item['initial_quantity'])?.toString() ?? '0') ?? Decimal.zero),
+                    remainingBaseQty: Value(Decimal.tryParse((item['remaining_base_qty'] ?? item['remaining_quantity'])?.toString() ?? '0') ?? Decimal.zero),
+                    status: Value(item['status']?.toString() ?? 'active'),
                     createdAt: Value(DateTime.tryParse(item['created_at']?.toString() ?? '') ?? now),
                     updatedAt: Value(DateTime.tryParse(item['updated_at']?.toString() ?? '') ?? now),
+                    deletedAt: Value(DateTime.tryParse(item['deleted_at']?.toString() ?? '')),
                     syncStatus: const Value('synced'),
                     lastSyncedAt: Value(now),
                   ),
@@ -382,20 +532,65 @@ class ConflictResolver {
       if (deltas['inventory_containers'] is List) {
         for (final item in deltas['inventory_containers'] as List) {
           if (item is Map<String, dynamic>) {
+            final containerId = item['id']?.toString() ?? '';
+            final batchId = item['batch_id']?.toString() ?? '';
+            final productId = item['product_id']?.toString() ?? '';
+            if (containerId.isEmpty || batchId.isEmpty || productId.isEmpty) continue;
+
+            final productExists = await (db.select(db.inventoryProductsTable)..where((p) => p.id.equals(productId))).getSingleOrNull();
+            if (productExists == null) {
+              await db.into(db.inventoryProductsTable).insert(
+                InventoryProductsTableCompanion(
+                  id: Value(productId),
+                  tenantId: Value(tenantId),
+                  sku: const Value('SKU-AUTO'),
+                  name: const Value('Unknown Product'),
+                  createdAt: Value(now),
+                  updatedAt: Value(now),
+                  syncStatus: const Value('synced'),
+                  lastSyncedAt: Value(now),
+                ),
+                mode: InsertMode.insertOrIgnore,
+              );
+            }
+
+            final batchExists = await (db.select(db.inventoryBatchesTable)..where((b) => b.id.equals(batchId))).getSingleOrNull();
+            if (batchExists == null) {
+              await db.into(db.inventoryBatchesTable).insert(
+                InventoryBatchesTableCompanion(
+                  id: Value(batchId),
+                  tenantId: Value(tenantId),
+                  productId: Value(productId),
+                  lotNumber: const Value('BATCH-AUTO'),
+                  expiresAt: Value(now.add(const Duration(days: 365))),
+                  initialBaseQty: Value(Decimal.zero),
+                  remainingBaseQty: Value(Decimal.zero),
+                  createdAt: Value(now),
+                  updatedAt: Value(now),
+                  syncStatus: const Value('synced'),
+                  lastSyncedAt: Value(now),
+                ),
+                mode: InsertMode.insertOrIgnore,
+              );
+            }
+
+            final barcode = (item['barcode'] ?? item['container_identifier'])?.toString() ?? containerId;
+
             await db.into(db.inventoryContainersTable).insertOnConflictUpdate(
                   InventoryContainersTableCompanion(
-                    id: Value(item['id'] as String),
+                    id: Value(containerId),
                     tenantId: Value(tenantId),
-                    batchId: Value(item['batch_id'] as String),
-                    productId: Value(item['product_id'] as String),
-                    barcode: Value(item['barcode'] as String),
-                    initialVolume: Value(Decimal.tryParse(item['initial_volume']?.toString() ?? '0') ?? Decimal.zero),
-                    remainingBalance: Value(Decimal.tryParse(item['remaining_balance']?.toString() ?? '0') ?? Decimal.zero),
-                    status: Value(item['status'] as String? ?? 'sealed'),
+                    batchId: Value(batchId),
+                    productId: Value(productId),
+                    barcode: Value(barcode),
+                    initialVolume: Value(Decimal.tryParse((item['initial_volume'] ?? item['initial_base_quantity'])?.toString() ?? '0') ?? Decimal.zero),
+                    remainingBalance: Value(Decimal.tryParse((item['remaining_balance'] ?? item['current_base_balance'])?.toString() ?? '0') ?? Decimal.zero),
+                    status: Value(item['status']?.toString() ?? 'sealed'),
                     openedAt: Value(DateTime.tryParse(item['opened_at']?.toString() ?? '')),
-                    openedByUserId: Value(item['opened_by_user_id'] as String?),
+                    openedByUserId: Value(item['opened_by_user_id']?.toString()),
                     createdAt: Value(DateTime.tryParse(item['created_at']?.toString() ?? '') ?? now),
                     updatedAt: Value(DateTime.tryParse(item['updated_at']?.toString() ?? '') ?? now),
+                    deletedAt: Value(DateTime.tryParse((item['deleted_at'] ?? item['depleted_at'])?.toString() ?? '')),
                     syncStatus: const Value('synced'),
                     lastSyncedAt: Value(now),
                   ),

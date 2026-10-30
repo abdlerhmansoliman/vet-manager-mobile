@@ -16,17 +16,19 @@ import '../widgets/case_card.dart';
 class CasesBoardScreen extends StatelessWidget {
   final ICaseRepository? repository;
   final List<CaseSummaryEntity>? initialCases;
+  final VoidCallback? onSync;
 
   const CasesBoardScreen({
     super.key,
     this.repository,
     this.initialCases,
+    this.onSync,
   });
 
   @override
   Widget build(BuildContext context) {
     if (repository == null) {
-      return _CasesBoardView(initialCases: initialCases);
+      return _CasesBoardView(initialCases: initialCases, onSync: onSync);
     }
 
     return BlocProvider<CasesBoardBloc>(
@@ -35,6 +37,7 @@ class CasesBoardScreen extends StatelessWidget {
       child: _CasesBoardView(
         repository: repository,
         initialCases: initialCases,
+        onSync: onSync,
       ),
     );
   }
@@ -43,10 +46,12 @@ class CasesBoardScreen extends StatelessWidget {
 class _CasesBoardView extends StatefulWidget {
   final ICaseRepository? repository;
   final List<CaseSummaryEntity>? initialCases;
+  final VoidCallback? onSync;
 
   const _CasesBoardView({
     this.repository,
     this.initialCases,
+    this.onSync,
   });
 
   @override
@@ -127,6 +132,23 @@ class _CasesBoardViewState extends State<_CasesBoardView> {
                     ),
                   ),
             actions: [
+              IconButton(
+                icon: const Icon(
+                  Icons.sync_rounded,
+                  color: AppColors.primaryEmerald,
+                  size: 22,
+                ),
+                tooltip: 'Sync with Cloud',
+                onPressed: () {
+                  widget.onSync?.call();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Syncing cases and patient records...'),
+                      duration: Duration(seconds: 1),
+                    ),
+                  );
+                },
+              ),
               IconButton(
                 icon: Icon(
                   _isSearching ? Icons.close_rounded : Icons.search_rounded,
@@ -212,23 +234,39 @@ class _CasesBoardViewState extends State<_CasesBoardView> {
               ),
             ),
           ),
-          body: state.status == CasesBoardStatus.loading && cases.isEmpty
-              ? const Center(
-                  child: CircularProgressIndicator(color: AppColors.primaryEmerald),
-                )
-              : cases.isEmpty
-                  ? _buildEmptyState(state.activePriority)
-                  : ListView.builder(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: cases.length,
-                      itemBuilder: (context, index) {
-                        return CaseCard(
-                          clinicalCase: cases[index],
-                          repository: widget.repository,
-                          index: index,
-                        );
-                      },
-                    ),
+          body: RefreshIndicator(
+            color: AppColors.primaryEmerald,
+            onRefresh: () async {
+              widget.onSync?.call();
+              await Future<void>.delayed(const Duration(milliseconds: 600));
+            },
+            child: state.status == CasesBoardStatus.loading && cases.isEmpty
+                ? const Center(
+                    child: CircularProgressIndicator(color: AppColors.primaryEmerald),
+                  )
+                : cases.isEmpty
+                    ? CustomScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        slivers: [
+                          SliverFillRemaining(
+                            hasScrollBody: false,
+                            child: _buildEmptyState(state.activePriority),
+                          ),
+                        ],
+                      )
+                    : ListView.builder(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: const EdgeInsets.all(16),
+                        itemCount: cases.length,
+                        itemBuilder: (context, index) {
+                          return CaseCard(
+                            clinicalCase: cases[index],
+                            repository: widget.repository,
+                            index: index,
+                          );
+                        },
+                      ),
+          ),
           floatingActionButton: FloatingActionButton.extended(
             onPressed: () => _showOpenCaseModal(context),
             backgroundColor: AppColors.primaryEmerald,
