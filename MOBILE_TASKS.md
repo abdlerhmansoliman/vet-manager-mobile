@@ -183,13 +183,18 @@
 
 #### Part 10: Case Study PDF Export
 * **Branch**: `mobile/10-case-study-pdf-export`
-* **Status**: ⚪ Pending
+* **Status**: 🟡 **Ready to Start**
 * **Files to Create**:
-  - `lib/features/clinical_cases/presentation/widgets/export_case_study_pdf_sheet.dart`
-  - `lib/features/clinical_cases/domain/usecases/export_case_pdf_usecase.dart`
+  - `lib/features/clinical_cases/presentation/widgets/export_case_study_pdf_sheet.dart` (Live PDF preview & anonymize toggle)
+  - `lib/features/clinical_cases/domain/usecases/export_case_pdf_usecase.dart` (PDF document generator with PII masking)
   - `test/features/clinical_cases/export_case_pdf_usecase_test.dart`
+  - `test/features/clinical_cases/export_case_study_pdf_sheet_test.dart`
+* **Backend Alignment**:
+  - Ingests full case dataset matching Laravel transformers: `ClinicalCaseTransformer`, `ClinicalProgressNoteTransformer`, and `DiagnosisTransformer`.
+  - Includes case identifiers (`case_number`, dates, complaint, diagnoses), vitals (`temperature_c`, `heart_rate_bpm`, `respiratory_rate`, `systolic_bp`, `diastolic_bp`, `mucous_membrane`, `weight_kg`), and signed SOAP notes with attending vet credentials (`job_title`, `license_number`).
+  - Supports one-click PII anonymization toggle: replaces client name, phone numbers, and address with `[ANONYMIZED CLIENT #ID]`, and patient name with `[CANINE / FELINE PATIENT #ID]` for clinical study sharing.
 * **Definition of Done**:
-  - Live PDF preview via `printing` package with functional "Anonymize Owner & Pet" toggle switch; PII anonymization unit tests pass.
+  - Attending vet can generate, preview, and share high-resolution case PDFs with or without PII; automated PDF generation and anonymization unit tests pass.
 
 ---
 
@@ -199,40 +204,65 @@
 * **Branch**: `mobile/11-staff-and-doctor-profile`
 * **Status**: ⚪ Pending
 * **Files to Create**:
-  - `lib/features/staff_profile/presentation/screens/doctor_profile_screen.dart` (License, DEA, active workload, `is_available` toggle)
-  - `lib/features/staff_profile/presentation/screens/staff_management_screen.dart` (Owner staff CRUD + PIN setup)
+  - `lib/features/staff_profile/domain/entities/staff_entity.dart` (9 roles, capabilities matrix)
+  - `lib/features/staff_profile/domain/entities/vet_profile_entity.dart` (License, DEA, active workload, availability)
+  - `lib/features/staff_profile/data/repositories/staff_repository_impl.dart`
+  - `lib/features/staff_profile/presentation/bloc/staff_bloc.dart`
+  - `lib/features/staff_profile/presentation/screens/doctor_profile_screen.dart` (Doctor credentials, active workload metrics, real-time `is_available` toggle)
+  - `lib/features/staff_profile/presentation/screens/staff_management_screen.dart` (Owner staff CRUD: create, update, activate/suspend, reset 4-digit PIN)
   - `test/features/staff_profile/doctor_profile_screen_test.dart`
   - `test/features/staff_profile/staff_management_test.dart`
+  - `test/features/staff_profile/staff_bloc_test.dart`
+* **Backend Alignment**:
+  - Directly matches Laravel 11 endpoints:
+    - `GET /api/v1/staff` & `POST /api/v1/staff` (fields: `name`, `email`, `password`, `role`, `phone`, `pin`, `job_title`, `specialty`, `license_number`, `is_available`)
+    - `GET /api/v1/staff/{user}` & `PUT /api/v1/staff/{user}`
+    - `PATCH /api/v1/staff/{user}/availability` (payload: `{"is_available": bool}`)
+    - `PATCH /api/v1/staff/{user}/status` (payload: `{"is_active": bool}`)
+    - `DELETE /api/v1/staff/{user}`
+  - Supports all 9 backend `StaffRole`s: `owner`, `doctor`, `head_vet`, `field_doctor`, `assistant`, `vet_tech`, `counter`, `receptionist`, `employee`.
+  - Integrates `capabilities` matrix: `can_manage_staff`, `can_witness_controlled_substances`, `can_access_owner_dashboard`, `can_prescribe_medication`, `can_perform_surgery`, `can_manage_billing`.
 * **Definition of Done**:
-  - Doctor can toggle on-duty availability; Owner can manage staff and reset 4-digit PINs; unit and widget tests pass.
+  - Doctor can toggle on-duty availability (`PATCH /staff/{id}/availability`); Clinic Owner can manage staff CRUD, roles, and witness PINs; all unit, BLoC, and widget tests pass.
 
 ---
 
-#### Part 12: Controlled Substances & Witness PIN
+#### Part 12: Controlled Substances & Witness PIN Dual-Authorization
 * **Branch**: `mobile/12-witness-pin-and-dosing`
 * **Status**: ⚪ Pending
 * **Files to Create**:
-  - `lib/features/inventory_doses/presentation/screens/administer_dose_screen.dart`
-  - `lib/features/inventory_doses/presentation/widgets/witness_pin_bottom_sheet.dart` (Blurred 4-digit PIN modal)
-  - `lib/features/inventory_doses/presentation/widgets/void_dose_bottom_sheet.dart` (Ledger reversal)
+  - `lib/features/inventory_doses/data/datasources/inventory_dose_remote_datasource.dart`
+  - `lib/features/inventory_doses/domain/usecases/verify_witness_pin_usecase.dart`
+  - `lib/features/inventory_doses/presentation/screens/administer_dose_screen.dart` (Fractional dosing slider with `Decimal` precision)
+  - `lib/features/inventory_doses/presentation/widgets/witness_pin_bottom_sheet.dart` (Blurred 4-digit supervisor PIN modal)
+  - `lib/features/inventory_doses/presentation/widgets/void_dose_bottom_sheet.dart` (Movement reversal & waste reason audit)
   - `test/features/inventory_doses/administer_dose_screen_test.dart`
   - `test/features/inventory_doses/witness_pin_bottom_sheet_test.dart`
+  - `test/features/inventory_doses/verify_witness_pin_usecase_test.dart`
+* **Backend Alignment**:
+  - Witness Verification: binds to `POST /api/v1/auth/verify-pin` (payload: `witness_email` or `witness_id` + `pin`), validating `canWitnessControlledSubstances()` and returning verified witness metadata.
+  - State-Modifying Movements:
+    - Dispense/Dose: `POST /api/v1/inventory/consume` with mandatory `Idempotency-Key` header and payload `{"product_id", "quantity", "movement_type": "dispense", "reason"}`.
+    - Waste/Discard: `POST /api/v1/inventory/waste` with mandatory `Idempotency-Key` header and payload `{"product_id", "quantity", "reason"}`.
 * **Definition of Done**:
-  - Controlled drug administration requires supervisor PIN verification before ledger write; PIN verification & void reversal tests pass.
+  - Administering Schedule II–V substances triggers the blurred witness modal; verification completes via PIN before ledger mutation commits; void reversals record audit log; all tests pass.
 
 ---
 
-#### Part 13: Direct Cloudflare R2 Media Pipeline
+#### Part 13: Direct Cloudflare R2 / S3 Media Pipeline & Radiograph Viewer
 * **Branch**: `mobile/13-diagnostic-media-r2`
 * **Status**: ⚪ Pending
 * **Files to Create**:
-  - `lib/features/media/data/services/r2_direct_uploader.dart` (Direct HTTP PUT to presigned URLs)
-  - `lib/features/media/presentation/widgets/camera_capture_sheet.dart` (WebP compression)
-  - `lib/features/media/presentation/screens/photo_viewer_screen.dart` (Pinch-to-zoom radiograph viewer)
+  - `lib/features/media/data/services/r2_direct_uploader.dart` (Direct HTTP PUT to cloud object storage)
+  - `lib/features/media/presentation/widgets/camera_capture_sheet.dart` (Pre-upload WebP compression & metadata tagger)
+  - `lib/features/media/presentation/screens/photo_viewer_screen.dart` (Pinch-to-zoom high-res radiograph / ultrasound viewer)
   - `test/features/media/r2_direct_uploader_test.dart`
   - `test/features/media/photo_viewer_screen_test.dart`
+* **Backend Alignment**:
+  - Aligns with backend polymorphic `images` table (`id` UUID, `imageable_type`, `imageable_id`, `url`, `title`, `mime_type`, `file_size_bytes`).
+  - Supports attaching diagnostic images to both `ClinicalProgressNote` and `ClinicalCase`.
 * **Definition of Done**:
-  - Photo is compressed to WebP locally and uploaded directly to R2; offline photos queue properly; upload and image viewer tests pass.
+  - Clinical photos compress locally to WebP, upload directly to S3/R2 storage with progress indicator, and link to clinical notes; pinch-to-zoom viewer works smoothly; all tests pass.
 
 ---
 
@@ -246,4 +276,4 @@
   - `test/features/settings/delete_account_screen_test.dart`
   - `test/features/settings/medical_disclaimer_screen_test.dart`
 * **Definition of Done**:
-  - Account deletion works; privacy manifests pass `xcrun altool` audit; edge-to-edge passes Android 15 audit; compliance widget tests pass.
+  - Self-service account deletion functions properly; privacy manifest passes `xcrun altool` audit; edge-to-edge passes Android 15 audit; compliance widget tests pass.
