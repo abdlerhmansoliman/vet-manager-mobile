@@ -132,6 +132,93 @@ class PatientRepositoryImpl implements IPatientRepository {
     return clients.map(_mapClientDataToSummary).toList();
   }
 
+  @override
+  Future<PatientEntity> updatePatient({
+    required String patientId,
+    required String nameOrTag,
+    required String species,
+    String? breed,
+    required String gender,
+    int? age,
+    DateTime? dateOfBirth,
+    bool isApproximateAge = false,
+    String? microchipNumber,
+    String? earTagId,
+    String? coatColorMarkings,
+    double? currentWeightKg,
+    String? history,
+    String? notes,
+    List<String> allergies = const [],
+    String? status,
+    String? clientName,
+    String? clientPhonePrimary,
+    String? clientPhoneSecondary,
+    String? clientAddress,
+  }) async {
+    final tenantId = await _storageService.getTenantId() ?? 'default';
+    final existing = await _dao.getPatientWithClient(tenantId: tenantId, patientId: patientId);
+    if (existing == null) {
+      throw Exception('Patient not found');
+    }
+
+    final now = DateTime.now().toUtc();
+    final patientCompanion = PatientsTableCompanion(
+      id: Value(patientId),
+      nameOrTag: Value(nameOrTag.trim()),
+      species: Value(species.trim()),
+      breed: Value(breed?.trim()),
+      gender: Value(gender),
+      age: Value(age),
+      dateOfBirth: Value(dateOfBirth),
+      isApproximateAge: Value(isApproximateAge),
+      microchipNumber: Value(microchipNumber?.trim()),
+      earTagId: Value(earTagId?.trim()),
+      coatColorMarkings: Value(coatColorMarkings?.trim()),
+      currentWeightKg: Value(currentWeightKg),
+      weightRecordedAt: Value(currentWeightKg != null ? now : existing.patient.weightRecordedAt),
+      history: Value(history?.trim()),
+      notes: Value(notes?.trim()),
+      allergies: Value(allergies.isNotEmpty ? jsonEncode(allergies) : null),
+      status: status != null ? Value(status) : const Value.absent(),
+      updatedAt: Value(now),
+    );
+
+    ClientsTableCompanion? clientCompanion;
+    if (clientName != null || clientPhonePrimary != null || clientPhoneSecondary != null || clientAddress != null) {
+      clientCompanion = ClientsTableCompanion(
+        id: Value(existing.client.id),
+        name: clientName != null ? Value(clientName.trim()) : const Value.absent(),
+        phonePrimary: clientPhonePrimary != null ? Value(clientPhonePrimary.trim()) : const Value.absent(),
+        phoneSecondary: clientPhoneSecondary != null ? Value(clientPhoneSecondary.trim()) : const Value.absent(),
+        physicalAddress: clientAddress != null ? Value(clientAddress.trim()) : const Value.absent(),
+        updatedAt: Value(now),
+      );
+    }
+
+    final updated = await _dao.updatePatient(
+      tenantId: tenantId,
+      patientCompanion: patientCompanion,
+      clientCompanion: clientCompanion,
+      enqueueSync: true,
+    );
+
+    if (updated == null) {
+      throw Exception('Failed to update patient');
+    }
+
+    return _mapPatientWithClientToEntity(updated);
+  }
+
+  @override
+  Future<bool> deletePatient(String patientId) async {
+    final tenantId = await _storageService.getTenantId() ?? 'default';
+    return await _dao.deletePatient(
+      tenantId: tenantId,
+      patientId: patientId,
+      enqueueSync: true,
+    );
+  }
+
   PatientEntity _mapPatientWithClientToEntity(PatientWithClient bundle) {
     return PatientEntity(
       id: bundle.patient.id,

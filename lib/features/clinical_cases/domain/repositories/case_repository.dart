@@ -9,6 +9,9 @@ abstract class ICaseRepository {
     String? query,
   });
 
+  /// Watches all historical and active clinical cases/visits for a specific patient.
+  Stream<List<CaseSummaryEntity>> watchCasesForPatient(String patientId);
+
   /// Real-time stream watching a specific case encounter with notes and diagnoses.
   Stream<CaseDetailEntity?> watchCaseDetail(String caseId);
 

@@ -5,17 +5,23 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/text_styles.dart';
 import '../../../../core/widgets/animal_species_avatar.dart';
 import '../../domain/entities/patient_entity.dart';
+import '../../domain/repositories/patient_repository.dart';
+import '../../../clinical_cases/domain/repositories/case_repository.dart';
 import '../screens/patient_detail_screen.dart';
 
 /// Clinical patient card featuring seamless [OpenContainer] Material motion transform.
 class PatientCard extends StatelessWidget {
   final PatientEntity patient;
   final int index;
+  final IPatientRepository? repository;
+  final ICaseRepository? caseRepository;
 
   const PatientCard({
     super.key,
     required this.patient,
     this.index = 0,
+    this.repository,
+    this.caseRepository,
   });
 
   @override
@@ -186,7 +192,11 @@ class PatientCard extends StatelessWidget {
           );
         },
         openBuilder: (context, closeContainer) {
-          return PatientDetailScreen(patient: patient);
+          return PatientDetailScreen(
+            patient: patient,
+            repository: repository,
+            caseRepository: caseRepository,
+          );
         },
       ),
     )

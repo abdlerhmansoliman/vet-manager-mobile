@@ -52,6 +52,7 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
           if (widget.patientRepository != null)
             PatientListScreen(
               repository: widget.patientRepository!,
+              caseRepository: widget.caseRepository,
               onSync: () => widget.syncManager?.syncNow(),
             )
           else

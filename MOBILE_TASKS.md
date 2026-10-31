@@ -18,9 +18,10 @@
 | **06** | `mobile/06-drift-pharmacy-tables` | 4-tier pharmacy tables (Products, Batches, Containers, Ledger) | 🟢 **Completed** |
 | **07** | `mobile/07-offline-sync-engine` | FIFO mutation queue & Force-Reconcile conflict protocol | 🟢 **Completed** |
 | **08** | `mobile/08-clients-patients-module` | Client/Patient lists, search, and `OpenContainer` hero morph | 🟢 **Completed** |
+| **08-B** | `mobile/08-patient-crud-medical-file` | Patient Edit, Delete, Multi-Case Medical File & Quick Visit | 🟡 **In Progress** |
 | **09** | `mobile/09-cases-triage-board` | Triage board (Routine/Urgent/Critical), SOAP notes & addenda | 🟢 **Completed** |
-| **10** | `mobile/10-case-study-pdf-export` | Case study PDF generator with owner anonymization toggle | 🟡 **Ready to Start** |
-| **11** | `mobile/11-staff-and-doctor-profile` | Doctor profile, on-duty toggle & Owner staff management | ⚪ Pending |
+| **10** | `mobile/10-case-study-pdf-export` | Case study PDF generator with owner anonymization toggle | ⏸️ **Deferred** |
+| **11** | `mobile/11-staff-and-doctor-profile` | Doctor profile, on-duty toggle & Owner staff CRUD (Create/Edit/PIN) | ⚪ Ready Next |
 | **12** | `mobile/12-witness-pin-and-dosing` | Fractional dosing slider & blurred witness PIN bottom sheet | ⚪ Pending |
 | **13** | `mobile/13-diagnostic-media-r2` | Direct-to-R2 upload pipeline, WebP compression & zoom viewer | ⚪ Pending |
 | **14** | `mobile/14-store-review-hardening` | Privacy manifest, account deletion & medical disclaimers | ⚪ Pending |
@@ -163,6 +164,24 @@
   - `test/features/clients_patients/patient_list_screen_test.dart`
 * **Definition of Done**:
   - Search by phone/name, filter by species, and seamless transition from card to patient profile; all widget & unit tests pass.
+
+---
+
+#### Part 08-B: Patient Medical File Structure & Full CRUD
+* **Branch**: `mobile/08-patient-crud-medical-file`
+* **Status**: 🟡 **In Progress**
+* **Files to Create / Modify**:
+  - `lib/database/daos/client_patient_dao.dart` (`updatePatient`, `deletePatient` with sync queue)
+  - `lib/features/clients_patients/domain/repositories/patient_repository.dart`
+  - `lib/features/clients_patients/data/repositories/patient_repository_impl.dart`
+  - `lib/features/clinical_cases/domain/repositories/case_repository.dart` (`watchCasesForPatient`)
+  - `lib/features/clinical_cases/data/repositories/case_repository_impl.dart`
+  - `lib/features/clients_patients/presentation/screens/patient_form_screen.dart` (Unified Create & Edit)
+  - `lib/features/clients_patients/presentation/screens/patient_detail_screen.dart` (Multi-case history, tabs, edit/delete actions, new encounter quick sheet)
+  - `test/database/client_patient_dao_test.dart` (CRUD & sync queue tests)
+  - `test/features/clients_patients/` (Widget and unit tests)
+* **Definition of Done**:
+  - Patient profile functions as complete medical file showing all clinical cases/visits; doctor can create new visit directly from patient; edit & soft-delete operate atomically offline; all tests pass.
 
 ---
 

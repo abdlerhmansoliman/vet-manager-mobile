@@ -37,4 +37,32 @@ abstract class IPatientRepository {
 
   /// Searches existing active clients by name or phone.
   Future<List<ClientSummaryEntity>> searchClients(String query);
+
+  /// Updates an existing patient's clinical and demographic details.
+  Future<PatientEntity> updatePatient({
+    required String patientId,
+    required String nameOrTag,
+    required String species,
+    String? breed,
+    required String gender,
+    int? age,
+    DateTime? dateOfBirth,
+    bool isApproximateAge = false,
+    String? microchipNumber,
+    String? earTagId,
+    String? coatColorMarkings,
+    double? currentWeightKg,
+    String? history,
+    String? notes,
+    List<String> allergies = const [],
+    String? status,
+    // Optional client updates
+    String? clientName,
+    String? clientPhonePrimary,
+    String? clientPhoneSecondary,
+    String? clientAddress,
+  });
+
+  /// Soft-deletes a patient and records an offline sync deletion.
+  Future<bool> deletePatient(String patientId);
 }

@@ -3,22 +3,334 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/text_styles.dart';
 import '../../../../core/widgets/animal_species_avatar.dart';
+import '../../../../core/widgets/triage_priority_badge.dart';
+import '../../../clinical_cases/domain/entities/case_entity.dart';
+import '../../../clinical_cases/domain/repositories/case_repository.dart';
+import '../../../clinical_cases/presentation/screens/case_detail_screen.dart';
 import '../../domain/entities/patient_entity.dart';
+import '../../domain/repositories/patient_repository.dart';
+import 'create_patient_screen.dart';
 
-/// Comprehensive Patient Clinical Profile Screen.
+/// Comprehensive Patient Clinical Profile & Medical File Screen.
 ///
 /// Designed with the Cheerful Warm Clinical Aesthetic:
 /// - Prominent species avatar header with health status pill
 /// - High-risk allergy alert badges and behavioral cautions
-/// - Owner contact card with quick-dial support
-/// - Quick clinical encounter action triggers
-class PatientDetailScreen extends StatelessWidget {
+/// - Multi-case medical history & clinical encounters timeline
+/// - Quick clinical encounter generator linked to patient
+/// - Direct Edit and Soft-Delete patient actions
+class PatientDetailScreen extends StatefulWidget {
   final PatientEntity patient;
+  final IPatientRepository? repository;
+  final ICaseRepository? caseRepository;
 
   const PatientDetailScreen({
     super.key,
     required this.patient,
+    this.repository,
+    this.caseRepository,
   });
+
+  @override
+  State<PatientDetailScreen> createState() => _PatientDetailScreenState();
+}
+
+class _PatientDetailScreenState extends State<PatientDetailScreen> {
+  late PatientEntity _patient;
+  int _selectedTabIndex = 0; // 0: Demographics & Owner, 1: Visits & Clinical Cases
+
+  @override
+  void initState() {
+    super.initState();
+    _patient = widget.patient;
+  }
+
+  Future<void> _navigateToEdit() async {
+    if (widget.repository == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Patient repository unavailable for editing.'),
+          backgroundColor: AppColors.secondaryCoral,
+        ),
+      );
+      return;
+    }
+
+    final updated = await Navigator.of(context).push<PatientEntity>(
+      MaterialPageRoute(
+        builder: (context) => CreatePatientScreen(
+          repository: widget.repository!,
+          initialPatient: _patient,
+        ),
+      ),
+    );
+
+    if (updated != null && mounted) {
+      setState(() => _patient = updated);
+    }
+  }
+
+  Future<void> _confirmDelete() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surfaceWhite,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          'Delete ${_patient.nameOrTag}?',
+          style: AppTextStyles.titleMedium.copyWith(fontWeight: FontWeight.w700),
+        ),
+        content: Text(
+          'Are you sure you want to remove this patient? The medical history will be preserved offline and the deletion will sync with the clinic server.',
+          style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textCharcoal),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel', style: TextStyle(color: AppColors.textMuted)),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.badgeCriticalRoseText,
+              foregroundColor: Colors.white,
+              elevation: 0,
+            ),
+            child: const Text('Delete Patient'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      if (widget.repository != null) {
+        await widget.repository!.deletePatient(_patient.id);
+      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${_patient.nameOrTag} was removed.'),
+          backgroundColor: AppColors.secondaryCoral,
+        ),
+      );
+      Navigator.of(context).maybePop();
+    }
+  }
+
+  void _showStartCaseSheet(BuildContext context) {
+    final complaintController = TextEditingController();
+    String priority = 'routine';
+    String caseType = 'outpatient';
+
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (modalContext) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+            return Container(
+              padding: EdgeInsets.fromLTRB(20, 20, 20, 24 + bottomInset),
+              decoration: const BoxDecoration(
+                color: AppColors.surfaceWhite,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Start Case for ${_patient.nameOrTag}',
+                          style: AppTextStyles.titleMedium.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textCharcoal,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close_rounded, color: AppColors.textMuted),
+                          onPressed: () => Navigator.of(context).pop(),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: complaintController,
+                      autofocus: true,
+                      decoration: InputDecoration(
+                        labelText: 'Chief Complaint *',
+                        hintText: 'e.g. Acute vomiting, Limping right forelimb',
+                        filled: true,
+                        fillColor: AppColors.backgroundCream,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: AppColors.borderWarm),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Triage Priority',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        _buildPriorityChip('routine', 'Routine', priority, (val) {
+                          setModalState(() => priority = val);
+                        }),
+                        const SizedBox(width: 8),
+                        _buildPriorityChip('urgent', 'Urgent', priority, (val) {
+                          setModalState(() => priority = val);
+                        }),
+                        const SizedBox(width: 8),
+                        _buildPriorityChip('critical', 'Critical', priority, (val) {
+                          setModalState(() => priority = val);
+                        }),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Encounter Type',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<String>(
+                      initialValue: caseType,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: AppColors.backgroundCream,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: AppColors.borderWarm),
+                        ),
+                      ),
+                      items: const [
+                        DropdownMenuItem(value: 'outpatient', child: Text('Outpatient')),
+                        DropdownMenuItem(value: 'inpatient', child: Text('Inpatient')),
+                        DropdownMenuItem(value: 'emergency', child: Text('Emergency')),
+                        DropdownMenuItem(value: 'surgery', child: Text('Surgery')),
+                        DropdownMenuItem(value: 'herd_check', child: Text('Herd Check')),
+                      ],
+                      onChanged: (val) {
+                        if (val != null) setModalState(() => caseType = val);
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton.icon(
+                      onPressed: () async {
+                        final complaint = complaintController.text.trim();
+                        if (complaint.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Please enter a chief complaint.'),
+                              backgroundColor: AppColors.secondaryCoral,
+                            ),
+                          );
+                          return;
+                        }
+
+                        Navigator.of(context).pop();
+
+                        if (widget.caseRepository != null) {
+                          final now = DateTime.now();
+                          final caseNum =
+                              'CAS-${now.year}-${now.millisecondsSinceEpoch.toString().substring(7)}';
+
+                          final newCase = await widget.caseRepository!.openCase(
+                            patientId: _patient.id,
+                            caseNumber: caseNum,
+                            chiefComplaint: complaint,
+                            priority: priority,
+                            caseType: caseType,
+                          );
+
+                          if (!mounted) return;
+                          ScaffoldMessenger.of(this.context).showSnackBar(
+                            SnackBar(
+                              content: Text('Encounter ${newCase.caseNumber} opened!'),
+                              backgroundColor: AppColors.primaryEmerald,
+                            ),
+                          );
+
+                          Navigator.of(this.context).push(
+                            MaterialPageRoute<void>(
+                              builder: (context) => CaseDetailScreen(
+                                caseId: newCase.id,
+                                repository: widget.caseRepository,
+                              ),
+                            ),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(this.context).showSnackBar(
+                            SnackBar(
+                              content: Text('Starting encounter for ${_patient.nameOrTag}...'),
+                              backgroundColor: AppColors.primaryEmerald,
+                            ),
+                          );
+                        }
+                      },
+                      icon: const Icon(Icons.check_circle_outline_rounded),
+                      label: const Text('Open Encounter & Begin Triage'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryEmerald,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        elevation: 0,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildPriorityChip(
+    String value,
+    String label,
+    String current,
+    ValueChanged<String> onSelected,
+  ) {
+    final isSelected = value == current;
+    Color color;
+    if (value == 'critical') {
+      color = AppColors.badgeCriticalRoseText;
+    } else if (value == 'urgent') {
+      color = AppColors.badgeObsAmberText;
+    } else {
+      color = AppColors.primaryEmerald;
+    }
+
+    return ChoiceChip(
+      label: Text(label),
+      selected: isSelected,
+      onSelected: (_) => onSelected(value),
+      selectedColor: color.withValues(alpha: 0.15),
+      labelStyle: TextStyle(
+        fontSize: 12,
+        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+        color: isSelected ? color : AppColors.textCharcoal,
+      ),
+      side: BorderSide(color: isSelected ? color : AppColors.borderWarm),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +345,7 @@ class PatientDetailScreen extends StatelessWidget {
           onPressed: () => Navigator.of(context).maybePop(),
         ),
         title: Text(
-          patient.nameOrTag,
+          _patient.nameOrTag,
           style: AppTextStyles.titleLarge.copyWith(
             fontWeight: FontWeight.w700,
             color: AppColors.textCharcoal,
@@ -41,30 +353,67 @@ class PatientDetailScreen extends StatelessWidget {
         ),
         actions: [
           Container(
-            margin: const EdgeInsets.only(right: 16),
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: patient.status.toLowerCase() == 'active'
+              color: _patient.status.toLowerCase() == 'active'
                   ? AppColors.badgeStableMint
                   : AppColors.badgeObsAmber,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: patient.status.toLowerCase() == 'active'
+                color: _patient.status.toLowerCase() == 'active'
                     ? const Color(0xFFA7F3D0)
                     : const Color(0xFFFDE68A),
               ),
             ),
             child: Text(
-              patient.status.toUpperCase(),
+              _patient.status.toUpperCase(),
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
-                color: patient.status.toLowerCase() == 'active'
+                color: _patient.status.toLowerCase() == 'active'
                     ? AppColors.badgeStableMintText
                     : AppColors.badgeObsAmberText,
               ),
             ),
           ),
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert_rounded, color: AppColors.textCharcoal),
+            onSelected: (val) {
+              if (val == 'edit') {
+                _navigateToEdit();
+              } else if (val == 'delete') {
+                _confirmDelete();
+              }
+            },
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'edit',
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.edit_outlined, size: 18, color: AppColors.primaryEmerald),
+                    SizedBox(width: 8),
+                    Text('Edit Profile'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'delete',
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.delete_outline_rounded,
+                        size: 18, color: AppColors.badgeCriticalRoseText),
+                    SizedBox(width: 8),
+                    Text('Delete Patient',
+                        style: TextStyle(color: AppColors.badgeCriticalRoseText)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(width: 8),
         ],
       ),
       body: SingleChildScrollView(
@@ -74,19 +423,257 @@ class PatientDetailScreen extends StatelessWidget {
           children: [
             _buildProfileHero(),
             const SizedBox(height: 16),
-            if (patient.allergies.isNotEmpty) ...[
+            if (_patient.allergies.isNotEmpty) ...[
               _buildAllergiesAlert(),
               const SizedBox(height: 16),
             ],
-            _buildDemographicsCard(),
+            _buildTabSelector(),
             const SizedBox(height: 16),
-            _buildOwnerCard(),
-            const SizedBox(height: 16),
-            _buildMedicalHistoryCard(),
+            if (_selectedTabIndex == 0) ...[
+              _buildDemographicsCard(),
+              const SizedBox(height: 16),
+              _buildOwnerCard(),
+              const SizedBox(height: 16),
+              _buildMedicalHistoryCard(),
+            ] else ...[
+              _buildCasesAndVisitsSection(),
+            ],
           ],
         ),
       ),
       bottomNavigationBar: _buildBottomActions(context),
+    );
+  }
+
+  Widget _buildTabSelector() {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceWhite,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.borderWarm),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: InkWell(
+              onTap: () => setState(() => _selectedTabIndex = 0),
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                decoration: BoxDecoration(
+                  color: _selectedTabIndex == 0 ? AppColors.primaryEmerald : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  'Details & Owner',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: _selectedTabIndex == 0 ? Colors.white : AppColors.textMuted,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: InkWell(
+              onTap: () => setState(() => _selectedTabIndex = 1),
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                decoration: BoxDecoration(
+                  color: _selectedTabIndex == 1 ? AppColors.primaryEmerald : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  'Visits & Cases',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: _selectedTabIndex == 1 ? Colors.white : AppColors.textMuted,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCasesAndVisitsSection() {
+    if (widget.caseRepository == null) {
+      return Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceWhite,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.borderWarm),
+        ),
+        child: Column(
+          children: [
+            const Icon(Icons.folder_open_rounded, size: 44, color: AppColors.textMuted),
+            const SizedBox(height: 12),
+            Text(
+              'No Clinical Cases Recorded',
+              style: AppTextStyles.titleMedium.copyWith(fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Every clinical encounter, diagnosis, and SOAP progress note is stored as a case for ${_patient.nameOrTag}. Tap "Start Case" below to record the first visit.',
+              style: AppTextStyles.bodySmall.copyWith(color: AppColors.textMuted),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      );
+    }
+
+    return StreamBuilder<List<CaseSummaryEntity>>(
+      stream: widget.caseRepository!.watchCasesForPatient(_patient.id),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(32),
+              child: CircularProgressIndicator(color: AppColors.primaryEmerald),
+            ),
+          );
+        }
+
+        final cases = snapshot.data ?? [];
+        if (cases.isEmpty) {
+          return Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceWhite,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.borderWarm),
+            ),
+            child: Column(
+              children: [
+                const Icon(Icons.medical_information_outlined, size: 44, color: AppColors.primaryEmerald),
+                const SizedBox(height: 12),
+                Text(
+                  'No Prior Encounters Recorded',
+                  style: AppTextStyles.titleMedium.copyWith(fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'All clinical visits, vitals, and diagnoses for ${_patient.nameOrTag} will appear here in chronological order.',
+                  style: AppTextStyles.bodySmall.copyWith(color: AppColors.textMuted),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          );
+        }
+
+        return ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: cases.length,
+          separatorBuilder: (context, index) => const SizedBox(height: 10),
+          itemBuilder: (context, index) {
+            final c = cases[index];
+            return InkWell(
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (context) => CaseDetailScreen(
+                      caseId: c.id,
+                      repository: widget.caseRepository,
+                    ),
+                  ),
+                );
+              },
+              borderRadius: BorderRadius.circular(16),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceWhite,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.borderWarm),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.02),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          c.caseNumber,
+                          style: AppTextStyles.titleMedium.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.textCharcoal,
+                          ),
+                        ),
+                        TriagePriorityBadge.fromString(c.priority),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      c.chiefComplaint,
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textCharcoal,
+                      ),
+                    ),
+                    if (c.finalDiagnosis != null || c.provisionalDiagnosis != null) ...[
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryEmeraldLight,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          'Diagnosis: ${c.finalDiagnosis ?? c.provisionalDiagnosis}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primaryEmeraldDark,
+                          ),
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Attending: ${c.primaryVeterinarianName ?? "Clinician"}',
+                          style: AppTextStyles.bodySmall.copyWith(color: AppColors.textMuted),
+                        ),
+                        Text(
+                          c.status.toUpperCase(),
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: c.status == 'closed'
+                                ? AppColors.textMuted
+                                : AppColors.primaryEmerald,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -108,7 +695,7 @@ class PatientDetailScreen extends StatelessWidget {
       child: Row(
         children: [
           AnimalSpeciesAvatar(
-            species: patient.species,
+            species: _patient.species,
             radius: 36,
           ),
           const SizedBox(width: 16),
@@ -117,7 +704,7 @@ class PatientDetailScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  patient.nameOrTag,
+                  _patient.nameOrTag,
                   style: AppTextStyles.headlineMedium.copyWith(
                     fontWeight: FontWeight.w800,
                     color: AppColors.textCharcoal,
@@ -133,7 +720,7 @@ class PatientDetailScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
-                        patient.species,
+                        _patient.species,
                         style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
@@ -141,11 +728,11 @@ class PatientDetailScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                    if (patient.breed != null && patient.breed!.isNotEmpty) ...[
+                    if (_patient.breed != null && _patient.breed!.isNotEmpty) ...[
                       const SizedBox(width: 8),
                       Flexible(
                         child: Text(
-                          patient.breed!,
+                          _patient.breed!,
                           style: AppTextStyles.bodyMedium.copyWith(
                             color: AppColors.textMuted,
                             fontWeight: FontWeight.w500,
@@ -158,7 +745,7 @@ class PatientDetailScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '${patient.formattedAge} • ${patient.formattedGender}',
+                  '${_patient.formattedAge} • ${_patient.formattedGender}',
                   style: AppTextStyles.bodySmall.copyWith(
                     color: AppColors.textCharcoal,
                     fontWeight: FontWeight.w600,
@@ -202,7 +789,7 @@ class PatientDetailScreen extends StatelessWidget {
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: patient.allergies.map((allergy) {
+            children: _patient.allergies.map((allergy) {
               return Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
@@ -247,30 +834,30 @@ class PatientDetailScreen extends StatelessWidget {
           const SizedBox(height: 14),
           _buildInfoRow(
             'Body Weight',
-            patient.currentWeightKg != null
-                ? '${patient.currentWeightKg!.toStringAsFixed(1)} kg'
+            _patient.currentWeightKg != null
+                ? '${_patient.currentWeightKg!.toStringAsFixed(1)} kg'
                 : 'Not recorded',
             icon: Icons.scale_rounded,
           ),
           const Divider(height: 18, color: AppColors.borderWarm),
           _buildInfoRow(
             'RFID Microchip',
-            patient.microchipNumber ?? 'No chip implanted',
+            _patient.microchipNumber ?? 'No chip implanted',
             icon: Icons.qr_code_2_rounded,
           ),
-          if (patient.earTagId != null && patient.earTagId!.isNotEmpty) ...[
+          if (_patient.earTagId != null && _patient.earTagId!.isNotEmpty) ...[
             const Divider(height: 18, color: AppColors.borderWarm),
             _buildInfoRow(
               'Ear Tag ID',
-              patient.earTagId!,
+              _patient.earTagId!,
               icon: Icons.tag_rounded,
             ),
           ],
-          if (patient.coatColorMarkings != null && patient.coatColorMarkings!.isNotEmpty) ...[
+          if (_patient.coatColorMarkings != null && _patient.coatColorMarkings!.isNotEmpty) ...[
             const Divider(height: 18, color: AppColors.borderWarm),
             _buildInfoRow(
               'Coat / Markings',
-              patient.coatColorMarkings!,
+              _patient.coatColorMarkings!,
               icon: Icons.palette_outlined,
             ),
           ],
@@ -280,7 +867,7 @@ class PatientDetailScreen extends StatelessWidget {
   }
 
   Widget _buildOwnerCard() {
-    final client = patient.client;
+    final client = _patient.client;
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
@@ -371,7 +958,7 @@ class PatientDetailScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          if (patient.notes != null && patient.notes!.isNotEmpty) ...[
+          if (_patient.notes != null && _patient.notes!.isNotEmpty) ...[
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(12),
@@ -388,7 +975,7 @@ class PatientDetailScreen extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      patient.notes!,
+                      _patient.notes!,
                       style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
@@ -402,8 +989,8 @@ class PatientDetailScreen extends StatelessWidget {
             const SizedBox(height: 12),
           ],
           Text(
-            patient.history != null && patient.history!.isNotEmpty
-                ? patient.history!
+            _patient.history != null && _patient.history!.isNotEmpty
+                ? _patient.history!
                 : 'No prior clinical history recorded.',
             style: AppTextStyles.bodyMedium.copyWith(
               color: AppColors.textCharcoal,
@@ -462,14 +1049,7 @@ class PatientDetailScreen extends StatelessWidget {
         children: [
           Expanded(
             child: ElevatedButton.icon(
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Starting encounter for ${patient.nameOrTag}...'),
-                    backgroundColor: AppColors.primaryEmerald,
-                  ),
-                );
-              },
+              onPressed: () => _showStartCaseSheet(context),
               icon: const Icon(Icons.medical_services_outlined, size: 20),
               label: const Text('Start Case'),
               style: ElevatedButton.styleFrom(

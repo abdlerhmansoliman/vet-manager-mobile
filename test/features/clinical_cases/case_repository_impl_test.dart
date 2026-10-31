@@ -162,5 +162,19 @@ void main() {
       expect(detail.summary.provisionalDiagnosis, 'Fever of Unknown Origin');
       expect(detail.summary.finalDiagnosis, 'Feline Panleukopenia');
     });
+
+    test('watchCasesForPatient returns chronological cases for patient', () async {
+      await repository.openCase(
+        patientId: 'patient-100',
+        caseNumber: 'CAS-PAT-01',
+        chiefComplaint: 'Ear discharge',
+        priority: 'routine',
+      );
+
+      final patientCases = await repository.watchCasesForPatient('patient-100').first;
+      expect(patientCases.length, equals(1));
+      expect(patientCases.first.caseNumber, equals('CAS-PAT-01'));
+      expect(patientCases.first.patientName, equals('Oliver'));
+    });
   });
 }

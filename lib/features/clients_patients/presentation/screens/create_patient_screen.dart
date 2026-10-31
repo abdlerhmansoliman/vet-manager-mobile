@@ -1,20 +1,25 @@
 import 'package:flutter/material.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/text_styles.dart';
+import '../../domain/entities/patient_entity.dart';
 import '../../domain/repositories/patient_repository.dart';
 
-/// Form screen allowing clinicians to register a new animal patient and their owner.
+/// Form screen allowing clinicians to register a new animal patient or edit an existing profile.
 class CreatePatientScreen extends StatefulWidget {
   final IPatientRepository repository;
+  final PatientEntity? initialPatient;
 
   const CreatePatientScreen({
     super.key,
     required this.repository,
+    this.initialPatient,
   });
 
   @override
   State<CreatePatientScreen> createState() => _CreatePatientScreenState();
 }
+
+typedef PatientFormScreen = CreatePatientScreen;
 
 class _CreatePatientScreenState extends State<CreatePatientScreen> {
   final _formKey = GlobalKey<FormState>();
@@ -60,6 +65,30 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.initialPatient != null) {
+      final p = widget.initialPatient!;
+      _nameController.text = p.nameOrTag;
+      _breedController.text = p.breed ?? '';
+      _ageController.text = p.age?.toString() ?? '';
+      _weightController.text = p.currentWeightKg != null ? p.currentWeightKg!.toStringAsFixed(1) : '';
+      _microchipController.text = p.microchipNumber ?? '';
+      _earTagController.text = p.earTagId ?? '';
+      _allergiesController.text = p.allergies.join(', ');
+      _historyController.text = p.history ?? '';
+      _notesController.text = p.notes ?? '';
+      _selectedSpecies = p.species;
+      _selectedGender = p.gender;
+      _isApproximateAge = p.isApproximateAge;
+
+      _ownerNameController.text = p.client.name;
+      _ownerPhoneController.text = p.client.phonePrimary;
+      _ownerAddressController.text = p.client.physicalAddress ?? '';
+    }
+  }
+
+  @override
   void dispose() {
     _nameController.dispose();
     _breedController.dispose();
@@ -94,50 +123,96 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
       final age = int.tryParse(_ageController.text.trim());
       final weight = double.tryParse(_weightController.text.trim());
 
-      await widget.repository.registerPatient(
-        nameOrTag: _nameController.text.trim(),
-        species: _selectedSpecies,
-        breed: _breedController.text.trim().isNotEmpty
-            ? _breedController.text.trim()
-            : null,
-        gender: _selectedGender,
-        age: age,
-        isApproximateAge: _isApproximateAge,
-        microchipNumber: _microchipController.text.trim().isNotEmpty
-            ? _microchipController.text.trim()
-            : null,
-        earTagId: _earTagController.text.trim().isNotEmpty
-            ? _earTagController.text.trim()
-            : null,
-        currentWeightKg: weight,
-        allergies: allergiesList,
-        history: _historyController.text.trim().isNotEmpty
-            ? _historyController.text.trim()
-            : null,
-        notes: _notesController.text.trim().isNotEmpty
-            ? _notesController.text.trim()
-            : null,
-        clientName: _ownerNameController.text.trim(),
-        clientPhonePrimary: _ownerPhoneController.text.trim(),
-        clientAddress: _ownerAddressController.text.trim().isNotEmpty
-            ? _ownerAddressController.text.trim()
-            : null,
-      );
+      if (widget.initialPatient != null) {
+        final updated = await widget.repository.updatePatient(
+          patientId: widget.initialPatient!.id,
+          nameOrTag: _nameController.text.trim(),
+          species: _selectedSpecies,
+          breed: _breedController.text.trim().isNotEmpty
+              ? _breedController.text.trim()
+              : null,
+          gender: _selectedGender,
+          age: age,
+          isApproximateAge: _isApproximateAge,
+          microchipNumber: _microchipController.text.trim().isNotEmpty
+              ? _microchipController.text.trim()
+              : null,
+          earTagId: _earTagController.text.trim().isNotEmpty
+              ? _earTagController.text.trim()
+              : null,
+          currentWeightKg: weight,
+          allergies: allergiesList,
+          history: _historyController.text.trim().isNotEmpty
+              ? _historyController.text.trim()
+              : null,
+          notes: _notesController.text.trim().isNotEmpty
+              ? _notesController.text.trim()
+              : null,
+          clientName: _ownerNameController.text.trim().isNotEmpty
+              ? _ownerNameController.text.trim()
+              : null,
+          clientPhonePrimary: _ownerPhoneController.text.trim().isNotEmpty
+              ? _ownerPhoneController.text.trim()
+              : null,
+          clientAddress: _ownerAddressController.text.trim().isNotEmpty
+              ? _ownerAddressController.text.trim()
+              : null,
+        );
 
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Registered ${_nameController.text.trim()} successfully!'),
-          backgroundColor: AppColors.primaryEmerald,
-        ),
-      );
-      Navigator.of(context).pop();
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Updated ${_nameController.text.trim()} successfully!'),
+            backgroundColor: AppColors.primaryEmerald,
+          ),
+        );
+        Navigator.of(context).pop(updated);
+      } else {
+        await widget.repository.registerPatient(
+          nameOrTag: _nameController.text.trim(),
+          species: _selectedSpecies,
+          breed: _breedController.text.trim().isNotEmpty
+              ? _breedController.text.trim()
+              : null,
+          gender: _selectedGender,
+          age: age,
+          isApproximateAge: _isApproximateAge,
+          microchipNumber: _microchipController.text.trim().isNotEmpty
+              ? _microchipController.text.trim()
+              : null,
+          earTagId: _earTagController.text.trim().isNotEmpty
+              ? _earTagController.text.trim()
+              : null,
+          currentWeightKg: weight,
+          allergies: allergiesList,
+          history: _historyController.text.trim().isNotEmpty
+              ? _historyController.text.trim()
+              : null,
+          notes: _notesController.text.trim().isNotEmpty
+              ? _notesController.text.trim()
+              : null,
+          clientName: _ownerNameController.text.trim(),
+          clientPhonePrimary: _ownerPhoneController.text.trim(),
+          clientAddress: _ownerAddressController.text.trim().isNotEmpty
+              ? _ownerAddressController.text.trim()
+              : null,
+        );
+
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Registered ${_nameController.text.trim()} successfully!'),
+            backgroundColor: AppColors.primaryEmerald,
+          ),
+        );
+        Navigator.of(context).pop();
+      }
     } catch (e) {
       if (!mounted) return;
       setState(() => _isSubmitting = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error registering patient: $e'),
+          content: Text('Error saving patient: $e'),
           backgroundColor: AppColors.secondaryCoral,
         ),
       );
@@ -146,6 +221,7 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isEditing = widget.initialPatient != null;
     return Scaffold(
       backgroundColor: AppColors.backgroundCream,
       appBar: AppBar(
@@ -157,7 +233,7 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
           onPressed: () => Navigator.of(context).maybePop(),
         ),
         title: Text(
-          'Register Patient',
+          isEditing ? 'Edit Patient Profile' : 'Register Patient',
           style: AppTextStyles.titleLarge.copyWith(
             fontWeight: FontWeight.w700,
             color: AppColors.textCharcoal,
@@ -382,9 +458,9 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       ),
                     )
-                  : const Text(
-                      'Save Patient & Enqueue Sync',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                  : Text(
+                      isEditing ? 'Save Changes' : 'Save Patient & Enqueue Sync',
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                     ),
             ),
           ],

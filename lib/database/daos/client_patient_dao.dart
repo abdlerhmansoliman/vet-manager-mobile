@@ -236,4 +236,121 @@ class ClientPatientDao extends DatabaseAccessor<AppDatabase> with _$ClientPatien
       return PatientWithClient(patient: savedPatient, client: savedClient);
     });
   }
+
+  /// Atomically updates a patient's details and enqueues an offline sync update mutation.
+  Future<PatientWithClient?> updatePatient({
+    required String tenantId,
+    required PatientsTableCompanion patientCompanion,
+    ClientsTableCompanion? clientCompanion,
+    bool enqueueSync = true,
+  }) {
+    return transaction(() async {
+      final now = DateTime.now().toUtc();
+      final patientId = patientCompanion.id.value;
+
+      final updatedCompanion = patientCompanion.copyWith(
+        updatedAt: Value(now),
+        syncStatus: const Value('pending_update'),
+      );
+
+      final rowsAffected = await (update(patientsTable)
+            ..where((p) => p.tenantId.equals(tenantId) & p.id.equals(patientId) & p.deletedAt.isNull()))
+          .write(updatedCompanion);
+
+      if (rowsAffected == 0) return null;
+
+      if (clientCompanion != null && clientCompanion.id.present) {
+        final clientId = clientCompanion.id.value;
+        await (update(clientsTable)
+              ..where((c) => c.tenantId.equals(tenantId) & c.id.equals(clientId)))
+            .write(clientCompanion.copyWith(updatedAt: Value(now)));
+      }
+
+      final updatedBundle = await getPatientWithClient(tenantId: tenantId, patientId: patientId);
+      if (updatedBundle == null) return null;
+
+      if (enqueueSync) {
+        final savedPatient = updatedBundle.patient;
+        final patientPayload = {
+          'id': savedPatient.id,
+          'tenant_id': savedPatient.tenantId,
+          'client_id': savedPatient.clientId,
+          'name_or_tag': savedPatient.nameOrTag,
+          'species': savedPatient.species,
+          'breed': savedPatient.breed,
+          'gender': savedPatient.gender,
+          'age': savedPatient.age,
+          'date_of_birth': savedPatient.dateOfBirth?.toIso8601String(),
+          'is_approximate_age': savedPatient.isApproximateAge,
+          'microchip_number': savedPatient.microchipNumber,
+          'ear_tag_id': savedPatient.earTagId,
+          'coat_color_markings': savedPatient.coatColorMarkings,
+          'current_weight_kg': savedPatient.currentWeightKg,
+          'weight_recorded_at': savedPatient.weightRecordedAt?.toIso8601String(),
+          'history': savedPatient.history,
+          'notes': savedPatient.notes,
+          'status': savedPatient.status,
+          'allergies': savedPatient.allergies,
+          'updated_at': savedPatient.updatedAt.toIso8601String(),
+        };
+
+        await into(syncQueueTable).insert(
+          SyncQueueTableCompanion.insert(
+            id: _uuid.v7(),
+            tenantId: tenantId,
+            entityType: 'patient',
+            entityId: savedPatient.id,
+            action: 'update',
+            payload: jsonEncode(patientPayload),
+            clientTimestamp: now,
+            idempotencyKey: _uuid.v7(),
+            createdAt: now,
+          ),
+        );
+      }
+
+      return updatedBundle;
+    });
+  }
+
+  /// Soft deletes a patient and enqueues an offline sync delete mutation.
+  Future<bool> deletePatient({
+    required String tenantId,
+    required String patientId,
+    bool enqueueSync = true,
+  }) {
+    return transaction(() async {
+      final now = DateTime.now().toUtc();
+
+      final rowsAffected = await (update(patientsTable)
+            ..where((p) => p.tenantId.equals(tenantId) & p.id.equals(patientId) & p.deletedAt.isNull()))
+          .write(
+        PatientsTableCompanion(
+          deletedAt: Value(now),
+          updatedAt: Value(now),
+          syncStatus: const Value('pending_delete'),
+        ),
+      );
+
+      if (rowsAffected == 0) return false;
+
+      if (enqueueSync) {
+        await into(syncQueueTable).insert(
+          SyncQueueTableCompanion.insert(
+            id: _uuid.v7(),
+            tenantId: tenantId,
+            entityType: 'patient',
+            entityId: patientId,
+            action: 'delete',
+            payload: jsonEncode({'id': patientId, 'deleted_at': now.toIso8601String()}),
+            clientTimestamp: now,
+            idempotencyKey: _uuid.v7(),
+            createdAt: now,
+          ),
+        );
+      }
+
+      return true;
+    });
+  }
 }

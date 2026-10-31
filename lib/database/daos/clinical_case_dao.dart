@@ -167,6 +167,44 @@ class ClinicalCaseDao extends DatabaseAccessor<AppDatabase> with _$ClinicalCaseD
         .watch();
   }
 
+  /// Streams all historical cases for a specific patient joined with Patient and Client details.
+  Stream<List<CaseSummaryBundle>> watchCasesForPatientWithDetails(String patientId) {
+    final joinedQuery = select(clinicalCasesTable).join([
+      innerJoin(
+        patientsTable,
+        patientsTable.id.equalsExp(clinicalCasesTable.patientId),
+      ),
+      innerJoin(
+        clientsTable,
+        clientsTable.id.equalsExp(patientsTable.clientId),
+      ),
+    ]);
+
+    joinedQuery.where(
+      clinicalCasesTable.patientId.equals(patientId) &
+          clinicalCasesTable.deletedAt.isNull() &
+          patientsTable.deletedAt.isNull() &
+          clientsTable.deletedAt.isNull(),
+    );
+
+    joinedQuery.orderBy([
+      OrderingTerm(
+        expression: clinicalCasesTable.admittedAt,
+        mode: OrderingMode.desc,
+      ),
+    ]);
+
+    return joinedQuery.watch().map((rows) {
+      return rows.map((row) {
+        return CaseSummaryBundle(
+          clinicalCase: row.readTable(clinicalCasesTable),
+          patient: row.readTable(patientsTable),
+          client: row.readTable(clientsTable),
+        );
+      }).toList();
+    });
+  }
+
   /// Retrieves a single case by its unique UUID.
   Future<ClinicalCaseData?> getCaseById(String caseId) {
     return (select(clinicalCasesTable)..where((c) => c.id.equals(caseId))).getSingleOrNull();

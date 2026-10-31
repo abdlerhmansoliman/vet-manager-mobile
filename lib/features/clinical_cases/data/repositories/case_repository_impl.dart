@@ -43,6 +43,13 @@ class CaseRepositoryImpl implements ICaseRepository {
   }
 
   @override
+  Stream<List<CaseSummaryEntity>> watchCasesForPatient(String patientId) {
+    return _dao
+        .watchCasesForPatientWithDetails(patientId)
+        .map((bundles) => bundles.map(_mapSummaryBundleToEntity).toList());
+  }
+
+  @override
   Stream<CaseDetailEntity?> watchCaseDetail(String caseId) {
     return _dao.watchCaseDetailBundle(caseId).map((bundle) {
       if (bundle == null) return null;

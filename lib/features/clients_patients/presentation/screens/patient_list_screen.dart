@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/text_styles.dart';
 import '../../domain/repositories/patient_repository.dart';
+import '../../../clinical_cases/domain/repositories/case_repository.dart';
 import '../bloc/patient_list_bloc.dart';
 import '../bloc/patient_list_event.dart';
 import '../bloc/patient_list_state.dart';
@@ -13,11 +14,13 @@ import 'create_patient_screen.dart';
 /// Main Patient and Client Directory Screen.
 class PatientListScreen extends StatefulWidget {
   final IPatientRepository repository;
+  final ICaseRepository? caseRepository;
   final VoidCallback? onSync;
 
   const PatientListScreen({
     super.key,
     required this.repository,
+    this.caseRepository,
     this.onSync,
   });
 
@@ -338,6 +341,8 @@ class _PatientListScreenState extends State<PatientListScreen> {
               return PatientCard(
                 patient: state.patients[index],
                 index: index,
+                repository: widget.repository,
+                caseRepository: widget.caseRepository,
               );
             },
           ),

@@ -81,4 +81,66 @@ void main() {
     // 6. Action button
     expect(find.text('Start Case'), findsOneWidget);
   });
+
+  testWidgets('PatientDetailScreen switches between tabs and displays empty cases placeholder', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PatientDetailScreen(patient: samplePatient),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Tap on Visits & Cases tab
+    await tester.tap(find.text('Visits & Cases'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('No Clinical Cases Recorded'), findsOneWidget);
+
+    // Tap back to Details & Owner tab
+    await tester.tap(find.text('Details & Owner'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Patient Demographics'), findsOneWidget);
+  });
+
+  testWidgets('PatientDetailScreen opens Start Case bottom sheet when Start Case is tapped', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PatientDetailScreen(patient: samplePatient),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Start Case'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Start Case for Bessie'), findsOneWidget);
+    expect(find.text('Chief Complaint *'), findsOneWidget);
+    expect(find.text('Triage Priority'), findsOneWidget);
+    expect(find.text('Encounter Type'), findsOneWidget);
+    expect(find.text('Open Encounter & Begin Triage'), findsOneWidget);
+  });
+
+  testWidgets('PatientDetailScreen opens delete confirmation dialog from overflow menu', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PatientDetailScreen(patient: samplePatient),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Tap overflow menu
+    await tester.tap(find.byIcon(Icons.more_vert_rounded));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Edit Profile'), findsOneWidget);
+    expect(find.text('Delete Patient'), findsOneWidget);
+
+    // Tap Delete Patient
+    await tester.tap(find.text('Delete Patient'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Delete Bessie?'), findsOneWidget);
+    expect(find.text('Cancel'), findsOneWidget);
+  });
 }

@@ -310,4 +310,105 @@ void main() {
       expect(syncQueueItems.first.entityId, equals('pat-raptor'));
     });
   });
+
+  group('ClientPatientDao — Patient Update and Soft Delete', () {
+    test('updatePatient modifies fields and enqueues sync outbox record', () async {
+      final now = DateTime.now().toUtc();
+
+      await db.into(db.clientsTable).insert(
+            ClientsTableCompanion.insert(
+              id: 'client-upd',
+              tenantId: tenantId,
+              name: 'John Wick',
+              phonePrimary: '+1-555-0077',
+              createdAt: now,
+              updatedAt: now,
+            ),
+          );
+
+      await db.into(db.patientsTable).insert(
+            PatientsTableCompanion.insert(
+              id: 'pat-upd',
+              tenantId: tenantId,
+              clientId: 'client-upd',
+              nameOrTag: 'Daisy',
+              species: 'Canine',
+              breed: const Value('Beagle'),
+              currentWeightKg: const Value(9.5),
+              createdAt: now,
+              updatedAt: now,
+            ),
+          );
+
+      // Perform update
+      final updatedResult = await dao.updatePatient(
+        tenantId: tenantId,
+        patientCompanion: const PatientsTableCompanion(
+          id: Value('pat-upd'),
+          nameOrTag: Value('Daisy Wick'),
+          currentWeightKg: Value(10.2),
+        ),
+      );
+
+      expect(updatedResult, isNotNull);
+      expect(updatedResult!.patient.nameOrTag, equals('Daisy Wick'));
+      expect(updatedResult.patient.currentWeightKg, equals(10.2));
+
+      // Check sync queue
+      final syncItems = await db.select(db.syncQueueTable).get();
+      expect(syncItems.length, equals(1));
+      expect(syncItems.first.entityType, equals('patient'));
+      expect(syncItems.first.entityId, equals('pat-upd'));
+      expect(syncItems.first.action, equals('update'));
+    });
+
+    test('deletePatient soft deletes patient and enqueues sync outbox record', () async {
+      final now = DateTime.now().toUtc();
+
+      await db.into(db.clientsTable).insert(
+            ClientsTableCompanion.insert(
+              id: 'client-del',
+              tenantId: tenantId,
+              name: 'Bruce Wayne',
+              phonePrimary: '+1-555-1234',
+              createdAt: now,
+              updatedAt: now,
+            ),
+          );
+
+      await db.into(db.patientsTable).insert(
+            PatientsTableCompanion.insert(
+              id: 'pat-del',
+              tenantId: tenantId,
+              clientId: 'client-del',
+              nameOrTag: 'Ace',
+              species: 'Canine',
+              createdAt: now,
+              updatedAt: now,
+            ),
+          );
+
+      // Verify patient is visible initially
+      final initial = await dao.getPatientWithClient(tenantId: tenantId, patientId: 'pat-del');
+      expect(initial, isNotNull);
+
+      // Perform soft delete
+      final success = await dao.deletePatient(tenantId: tenantId, patientId: 'pat-del');
+      expect(success, isTrue);
+
+      // Verify patient is no longer returned
+      final afterDelete = await dao.getPatientWithClient(tenantId: tenantId, patientId: 'pat-del');
+      expect(afterDelete, isNull);
+
+      final listAfterDelete = await dao.watchPatientsWithClient(tenantId: tenantId).first;
+      expect(listAfterDelete.any((p) => p.patient.id == 'pat-del'), isFalse);
+
+      // Check sync queue
+      final syncItems = await db.select(db.syncQueueTable).get();
+      expect(syncItems.length, equals(1));
+      expect(syncItems.first.entityType, equals('patient'));
+      expect(syncItems.first.entityId, equals('pat-del'));
+      expect(syncItems.first.action, equals('delete'));
+    });
+  });
 }
