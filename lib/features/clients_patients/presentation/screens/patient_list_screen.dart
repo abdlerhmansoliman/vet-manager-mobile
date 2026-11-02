@@ -1,3 +1,4 @@
+import '../../../../core/widgets/app_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -68,12 +69,16 @@ class _PatientListScreenState extends State<PatientListScreen> {
         ),
         floatingActionButton: Builder(
           builder: (fabContext) => FloatingActionButton.extended(
-            onPressed: () {
-              Navigator.of(fabContext).push(
+            onPressed: () async {
+              await Navigator.of(fabContext).push(
                 MaterialPageRoute<void>(
-                  builder: (context) => CreatePatientScreen(repository: widget.repository),
+                  builder: (context) => CreatePatientScreen(
+                    repository: widget.repository,
+                    onSync: widget.onSync,
+                  ),
                 ),
               );
+              widget.onSync?.call();
             },
             backgroundColor: AppColors.primaryEmerald,
             foregroundColor: Colors.white,
@@ -122,12 +127,7 @@ class _PatientListScreenState extends State<PatientListScreen> {
                 tooltip: 'Sync with Cloud',
                 onPressed: () {
                   widget.onSync?.call();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Syncing patient directory...'),
-                      duration: Duration(seconds: 1),
-                    ),
-                  );
+                  AppSnackbar.showInfo(context, 'Syncing patient directory...');
                 },
               ),
               Container(
@@ -256,7 +256,7 @@ class _PatientListScreenState extends State<PatientListScreen> {
                   Text('Failed to load patients', style: AppTextStyles.titleMedium),
                   const SizedBox(height: 4),
                   Text(
-                    state.errorMessage ?? 'Unknown local SQLite error',
+                    state.errorMessage ?? 'Unable to load clinical records. Please tap below to retry.',
                     style: AppTextStyles.bodySmall.copyWith(color: AppColors.textMuted),
                     textAlign: TextAlign.center,
                   ),

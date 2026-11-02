@@ -1,3 +1,4 @@
+import '../../../../core/widgets/app_snackbar.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
 import 'package:flutter/material.dart';
@@ -141,12 +142,7 @@ class _CasesBoardViewState extends State<_CasesBoardView> {
                 tooltip: 'Sync with Cloud',
                 onPressed: () {
                   widget.onSync?.call();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Syncing cases and patient records...'),
-                      duration: Duration(seconds: 1),
-                    ),
-                  );
+                  AppSnackbar.showInfo(context, 'Syncing cases and patient records...');
                 },
               ),
               IconButton(

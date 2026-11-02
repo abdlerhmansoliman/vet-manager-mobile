@@ -162,7 +162,7 @@ void main() {
         const PatientListState(status: PatientListStatus.loading),
         const PatientListState(
           status: PatientListStatus.failure,
-          errorMessage: 'Exception: SQLite lock timeout',
+          errorMessage: 'Unable to load patient records.',
         ),
       ],
     );

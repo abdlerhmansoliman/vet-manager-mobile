@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
@@ -6,19 +7,23 @@ import '../../../../database/app_database.dart';
 import '../../../../database/daos/client_patient_dao.dart';
 import '../../domain/entities/patient_entity.dart';
 import '../../domain/repositories/patient_repository.dart';
+import '../../../../sync/sync_manager.dart';
 
 /// Concrete implementation of [IPatientRepository] utilizing local SQLite via [ClientPatientDao].
 class PatientRepositoryImpl implements IPatientRepository {
   final ClientPatientDao _dao;
   final ISecureStorageService _storageService;
+  final SyncManager? _syncManager;
   final Uuid _uuid;
 
   PatientRepositoryImpl({
     required ClientPatientDao dao,
     required ISecureStorageService storageService,
+    SyncManager? syncManager,
     Uuid? uuid,
   })  : _dao = dao,
         _storageService = storageService,
+        _syncManager = syncManager,
         _uuid = uuid ?? const Uuid();
 
   @override
@@ -80,8 +85,8 @@ class PatientRepositoryImpl implements IPatientRepository {
     final clientCompanion = ClientsTableCompanion(
       id: Value(clientId),
       tenantId: Value(tenantId),
-      name: Value(clientName?.trim() ?? 'Unknown Owner'),
-      phonePrimary: Value(clientPhonePrimary?.trim() ?? 'N/A'),
+      name: Value(clientName != null && clientName.trim().isNotEmpty ? clientName.trim() : 'Unknown Owner'),
+      phonePrimary: Value(_sanitizePhone(clientPhonePrimary)),
       phoneSecondary: Value(clientPhoneSecondary?.trim()),
       physicalAddress: Value(clientAddress?.trim()),
       createdAt: Value(now),
@@ -121,6 +126,8 @@ class PatientRepositoryImpl implements IPatientRepository {
       patientCompanion: patientCompanion,
       enqueueSync: true,
     );
+
+    unawaited(_syncManager?.syncNow());
 
     return _mapPatientWithClientToEntity(result);
   }
@@ -187,8 +194,8 @@ class PatientRepositoryImpl implements IPatientRepository {
     if (clientName != null || clientPhonePrimary != null || clientPhoneSecondary != null || clientAddress != null) {
       clientCompanion = ClientsTableCompanion(
         id: Value(existing.client.id),
-        name: clientName != null ? Value(clientName.trim()) : const Value.absent(),
-        phonePrimary: clientPhonePrimary != null ? Value(clientPhonePrimary.trim()) : const Value.absent(),
+        name: clientName != null ? Value(clientName.trim().isNotEmpty ? clientName.trim() : 'Unknown Owner') : const Value.absent(),
+        phonePrimary: clientPhonePrimary != null ? Value(_sanitizePhone(clientPhonePrimary)) : const Value.absent(),
         phoneSecondary: clientPhoneSecondary != null ? Value(clientPhoneSecondary.trim()) : const Value.absent(),
         physicalAddress: clientAddress != null ? Value(clientAddress.trim()) : const Value.absent(),
         updatedAt: Value(now),
@@ -206,17 +213,23 @@ class PatientRepositoryImpl implements IPatientRepository {
       throw Exception('Failed to update patient');
     }
 
+    unawaited(_syncManager?.syncNow());
+
     return _mapPatientWithClientToEntity(updated);
   }
 
   @override
   Future<bool> deletePatient(String patientId) async {
     final tenantId = await _storageService.getTenantId() ?? 'default';
-    return await _dao.deletePatient(
+    final deleted = await _dao.deletePatient(
       tenantId: tenantId,
       patientId: patientId,
       enqueueSync: true,
     );
+    if (deleted) {
+      unawaited(_syncManager?.syncNow());
+    }
+    return deleted;
   }
 
   PatientEntity _mapPatientWithClientToEntity(PatientWithClient bundle) {
@@ -259,6 +272,14 @@ class PatientRepositoryImpl implements IPatientRepository {
       physicalAddress: client.physicalAddress,
       notes: client.notes,
     );
+  }
+
+  String _sanitizePhone(String? phone) {
+    if (phone == null || phone.trim().isEmpty) return 'N/A';
+    final trimmed = phone.trim();
+    if (trimmed.length < 3) return trimmed.padRight(3, '0');
+    if (trimmed.length > 32) return trimmed.substring(0, 32);
+    return trimmed;
   }
 
   List<String> _parseAllergies(String? raw) {

@@ -116,12 +116,16 @@ class PatientEntity extends Equatable {
   /// Clinical representation of gender and reproductive status.
   String get formattedGender {
     switch (gender.toLowerCase()) {
+      case 'neutered_male':
       case 'male_neutered':
         return 'Male (Neutered)';
+      case 'intact_male':
       case 'male_intact':
         return 'Male (Intact)';
+      case 'spayed_female':
       case 'female_spayed':
         return 'Female (Spayed)';
+      case 'intact_female':
       case 'female_intact':
         return 'Female (Intact)';
       default:

@@ -10,6 +10,7 @@ import '../../../clinical_cases/presentation/screens/case_detail_screen.dart';
 import '../../domain/entities/patient_entity.dart';
 import '../../domain/repositories/patient_repository.dart';
 import 'create_patient_screen.dart';
+import '../../../../core/widgets/app_snackbar.dart';
 
 /// Comprehensive Patient Clinical Profile & Medical File Screen.
 ///
@@ -47,12 +48,7 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
 
   Future<void> _navigateToEdit() async {
     if (widget.repository == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Patient repository unavailable for editing.'),
-          backgroundColor: AppColors.secondaryCoral,
-        ),
-      );
+      AppSnackbar.showWarning(context, 'Patient repository unavailable for editing.');
       return;
     }
 
@@ -103,17 +99,24 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
     );
 
     if (confirmed == true && mounted) {
-      if (widget.repository != null) {
-        await widget.repository!.deletePatient(_patient.id);
+      try {
+        if (widget.repository != null) {
+          await widget.repository!.deletePatient(_patient.id);
+        }
+        if (!mounted) return;
+        AppSnackbar.showSuccess(
+          context,
+          '${_patient.nameOrTag} was removed.',
+        );
+        Navigator.of(context).maybePop();
+      } catch (e) {
+        if (!mounted) return;
+        AppSnackbar.showError(
+          context,
+          e,
+          fallbackMessage: 'Unable to remove patient. Please try again.',
+        );
       }
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${_patient.nameOrTag} was removed.'),
-          backgroundColor: AppColors.secondaryCoral,
-        ),
-      );
-      Navigator.of(context).maybePop();
     }
   }
 
@@ -233,52 +236,52 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
                       onPressed: () async {
                         final complaint = complaintController.text.trim();
                         if (complaint.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Please enter a chief complaint.'),
-                              backgroundColor: AppColors.secondaryCoral,
-                            ),
-                          );
+                          AppSnackbar.showWarning(context, 'Please enter a chief complaint.');
                           return;
                         }
 
                         Navigator.of(context).pop();
 
                         if (widget.caseRepository != null) {
-                          final now = DateTime.now();
-                          final caseNum =
-                              'CAS-${now.year}-${now.millisecondsSinceEpoch.toString().substring(7)}';
+                          try {
+                            final now = DateTime.now();
+                            final caseNum =
+                                'CAS-${now.year}-${now.millisecondsSinceEpoch.toString().substring(7)}';
 
-                          final newCase = await widget.caseRepository!.openCase(
-                            patientId: _patient.id,
-                            caseNumber: caseNum,
-                            chiefComplaint: complaint,
-                            priority: priority,
-                            caseType: caseType,
-                          );
+                            final newCase = await widget.caseRepository!.openCase(
+                              patientId: _patient.id,
+                              caseNumber: caseNum,
+                              chiefComplaint: complaint,
+                              priority: priority,
+                              caseType: caseType,
+                            );
 
-                          if (!mounted) return;
-                          ScaffoldMessenger.of(this.context).showSnackBar(
-                            SnackBar(
-                              content: Text('Encounter ${newCase.caseNumber} opened!'),
-                              backgroundColor: AppColors.primaryEmerald,
-                            ),
-                          );
+                            if (!mounted) return;
+                            AppSnackbar.showSuccess(
+                              this.context,
+                              'Encounter ${newCase.caseNumber} opened!',
+                            );
 
-                          Navigator.of(this.context).push(
-                            MaterialPageRoute<void>(
-                              builder: (context) => CaseDetailScreen(
-                                caseId: newCase.id,
-                                repository: widget.caseRepository,
+                            Navigator.of(this.context).push(
+                              MaterialPageRoute<void>(
+                                builder: (context) => CaseDetailScreen(
+                                  caseId: newCase.id,
+                                  repository: widget.caseRepository,
+                                ),
                               ),
-                            ),
-                          );
+                            );
+                          } catch (e) {
+                            if (!mounted) return;
+                            AppSnackbar.showError(
+                              this.context,
+                              e,
+                              fallbackMessage: 'Unable to open encounter. Please try again.',
+                            );
+                          }
                         } else {
-                          ScaffoldMessenger.of(this.context).showSnackBar(
-                            SnackBar(
-                              content: Text('Starting encounter for ${_patient.nameOrTag}...'),
-                              backgroundColor: AppColors.primaryEmerald,
-                            ),
+                          AppSnackbar.showInfo(
+                            this.context,
+                            'Starting encounter for ${_patient.nameOrTag}...',
                           );
                         }
                       },

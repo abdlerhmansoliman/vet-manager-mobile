@@ -1,3 +1,4 @@
+import '../../../../core/errors/clinical_error_formatter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/case_entity.dart';
 import '../../domain/repositories/case_repository.dart';
@@ -39,7 +40,7 @@ class CaseDetailBloc extends Bloc<CaseDetailEvent, CaseDetailState> {
       },
       onError: (Object error, StackTrace stackTrace) => state.copyWith(
         status: CaseDetailStatus.failure,
-        errorMessage: error.toString(),
+        errorMessage: ClinicalErrorFormatter.format(error, fallbackMessage: 'Clinical encounter not found.'),
       ),
     );
   }
@@ -59,7 +60,7 @@ class CaseDetailBloc extends Bloc<CaseDetailEvent, CaseDetailState> {
         actionFeedback: 'Triage priority updated to ${event.newPriority.toUpperCase()}',
       ));
     } catch (e) {
-      emit(state.copyWith(errorMessage: 'Failed to update priority: $e'));
+      emit(state.copyWith(errorMessage: ClinicalErrorFormatter.format(e, fallbackMessage: 'Failed to update priority. Please try again.')));
     }
   }
 
@@ -78,7 +79,7 @@ class CaseDetailBloc extends Bloc<CaseDetailEvent, CaseDetailState> {
         actionFeedback: 'Status updated to ${event.newStatus.replaceAll("_", " ").toUpperCase()}',
       ));
     } catch (e) {
-      emit(state.copyWith(errorMessage: 'Failed to update status: $e'));
+      emit(state.copyWith(errorMessage: ClinicalErrorFormatter.format(e, fallbackMessage: 'Failed to update status. Please try again.')));
     }
   }
 
@@ -108,7 +109,7 @@ class CaseDetailBloc extends Bloc<CaseDetailEvent, CaseDetailState> {
         actionFeedback: 'SOAP Examination Note recorded and signed',
       ));
     } catch (e) {
-      emit(state.copyWith(errorMessage: 'Failed to record SOAP note: $e'));
+      emit(state.copyWith(errorMessage: ClinicalErrorFormatter.format(e, fallbackMessage: 'Failed to record SOAP note. Please try again.')));
     }
   }
 
@@ -130,7 +131,7 @@ class CaseDetailBloc extends Bloc<CaseDetailEvent, CaseDetailState> {
         actionFeedback: 'Immutable Addendum signed and appended',
       ));
     } catch (e) {
-      emit(state.copyWith(errorMessage: 'Failed to append addendum: $e'));
+      emit(state.copyWith(errorMessage: ClinicalErrorFormatter.format(e, fallbackMessage: 'Failed to append addendum. Please try again.')));
     }
   }
 
@@ -150,7 +151,7 @@ class CaseDetailBloc extends Bloc<CaseDetailEvent, CaseDetailState> {
         actionFeedback: 'Diagnoses updated successfully',
       ));
     } catch (e) {
-      emit(state.copyWith(errorMessage: 'Failed to update diagnoses: $e'));
+      emit(state.copyWith(errorMessage: ClinicalErrorFormatter.format(e, fallbackMessage: 'Failed to update diagnoses. Please try again.')));
     }
   }
 }

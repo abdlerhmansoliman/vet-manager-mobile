@@ -1,3 +1,4 @@
+import '../../../../core/errors/clinical_error_formatter.dart';
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/patient_entity.dart';
@@ -59,7 +60,7 @@ class PatientListBloc extends Bloc<PatientListEvent, PatientListState> {
       ),
       onError: (error, stackTrace) => state.copyWith(
         status: PatientListStatus.failure,
-        errorMessage: error.toString(),
+        errorMessage: ClinicalErrorFormatter.format(error, fallbackMessage: 'Unable to load patient records.'),
       ),
     );
   }

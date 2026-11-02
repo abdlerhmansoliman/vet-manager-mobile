@@ -1,3 +1,4 @@
+import '../../../../core/widgets/app_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -41,17 +42,7 @@ class _SmartLoginScreenState extends State<SmartLoginScreen> {
         child: BlocConsumer<AuthBloc, AuthState>(
           listener: (context, state) {
             if (state is AuthFailure) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    state.message,
-                    style: AppTextStyles.bodyMedium.copyWith(color: Colors.white),
-                  ),
-                  backgroundColor: AppColors.badgeCriticalRoseText,
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-              );
+              AppSnackbar.showError(context, state.message);
             }
           },
           builder: (context, state) {

@@ -52,6 +52,7 @@ void main() async {
   final patientRepo = PatientRepositoryImpl(
     dao: db.clientPatientDao,
     storageService: storageService,
+    syncManager: syncManager,
   );
   final caseRepo = CaseRepositoryImpl(
     dao: db.clinicalCaseDao,

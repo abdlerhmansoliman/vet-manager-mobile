@@ -1,3 +1,4 @@
+import '../../../../core/widgets/app_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -70,23 +71,10 @@ class _CaseDetailViewState extends State<_CaseDetailView> {
     return BlocConsumer<CaseDetailBloc, CaseDetailState>(
       listener: (context, state) {
         if (state.actionFeedback != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.actionFeedback!),
-              backgroundColor: AppColors.primaryEmeraldDark,
-              behavior: SnackBarBehavior.floating,
-              duration: const Duration(seconds: 2),
-            ),
-          );
+          AppSnackbar.showSuccess(context, state.actionFeedback!);
         }
         if (state.errorMessage != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.errorMessage!),
-              backgroundColor: AppColors.badgeCriticalRoseText,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
+          AppSnackbar.showError(context, state.errorMessage);
         }
       },
       builder: (context, state) {

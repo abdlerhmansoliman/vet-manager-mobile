@@ -1,3 +1,4 @@
+import '../../../../core/errors/clinical_error_formatter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/case_entity.dart';
 import '../../domain/repositories/case_repository.dart';
@@ -28,7 +29,7 @@ class CasesBoardBloc extends Bloc<CasesBoardEvent, CasesBoardState> {
       ),
       onError: (Object error, StackTrace stackTrace) => state.copyWith(
         status: CasesBoardStatus.failure,
-        errorMessage: error.toString(),
+        errorMessage: ClinicalErrorFormatter.format(error, fallbackMessage: 'Unable to load active triage board.'),
       ),
     );
   }
@@ -56,7 +57,7 @@ class CasesBoardBloc extends Bloc<CasesBoardEvent, CasesBoardState> {
       ),
       onError: (Object error, StackTrace stackTrace) => state.copyWith(
         status: CasesBoardStatus.failure,
-        errorMessage: error.toString(),
+        errorMessage: ClinicalErrorFormatter.format(error, fallbackMessage: 'Unable to load active triage board.'),
       ),
     );
   }

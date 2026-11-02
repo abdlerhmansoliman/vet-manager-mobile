@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/text_styles.dart';
+import '../../../../core/widgets/app_snackbar.dart';
 import '../../domain/entities/patient_entity.dart';
 import '../../domain/repositories/patient_repository.dart';
 
@@ -8,11 +9,13 @@ import '../../domain/repositories/patient_repository.dart';
 class CreatePatientScreen extends StatefulWidget {
   final IPatientRepository repository;
   final PatientEntity? initialPatient;
+  final VoidCallback? onSync;
 
   const CreatePatientScreen({
     super.key,
     required this.repository,
     this.initialPatient,
+    this.onSync,
   });
 
   @override
@@ -41,7 +44,7 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
   final _ownerAddressController = TextEditingController();
 
   String _selectedSpecies = 'Canine';
-  String _selectedGender = 'male_neutered';
+  String _selectedGender = 'neutered_male';
   bool _isApproximateAge = false;
   bool _isSubmitting = false;
 
@@ -57,10 +60,10 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
   ];
 
   static const _genderOptions = [
-    ('male_neutered', 'Male (Neutered)'),
-    ('male_intact', 'Male (Intact)'),
-    ('female_spayed', 'Female (Spayed)'),
-    ('female_intact', 'Female (Intact)'),
+    ('neutered_male', 'Male (Neutered)'),
+    ('intact_male', 'Male (Intact)'),
+    ('spayed_female', 'Female (Spayed)'),
+    ('intact_female', 'Female (Intact)'),
     ('unknown', 'Unknown'),
   ];
 
@@ -79,7 +82,18 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
       _historyController.text = p.history ?? '';
       _notesController.text = p.notes ?? '';
       _selectedSpecies = p.species;
-      _selectedGender = p.gender;
+      final g = p.gender;
+      if (g == 'male_neutered') {
+        _selectedGender = 'neutered_male';
+      } else if (g == 'male_intact') {
+        _selectedGender = 'intact_male';
+      } else if (g == 'female_spayed') {
+        _selectedGender = 'spayed_female';
+      } else if (g == 'female_intact') {
+        _selectedGender = 'intact_female';
+      } else {
+        _selectedGender = g;
+      }
       _isApproximateAge = p.isApproximateAge;
 
       _ownerNameController.text = p.client.name;
@@ -106,7 +120,13 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
   }
 
   Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) {
+      AppSnackbar.showWarning(
+        context,
+        'Please review the highlighted fields before saving.',
+      );
+      return;
+    }
 
     setState(() => _isSubmitting = true);
 
@@ -159,12 +179,11 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
               : null,
         );
 
+        widget.onSync?.call();
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Updated ${_nameController.text.trim()} successfully!'),
-            backgroundColor: AppColors.primaryEmerald,
-          ),
+        AppSnackbar.showSuccess(
+          context,
+          'Updated ${_nameController.text.trim()} successfully!',
         );
         Navigator.of(context).pop(updated);
       } else {
@@ -198,23 +217,21 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
               : null,
         );
 
+        widget.onSync?.call();
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Registered ${_nameController.text.trim()} successfully!'),
-            backgroundColor: AppColors.primaryEmerald,
-          ),
+        AppSnackbar.showSuccess(
+          context,
+          'Registered ${_nameController.text.trim()} successfully!',
         );
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (!mounted) return;
       setState(() => _isSubmitting = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error saving patient: $e'),
-          backgroundColor: AppColors.secondaryCoral,
-        ),
+      AppSnackbar.showError(
+        context,
+        e,
+        fallbackMessage: 'Unable to save patient record. Please check the details and try again.',
       );
     }
   }
@@ -227,14 +244,10 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
       appBar: AppBar(
         backgroundColor: AppColors.backgroundCream,
         elevation: 0,
-        scrolledUnderElevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.close_rounded, color: AppColors.textCharcoal),
-          onPressed: () => Navigator.of(context).maybePop(),
-        ),
+        centerTitle: true,
         title: Text(
           isEditing ? 'Edit Patient Profile' : 'Register Patient',
-          style: AppTextStyles.titleLarge.copyWith(
+          style: AppTextStyles.titleMedium.copyWith(
             fontWeight: FontWeight.w700,
             color: AppColors.textCharcoal,
           ),
@@ -243,7 +256,7 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 40),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           children: [
             _buildSectionHeader('Patient Identity', Icons.pets_rounded),
             const SizedBox(height: 12),
@@ -255,8 +268,12 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
                   hintText: 'e.g. Bella or EAR-104',
                 ),
                 validator: (val) {
-                  if (val == null || val.trim().isEmpty) {
+                  final trimmed = val?.trim() ?? '';
+                  if (trimmed.isEmpty) {
                     return 'Please enter patient name or ear tag';
+                  }
+                  if (trimmed.length > 100) {
+                    return 'Patient name cannot exceed 100 characters';
                   }
                   return null;
                 },
@@ -306,6 +323,13 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
                   labelText: 'Breed',
                   hintText: 'e.g. Golden Retriever, Holstein, Mixed',
                 ),
+                validator: (val) {
+                  final trimmed = val?.trim() ?? '';
+                  if (trimmed.length > 100) {
+                    return 'Breed cannot exceed 100 characters';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 14),
               DropdownButtonFormField<String>(
@@ -331,6 +355,16 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
                         labelText: 'Age (Years)',
                         hintText: 'e.g. 3',
                       ),
+                      validator: (val) {
+                        final trimmed = val?.trim() ?? '';
+                        if (trimmed.isNotEmpty) {
+                          final a = int.tryParse(trimmed);
+                          if (a == null || a < 0 || a > 150) {
+                            return 'Enter valid age (0-150)';
+                          }
+                        }
+                        return null;
+                      },
                     ),
                   ),
                   const SizedBox(width: 14),
@@ -343,6 +377,16 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
                         labelText: 'Weight (kg)',
                         hintText: 'e.g. 12.5',
                       ),
+                      validator: (val) {
+                        final trimmed = val?.trim() ?? '';
+                        if (trimmed.isNotEmpty) {
+                          final w = double.tryParse(trimmed);
+                          if (w == null || w <= 0 || w > 10000) {
+                            return 'Enter valid weight in kg';
+                          }
+                        }
+                        return null;
+                      },
                     ),
                   ),
                 ],
@@ -369,6 +413,13 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
                   labelText: 'RFID Microchip Implant #',
                   hintText: '15-digit ISO 11784/11785',
                 ),
+                validator: (val) {
+                  final trimmed = val?.trim() ?? '';
+                  if (trimmed.length > 32) {
+                    return 'Microchip ID cannot exceed 32 characters';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 14),
               TextFormField(
@@ -377,6 +428,13 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
                   labelText: 'Visual Livestock Ear Tag ID',
                   hintText: 'e.g. TAG-402',
                 ),
+                validator: (val) {
+                  final trimmed = val?.trim() ?? '';
+                  if (trimmed.length > 64) {
+                    return 'Ear tag ID cannot exceed 64 characters';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 14),
               TextFormField(
@@ -407,8 +465,12 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
                   hintText: 'e.g. Sarah Connor',
                 ),
                 validator: (val) {
-                  if (val == null || val.trim().isEmpty) {
+                  final trimmed = val?.trim() ?? '';
+                  if (trimmed.isEmpty) {
                     return 'Please enter owner name';
+                  }
+                  if (trimmed.length > 191) {
+                    return 'Owner name cannot exceed 191 characters';
                   }
                   return null;
                 },
@@ -422,8 +484,15 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
                   hintText: 'e.g. +1-555-0199',
                 ),
                 validator: (val) {
-                  if (val == null || val.trim().isEmpty) {
+                  final trimmed = val?.trim() ?? '';
+                  if (trimmed.isEmpty) {
                     return 'Please enter primary phone number';
+                  }
+                  if (trimmed.length < 3) {
+                    return 'Phone number must be at least 3 digits / characters';
+                  }
+                  if (trimmed.length > 32) {
+                    return 'Phone number cannot exceed 32 characters';
                   }
                   return null;
                 },
@@ -435,6 +504,13 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
                   labelText: 'Physical Address',
                   hintText: 'Farm location or residential address',
                 ),
+                validator: (val) {
+                  final trimmed = val?.trim() ?? '';
+                  if (trimmed.length > 255) {
+                    return 'Address cannot exceed 255 characters';
+                  }
+                  return null;
+                },
               ),
             ]),
             const SizedBox(height: 28),
