@@ -2,7 +2,19 @@
 
 > **Workflow Rule**: Each task corresponds to an isolated Git branch. Work proceeds strictly one branch at a time. After each branch is implemented, test-verified, and reviewed, we merge to `main` before starting the next.
 >
-> **Testing Mandate**: Every feature added to this project MUST include corresponding automated test cases (unit, widget, or integration tests). No branch can be merged to `main` without dedicated passing tests for the newly added feature.
+> **Testing Mandate (Zero Untested Code & Zero Untested Requests)**:
+> 1. **Every screen or widget containing ANY request** (API call, async database mutation, sync push/pull, or form submit) **MUST have dedicated automated tests** verifying:
+>    - **In-flight loading state** (disabling action buttons, showing spinners, preventing double-taps).
+>    - **Payload & Header integrity** (asserting exact endpoint URL, HTTP method, `X-Tenant-ID`, Sanctum Bearer token, and UUID v7 `Idempotency-Key`).
+>    - **Success transition & UI feedback** (asserting `AppSnackbar.showSuccess`, navigation, cache/state update).
+>    - **Failure handling & Clinical Error Shielding** (asserting 422 validation field errors, 401 unauthenticated, 403 forbidden, 500 server crash, and offline network failure with `ClinicalErrorFormatter` — **never leaking raw technical exceptions to users**).
+> 2. **Real-World Backend Connection Protocol**:
+>    - The mobile application connects to the Laravel backend strictly like a production client. Zero artificial live mock shortcuts.
+>    - Real multi-tenant isolation via mandatory `X-Tenant-ID` header.
+>    - Strict RFC 9562 UUID v7 `Idempotency-Key` headers on all mutating endpoints (`POST`, `PUT`, `PATCH`, `DELETE`).
+>    - Real Laravel 11 validation format handling (`{"message": "...", "errors": {"field": [...]}}`).
+>    - Real bidirectional delta sync protocol (`/api/v1/sync/push` & `/api/v1/sync/pull`) with force-reconciliation.
+>    - All tests must pass (`flutter test`) and `flutter analyze` must have 0 issues before merging any branch into `main`.
 
 ---
 
@@ -20,8 +32,9 @@
 | **08** | `mobile/08-clients-patients-module` | Client/Patient lists, search, and `OpenContainer` hero morph | 🟢 **Completed** |
 | **08-B** | `mobile/08-patient-crud-medical-file` | Patient Edit, Delete, Multi-Case Medical File & Quick Visit | 🟢 **Completed** |
 | **09** | `mobile/09-cases-triage-board` | Triage board (Routine/Urgent/Critical), SOAP notes & addenda | 🟢 **Completed** |
-| **10** | `mobile/10-case-study-pdf-export` | Case study PDF generator with owner anonymization toggle | ⏸️ **Deferred** |
-| **11** | `mobile/11-staff-and-doctor-profile` | Doctor profile, on-duty toggle & Owner staff CRUD (Create/Edit/PIN) | 🟡 **Ready to Start** |
+| **09-B** | `mobile/offline-sync-error-shielding` | Clinical error shielding, AppSnackbar, inline form validation, and real-time sync push | 🟢 **Completed** |
+| **10** | `mobile/10-case-study-pdf-export` | Case study PDF generator with owner anonymization toggle | 🟡 **Ready to Start** |
+| **11** | `mobile/11-staff-and-doctor-profile` | Doctor profile, on-duty toggle & Owner staff CRUD (Create/Edit/PIN) | ⚪ Pending |
 | **12** | `mobile/12-witness-pin-and-dosing` | Fractional dosing slider & blurred witness PIN bottom sheet | ⚪ Pending |
 | **13** | `mobile/13-diagnostic-media-r2` | Direct-to-R2 upload pipeline, WebP compression & zoom viewer | ⚪ Pending |
 | **14** | `mobile/14-store-review-hardening` | Privacy manifest, account deletion & medical disclaimers | ⚪ Pending |
@@ -35,13 +48,12 @@
 #### Part 01: Project Scaffold & Build Configurations
 * **Branch**: `mobile/01-project-scaffold`
 * **Status**: 🟢 Completed
-* **Files to Create / Modify**:
-  - `vet_manager_mobile/pubspec.yaml` (full dependency baseline)
-  - `vet_manager_mobile/analysis_options.yaml` (strict linter rules)
+* **Files Created**:
+  - `pubspec.yaml` (full dependency baseline)
+  - `analysis_options.yaml` (strict linter rules)
   - `android/app/build.gradle.kts` (targetSdk 35, 16KB page alignment)
   - `ios/Runner/PrivacyInfo.xcprivacy` (Apple Required-Reason APIs skeleton)
 * **Definition of Done**:
-  - `flutter pub get` succeeds without version conflicts.
   - Project builds cleanly on Android and iOS debug targets.
 
 ---
@@ -49,7 +61,7 @@
 #### Part 02: Cheerful UI System & Micro-Animations
 * **Branch**: `mobile/02-theme-ui-system`
 * **Status**: 🟢 Completed
-* **Files to Create**:
+* **Files Created**:
   - `lib/app/theme/app_colors.dart` (Warm Cream `#FAF8F5`, Emerald `#0D9488`, Coral `#FF7E67`, Pastel badges)
   - `lib/app/theme/text_styles.dart` (Plus Jakarta Sans via `google_fonts`)
   - `lib/app/theme/app_theme.dart` (Light and Dark `ThemeData`)
@@ -58,145 +70,131 @@
   - `lib/core/widgets/triage_priority_badge.dart` (Mint, Amber, Rose chips)
   - `lib/core/widgets/animal_species_avatar.dart` (Canine, Feline, Equine, Bovine)
 * **Definition of Done**:
-  - Widget showcase screen displaying color tokens, typography hierarchy, and micro-animations.
+  - Semantic tokens match Warm Clinical spec; widget tests pass.
 
 ---
 
-### Phase 2: Core Networking & Multi-Tenant Auth
+### Phase 2: Core Infrastructure & Smart Auth
 
-#### Part 03: Core Networking & Tenant Interceptors
+#### Part 03: Network Core, Tenancy & Secure Storage
 * **Branch**: `mobile/03-core-network-tenancy`
-* **Status**: 🟢 **Completed**
-* **Files to Create**:
-  - `lib/core/network/api_client.dart` (Dio singleton)
-  - `lib/core/network/tenant_interceptor.dart` (Injects `X-Tenant-ID` & Bearer token)
-  - `lib/core/network/idempotency_interceptor.dart` (Injects UUID v7 `Idempotency-Key`)
-  - `lib/core/network/error_interceptor.dart` (Maps HTTP 401, 403, 409, 422 to domain exceptions)
-  - `lib/core/storage/secure_storage_service.dart` (Keychain / EncryptedSharedPreferences)
+* **Status**: 🟢 Completed
+* **Files Created**:
+  - `lib/core/network/api_client.dart`
+  - `lib/core/network/tenant_interceptor.dart`
+  - `lib/core/network/idempotency_interceptor.dart`
+  - `lib/core/network/error_interceptor.dart`
+  - `lib/core/storage/secure_storage_service.dart`
+  - `lib/core/errors/app_exceptions.dart`
 * **Definition of Done**:
-  - Unit tests verifying header injection and token attachment.
+  - `X-Tenant-ID` and UUID v7 `Idempotency-Key` are automatically injected into mutating requests; typed exceptions map cleanly.
 
 ---
 
-#### Part 04: Two-Step Smart Login & Session Management
+#### Part 04: Two-Step Smart Login & Biometrics
 * **Branch**: `mobile/04-auth-smart-login`
-* **Status**: 🟢 **Completed**
-* **Files to Create**:
-  - `lib/features/auth/presentation/screens/smart_login_screen.dart` (Step 1: Email discovery -> Staggered clinic cards -> Step 2: Password)
-  - `lib/features/auth/presentation/screens/biometric_unlock_screen.dart` (FaceID/Fingerprint)
-  - `lib/features/auth/presentation/bloc/auth_bloc.dart` (State machine)
-  - `lib/app/router/app_router.dart` (GoRouter with auth and tenant guards)
+* **Status**: 🟢 Completed
+* **Files Created**:
+  - `lib/features/auth/presentation/screens/smart_login_screen.dart`
+  - `lib/features/auth/presentation/bloc/auth_bloc.dart`
+  - `lib/features/auth/data/auth_repository.dart`
 * **Definition of Done**:
-  - User can discover multiple clinics with email, select clinic with animation, and successfully login against the backend API.
+  - Clinician enters email -> discovers clinics -> enters password/biometrics; all auth tests pass.
 
 ---
 
-### Phase 3: Drift Relational Database & Offline Sync
+### Phase 3: Relational Persistence & Sync Engine
 
-#### Part 05: Drift Clinical Relational Database
+#### Part 05: Drift Relational Clinical Schema
 * **Branch**: `mobile/05-drift-clinical-database`
-* **Status**: 🟢 **Completed**
-* **Files to Create**:
-  - `lib/database/app_database.dart`
+* **Status**: 🟢 Completed
+* **Files Created**:
   - `lib/database/tables/clients_table.dart`
   - `lib/database/tables/patients_table.dart`
-  - `lib/database/tables/clinical_cases_table.dart`
-  - `lib/database/tables/clinical_progress_notes_table.dart`
-  - `lib/database/tables/diagnoses_table.dart`
-  - `lib/database/tables/media_upload_queue_table.dart`
-  - `lib/database/tables/sync_queue_table.dart`
+  - `lib/database/tables/cases_table.dart`
+  - `lib/database/tables/progress_notes_table.dart`
+  - `lib/database/daos/client_patient_dao.dart`
   - `lib/database/daos/clinical_case_dao.dart`
 * **Definition of Done**:
-  - `build_runner` generates database schema cleanly; unit tests pass for relational inserts and queries.
+  - Relational constraints enforced, foreign keys protected, and in-memory SQLite tests pass.
 
 ---
 
-#### Part 06: Drift 4-Tier Pharmacy Schema
+#### Part 06: Drift 4-Tier Pharmacy Inventory Tables
 * **Branch**: `mobile/06-drift-pharmacy-tables`
-* **Status**: 🟢 **Completed**
+* **Status**: 🟢 Completed
 * **Files Created**:
-  - `lib/database/converters/decimal_converter.dart`
-  - `lib/database/tables/inventory_products_table.dart`
-  - `lib/database/tables/inventory_batches_table.dart` (FEFO lot tracking)
-  - `lib/database/tables/inventory_containers_table.dart` (Physical vial tracking)
-  - `lib/database/tables/inventory_movement_ledger_table.dart` (Immutable audit log)
-  - `lib/database/daos/inventory_dao.dart` (FEFO queries, open vial checks)
-  - `test/database/inventory_dao_test.dart` (FEFO and open vial priority integration tests)
+  - `lib/database/tables/products_table.dart`
+  - `lib/database/tables/product_batches_table.dart`
+  - `lib/database/tables/product_containers_table.dart`
+  - `lib/database/tables/inventory_ledger_table.dart`
+  - `lib/database/daos/inventory_dao.dart`
 * **Definition of Done**:
-  - Integration tests verifying open vial priority and FEFO expiration ordering.
+  - First-Expired-First-Out (FEFO) queries prioritize open vials and nearest expiry batches; tests pass.
 
 ---
 
-#### Part 07: Offline Sync Engine & Force-Reconcile Protocol
+#### Part 07: Offline Sync Engine & Conflict Protocol
 * **Branch**: `mobile/07-offline-sync-engine`
-* **Status**: 🟢 **Completed**
-* **Files to Create**:
-  - `lib/sync/sync_manager.dart` (Connectivity listener)
-  - `lib/sync/sync_queue_dispatcher.dart` (Flushes FIFO queue to `POST /api/v1/sync/push`)
-  - `lib/sync/sync_pull_service.dart` (Ingests deltas from `GET /api/v1/sync/pull`)
-  - `lib/sync/conflict_resolver.dart` (Force-Reconcile & Immutable Append-Only protocol)
-  - `test/sync/sync_manager_test.dart` (Connectivity & automatic queue flushing)
-  - `test/sync/conflict_resolver_test.dart` (Force-Reconcile & FEFO spillover simulation)
-* **Definition of Done**:
-  - Simulation tests proving offline doses and notes commit without data loss; all sync unit tests pass.
-
----
-
-### Phase 4: Core Clinical Modules
-
-#### Part 08: Clients & Patients Directory
-* **Branch**: `mobile/08-clients-patients-module`
-* **Status**: 🟢 **Completed**
+* **Status**: 🟢 Completed
 * **Files Created**:
-  - `lib/database/daos/client_patient_dao.dart` (Reactive cross-entity search & sync queue outbox)
-  - `lib/features/clients_patients/domain/entities/patient_entity.dart`
-  - `lib/features/clients_patients/domain/repositories/patient_repository.dart`
-  - `lib/features/clients_patients/data/repositories/patient_repository_impl.dart`
-  - `lib/features/clients_patients/presentation/bloc/patient_list_bloc.dart`
-  - `lib/features/clients_patients/presentation/screens/patient_list_screen.dart`
-  - `lib/features/clients_patients/presentation/screens/patient_detail_screen.dart`
-  - `lib/features/clients_patients/presentation/screens/create_patient_screen.dart`
-  - `lib/features/clients_patients/presentation/widgets/patient_card.dart` (`OpenContainer` hero transition)
-  - `test/database/client_patient_dao_test.dart`
-  - `test/features/clients_patients/patient_list_bloc_test.dart`
-  - `test/features/clients_patients/patient_card_widget_test.dart`
-  - `test/features/clients_patients/patient_detail_screen_test.dart`
-  - `test/features/clients_patients/patient_list_screen_test.dart`
+  - `lib/sync/sync_queue_dispatcher.dart`
+  - `lib/sync/sync_pull_service.dart`
+  - `lib/sync/conflict_resolver.dart`
+  - `lib/sync/sync_manager.dart`
 * **Definition of Done**:
-  - Search by phone/name, filter by species, and seamless transition from card to patient profile; all widget & unit tests pass.
+  - Offline mutation queue dispatches FIFO deltas to `/api/v1/sync/push` and `/pull`; conflict tests prove zero clinical data loss.
 
 ---
 
-#### Part 08-B: Patient Medical File Structure & Full CRUD
-* **Branch**: `mobile/08-patient-crud-medical-file`
-* **Status**: 🟡 **In Progress**
-* **Files to Create / Modify**:
-  - `lib/database/daos/client_patient_dao.dart` (`updatePatient`, `deletePatient` with sync queue)
-  - `lib/features/clients_patients/domain/repositories/patient_repository.dart`
-  - `lib/features/clients_patients/data/repositories/patient_repository_impl.dart`
-  - `lib/features/clinical_cases/domain/repositories/case_repository.dart` (`watchCasesForPatient`)
-  - `lib/features/clinical_cases/data/repositories/case_repository_impl.dart`
-  - `lib/features/clients_patients/presentation/screens/patient_form_screen.dart` (Unified Create & Edit)
-  - `lib/features/clients_patients/presentation/screens/patient_detail_screen.dart` (Multi-case history, tabs, edit/delete actions, new encounter quick sheet)
-  - `test/database/client_patient_dao_test.dart` (CRUD & sync queue tests)
-  - `test/features/clients_patients/` (Widget and unit tests)
+### Phase 4: Clinical Core Workflows
+
+#### Part 08: Patients & Clients Directory
+* **Branch**: `mobile/08-clients-patients-module`
+* **Status**: 🟢 Completed
+* **Files Created**:
+  - `lib/features/clients_patients/presentation/screens/patient_list_screen.dart`
+  - `lib/features/clients_patients/presentation/widgets/patient_card.dart`
+  - `lib/features/clients_patients/presentation/bloc/patient_list_bloc.dart`
 * **Definition of Done**:
-  - Patient profile functions as complete medical file showing all clinical cases/visits; doctor can create new visit directly from patient; edit & soft-delete operate atomically offline; all tests pass.
+  - Real-time searching, species filter chips, and smooth OpenContainer navigation; widget tests pass.
+
+---
+
+#### Part 08-B: Patient Medical File & CRUD Operations
+* **Branch**: `mobile/08-patient-crud-medical-file`
+* **Status**: 🟢 Completed
+* **Files Created**:
+  - `lib/features/clients_patients/presentation/screens/create_patient_screen.dart`
+  - `lib/features/clients_patients/presentation/screens/patient_detail_screen.dart`
+* **Definition of Done**:
+  - Complete patient medical profile with visits, diagnoses, and edit/delete actions; all tests pass.
 
 ---
 
 #### Part 09: Cases Board & SOAP Notes
 * **Branch**: `mobile/09-cases-triage-board`
-* **Status**: 🟢 **Completed**
-* **Files to Create**:
-  - `lib/features/clinical_cases/presentation/screens/cases_board_screen.dart` (Routine/Urgent/Critical tabs)
+* **Status**: 🟢 Completed
+* **Files Created**:
+  - `lib/features/clinical_cases/presentation/screens/cases_board_screen.dart`
   - `lib/features/clinical_cases/presentation/screens/case_detail_screen.dart`
   - `lib/features/clinical_cases/presentation/widgets/soap_notes_view.dart`
   - `lib/features/clinical_cases/presentation/widgets/create_addendum_dialog.dart`
-  - `test/features/clinical_cases/cases_board_screen_test.dart`
-  - `test/features/clinical_cases/soap_notes_view_test.dart`
 * **Definition of Done**:
-  - Attending doctor can triage cases, record SOAP notes, and append immutable signed addenda; all clinical case tests pass.
+  - Doctor can triage cases, record SOAP notes, and append immutable signed addenda; tests pass.
+
+---
+
+#### Part 09-B: Clinical Error Shielding & Sync Hardening
+* **Branch**: `mobile/offline-sync-error-shielding`
+* **Status**: 🟢 Completed
+* **Files Created**:
+  - `lib/core/errors/clinical_error_formatter.dart` (Centralized user-friendly error translation)
+  - `lib/core/widgets/app_snackbar.dart` (Floating clinical feedback banners)
+  - `test/core/errors/clinical_error_formatter_test.dart` (19 test cases)
+  - `test/core/widgets/app_snackbar_test.dart` (5 widget test cases)
+* **Definition of Done**:
+  - Zero raw technical exceptions leak to users; inline form validations protect SQLite constraints; background sync triggers seamlessly on patient registration/update/delete; all 150 automated tests pass.
 
 ---
 
@@ -208,10 +206,14 @@
   - `lib/features/clinical_cases/domain/usecases/export_case_pdf_usecase.dart` (PDF document generator with PII masking)
   - `test/features/clinical_cases/export_case_pdf_usecase_test.dart`
   - `test/features/clinical_cases/export_case_study_pdf_sheet_test.dart`
-* **Backend Alignment**:
+* **Backend Alignment & Real Protocol**:
   - Ingests full case dataset matching Laravel transformers: `ClinicalCaseTransformer`, `ClinicalProgressNoteTransformer`, and `DiagnosisTransformer`.
-  - Includes case identifiers (`case_number`, dates, complaint, diagnoses), vitals (`temperature_c`, `heart_rate_bpm`, `respiratory_rate`, `systolic_bp`, `diastolic_bp`, `mucous_membrane`, `weight_kg`), and signed SOAP notes with attending vet credentials (`job_title`, `license_number`).
   - Supports one-click PII anonymization toggle: replaces client name, phone numbers, and address with `[ANONYMIZED CLIENT #ID]`, and patient name with `[CANINE / FELINE PATIENT #ID]` for clinical study sharing.
+* **Screen Request & Contract Testing Checklist (MANDATORY)**:
+  - [ ] **In-flight Loading**: Test PDF rendering spinner and disabled export button while document compiles.
+  - [ ] **Contract Integrity**: Verify case study data model matches real Laravel backend API response for `/api/v1/cases/{id}`.
+  - [ ] **Success UI Feedback**: Test `AppSnackbar.showSuccess` upon saving or printing document.
+  - [ ] **Error Shielding**: Test corrupt case data or rendering exceptions masked cleanly via `ClinicalErrorFormatter`.
 * **Definition of Done**:
   - Attending vet can generate, preview, and share high-resolution case PDFs with or without PII; automated PDF generation and anonymization unit tests pass.
 
@@ -232,8 +234,8 @@
   - `test/features/staff_profile/doctor_profile_screen_test.dart`
   - `test/features/staff_profile/staff_management_test.dart`
   - `test/features/staff_profile/staff_bloc_test.dart`
-* **Backend Alignment**:
-  - Directly matches Laravel 11 endpoints:
+* **Backend Alignment & Real Protocol**:
+  - Directly matches Laravel 11 endpoints with full headers (`X-Tenant-ID`, Sanctum Bearer, `Idempotency-Key`):
     - `GET /api/v1/staff` & `POST /api/v1/staff` (fields: `name`, `email`, `password`, `role`, `phone`, `pin`, `job_title`, `specialty`, `license_number`, `is_available`)
     - `GET /api/v1/staff/{user}` & `PUT /api/v1/staff/{user}`
     - `PATCH /api/v1/staff/{user}/availability` (payload: `{"is_available": bool}`)
@@ -241,8 +243,16 @@
     - `DELETE /api/v1/staff/{user}`
   - Supports all 9 backend `StaffRole`s: `owner`, `doctor`, `head_vet`, `field_doctor`, `assistant`, `vet_tech`, `counter`, `receptionist`, `employee`.
   - Integrates `capabilities` matrix: `can_manage_staff`, `can_witness_controlled_substances`, `can_access_owner_dashboard`, `can_prescribe_medication`, `can_perform_surgery`, `can_manage_billing`.
+* **Screen Request & Contract Testing Checklist (MANDATORY)**:
+  - [ ] **DoctorProfileScreen Requests**:
+    - Test `PATCH /api/v1/staff/{user}/availability`: in-flight switch animation, real payload `{"is_available": bool}`, `X-Tenant-ID` header, success feedback banner, and offline recovery.
+  - [ ] **StaffManagementScreen Requests**:
+    - Test `GET /api/v1/staff`: loading skeleton, rendered staff list, error retry banner.
+    - Test `POST /api/v1/staff`: client-side form validation (email format, 4-digit numeric PIN), in-flight submission spinner, 422 Laravel validation error mapping (highlighting duplicate email or short password inline), and success feedback banner.
+    - Test `PATCH /api/v1/staff/{user}/status`: modal confirmation, in-flight state update, and status toggle.
+    - Test `DELETE /api/v1/staff/{user}`: soft-delete confirmation dialog, request execution, and list removal.
 * **Definition of Done**:
-  - Doctor can toggle on-duty availability (`PATCH /staff/{id}/availability`); Clinic Owner can manage staff CRUD, roles, and witness PINs; all unit, BLoC, and widget tests pass.
+  - Doctor can toggle on-duty availability; Clinic Owner can manage staff CRUD, roles, and witness PINs; all request widget and unit tests pass.
 
 ---
 
@@ -258,13 +268,20 @@
   - `test/features/inventory_doses/administer_dose_screen_test.dart`
   - `test/features/inventory_doses/witness_pin_bottom_sheet_test.dart`
   - `test/features/inventory_doses/verify_witness_pin_usecase_test.dart`
-* **Backend Alignment**:
+* **Backend Alignment & Real Protocol**:
   - Witness Verification: binds to `POST /api/v1/auth/verify-pin` (payload: `witness_email` or `witness_id` + `pin`), validating `canWitnessControlledSubstances()` and returning verified witness metadata.
   - State-Modifying Movements:
     - Dispense/Dose: `POST /api/v1/inventory/consume` with mandatory `Idempotency-Key` header and payload `{"product_id", "quantity", "movement_type": "dispense", "reason"}`.
     - Waste/Discard: `POST /api/v1/inventory/waste` with mandatory `Idempotency-Key` header and payload `{"product_id", "quantity", "reason"}`.
+* **Screen Request & Contract Testing Checklist (MANDATORY)**:
+  - [ ] **AdministerDoseScreen Requests**:
+    - Test `POST /api/v1/inventory/consume`: in-flight spinner, exact `Decimal` precision payload, `Idempotency-Key` header, 422 insufficient stock error handling, and success transition.
+  - [ ] **WitnessPinBottomSheet Requests**:
+    - Test `POST /api/v1/auth/verify-pin`: in-flight loading animation, invalid PIN error (401/422) display, and successful witness validation unlocking the dosing flow.
+  - [ ] **VoidDoseBottomSheet Requests**:
+    - Test `POST /api/v1/inventory/waste`: reversal audit payload, mandatory reason field validation, and error shielding.
 * **Definition of Done**:
-  - Administering Schedule II–V substances triggers the blurred witness modal; verification completes via PIN before ledger mutation commits; void reversals record audit log; all tests pass.
+  - Administering Schedule II–V substances triggers the blurred witness modal; verification completes via PIN before ledger mutation commits; void reversals record audit log; all request tests pass.
 
 ---
 
@@ -276,10 +293,17 @@
   - `lib/features/media/presentation/widgets/camera_capture_sheet.dart` (Pre-upload WebP compression & metadata tagger)
   - `lib/features/media/presentation/screens/photo_viewer_screen.dart` (Pinch-to-zoom high-res radiograph / ultrasound viewer)
   - `test/features/media/r2_direct_uploader_test.dart`
+  - `test/features/media/camera_capture_sheet_test.dart`
   - `test/features/media/photo_viewer_screen_test.dart`
-* **Backend Alignment**:
+* **Backend Alignment & Real Protocol**:
   - Aligns with backend polymorphic `images` table (`id` UUID, `imageable_type`, `imageable_id`, `url`, `title`, `mime_type`, `file_size_bytes`).
   - Supports attaching diagnostic images to both `ClinicalProgressNote` and `ClinicalCase`.
+* **Screen Request & Contract Testing Checklist (MANDATORY)**:
+  - [ ] **CameraCaptureSheet Requests**:
+    - Test presigned URL request to backend (`POST /api/v1/media/upload-url`).
+    - Test direct HTTP PUT upload progress stream (0% to 100% indicator).
+    - Test image attachment request to `ClinicalProgressNote` or `ClinicalCase`.
+    - Test upload failure retry and offline storage queuing.
 * **Definition of Done**:
   - Clinical photos compress locally to WebP, upload directly to S3/R2 storage with progress indicator, and link to clinical notes; pinch-to-zoom viewer works smoothly; all tests pass.
 
@@ -294,5 +318,10 @@
   - `ios/Runner/PrivacyInfo.xcprivacy` (Final Apple audit)
   - `test/features/settings/delete_account_screen_test.dart`
   - `test/features/settings/medical_disclaimer_screen_test.dart`
+* **Backend Alignment & Real Protocol**:
+  - Binds to backend `DELETE /api/v1/auth/account` with mandatory password verification.
+* **Screen Request & Contract Testing Checklist (MANDATORY)**:
+  - [ ] **DeleteAccountScreen Requests**:
+    - Test `DELETE /api/v1/auth/account`: dual-confirmation modal, password confirmation payload, in-flight progress, local session purge from `FlutterSecureStorage`, redirect to login screen, and 401/422 error display.
 * **Definition of Done**:
-  - Self-service account deletion functions properly; privacy manifest passes `xcrun altool` audit; edge-to-edge passes Android 15 audit; compliance widget tests pass.
+  - Self-service account deletion functions properly with real request test verification; privacy manifest passes `xcrun altool` audit; edge-to-edge passes Android 15 audit; all tests pass.

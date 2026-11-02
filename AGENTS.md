@@ -97,16 +97,26 @@ Refer to `MOBILE_TASKS.md` for active development branches, phase completion sta
    - Never write raw SQL in UI or presentation code.
    - Always encapsulate database logic inside Drift DAOs (`lib/database/daos/`).
    - Use streams (`watch...`) for reactive UI updates rather than one-time fetches where real-time synchronization is needed.
-2. **Network & Tenancy Protocol**:
-   - Every authenticated request requires `X-Tenant-ID` header and Sanctum Bearer token (managed automatically by `TenantInterceptor`).
-   - Every mutating request (`POST`, `PUT`, `PATCH`, `DELETE`) must send an `Idempotency-Key` (managed automatically by `IdempotencyInterceptor`).
-3. **Error Handling**:
-   - HTTP errors are mapped into domain `AppException`s (`NetworkException`, `UnauthorizedException`, `ValidationException`, etc.) by `ErrorInterceptor`.
-   - Never catch untyped exceptions silently; present meaningful user messages or handle them in BLoC state.
+2. **Production-Grade Real Backend Connection Protocol**:
+   - Live execution must connect to the real Laravel backend just like a production client. Zero fake live shortcuts.
+   - **Tenancy Scoping**: Every clinic-scoped request must supply `X-Tenant-ID` header and Sanctum Bearer token (managed automatically by `TenantInterceptor`).
+   - **Idempotency**: Every mutating request (`POST`, `PUT`, `PATCH`, `DELETE`) must send an RFC 9562 UUID v7 `Idempotency-Key` (managed automatically by `IdempotencyInterceptor`).
+   - **Validation Format**: Handle Laravel 11 validation responses (`{"message": "...", "errors": {"field": [...]}}`) mapped to `ValidationException`.
+   - **Offline-First Fallback**: When the real backend connection is unreachable or offline, the client must seamlessly persist data locally to Drift SQLite and enqueue the mutation for background sync without blocking the user.
+3. **Clinical Error Shielding (Zero Raw Technical Errors to Users)**:
+   - Users must **NEVER** see raw exceptions, SQL errors, SQLite lock errors, `InvalidDataException`, companion dumps, or network stack traces in the UI.
+   - Always format user-facing error messages through `ClinicalErrorFormatter.format(e, fallbackMessage: ...)`.
+   - Always display notices via `AppSnackbar.showError`, `AppSnackbar.showSuccess`, `AppSnackbar.showWarning`, or `AppSnackbar.showInfo`.
 4. **Calculations**:
    - Always use `Decimal` from the `decimal` package for pharmacy stock quantities, unit conversions, and dosage calculations. Avoid native double/float rounding errors.
 5. **Mandatory Testing Requirements (Zero Untested Code)**:
    - **Every single feature, module, service, use case, or screen added MUST include dedicated automated test cases.** No task or branch is considered complete without accompanying passing tests.
+   - **MANDATORY SCREEN REQUEST TESTING**:
+     - Any screen or widget that contains or triggers an HTTP request, background mutation, or database write MUST have dedicated automated tests covering:
+       1. **In-Flight / Loading State**: Disabling buttons, showing progress indicators, preventing duplicate submissions.
+       2. **Payload & Contract Integrity**: Verifying that the exact JSON request body, HTTP method, URL endpoint, headers (`X-Tenant-ID`, `Authorization: Bearer`, `Idempotency-Key`) conform to real backend API specifications.
+       3. **Success State & UI Transitions**: Ensuring data updates locally, navigates or dismisses properly, and shows cheerful clinical success feedback (`AppSnackbar.showSuccess`).
+       4. **Failure State & Error Shielding**: Testing 422 validation errors (showing inline red hints), 401 unauthenticated (session expiry), 403 forbidden, and 500/offline errors. Ensuring `ClinicalErrorFormatter` converts raw exceptions into friendly instructions and **NEVER** displays technical/database dumps to the user.
    - **BLoC State Management**: Every BLoC/Cubit must have comprehensive event-driven state transition tests using `bloc_test`.
    - **Database & DAOs**: Every Drift table, schema migration, and DAO query must have isolated in-memory SQLite tests in `test/database/` verifying relational constraints, sorting (e.g., FEFO), and atomic mutations.
    - **Repositories & Network**: Every repository and remote client must mock dependencies with `mocktail`, verifying request payload mapping, header injection, and typed error handling.
