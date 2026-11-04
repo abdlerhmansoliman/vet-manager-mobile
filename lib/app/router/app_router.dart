@@ -12,6 +12,10 @@ import '../../features/clients_patients/domain/repositories/patient_repository.d
 import '../../features/clinical_cases/domain/repositories/case_repository.dart';
 import '../../features/clinical_cases/presentation/screens/clinic_home_screen.dart';
 import '../../features/clinical_cases/presentation/screens/case_detail_screen.dart';
+import '../../features/staff_profile/domain/entities/staff_entity.dart';
+import '../../features/staff_profile/domain/repositories/staff_repository.dart';
+import '../../features/staff_profile/presentation/screens/doctor_profile_screen.dart';
+import '../../features/staff_profile/presentation/screens/staff_management_screen.dart';
 
 abstract class AppRoutes {
   static const String login = '/login';
@@ -20,6 +24,8 @@ abstract class AppRoutes {
   static const String patients = '/patients';
   static const String cases = '/cases';
   static const String caseDetail = '/cases/:id';
+  static const String doctorProfile = '/profile';
+  static const String staffManagement = '/staff';
   static const String home = '/';
 }
 
@@ -27,16 +33,19 @@ class AppRouter {
   final AuthBloc _authBloc;
   final IPatientRepository? _patientRepository;
   final ICaseRepository? _caseRepository;
+  final IStaffRepository? _staffRepository;
   final SyncManager? _syncManager;
 
   AppRouter({
     required AuthBloc authBloc,
     IPatientRepository? patientRepository,
     ICaseRepository? caseRepository,
+    IStaffRepository? staffRepository,
     SyncManager? syncManager,
   })  : _authBloc = authBloc,
         _patientRepository = patientRepository,
         _caseRepository = caseRepository,
+        _staffRepository = staffRepository,
         _syncManager = syncManager;
 
   late final GoRouter router = GoRouter(
@@ -125,6 +134,24 @@ class AppRouter {
         builder: (context, state) {
           final caseId = state.pathParameters['id'] ?? '';
           return CaseDetailScreen(caseId: caseId, repository: _caseRepository);
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.doctorProfile,
+        builder: (context, state) {
+          final doctor = state.extra as StaffEntity?;
+          return DoctorProfileScreen(
+            initialDoctor: doctor,
+            repository: _staffRepository,
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.staffManagement,
+        builder: (context, state) {
+          return StaffManagementScreen(
+            repository: _staffRepository,
+          );
         },
       ),
     ],

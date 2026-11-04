@@ -1,8 +1,10 @@
+import '../../../../app/router/app_router.dart';
 import '../../../../core/widgets/app_snackbar.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/text_styles.dart';
 import '../../../../core/widgets/animated_pressable.dart';
@@ -133,6 +135,18 @@ class _CasesBoardViewState extends State<_CasesBoardView> {
                     ),
                   ),
             actions: [
+              IconButton(
+                key: const Key('doctor_profile_appbar_action'),
+                icon: const Icon(
+                  Icons.account_circle_outlined,
+                  color: AppColors.textCharcoal,
+                  size: 22,
+                ),
+                tooltip: 'Practitioner Profile',
+                onPressed: () {
+                  context.push(AppRoutes.doctorProfile);
+                },
+              ),
               IconButton(
                 icon: const Icon(
                   Icons.sync_rounded,

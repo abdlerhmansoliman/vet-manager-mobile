@@ -101,6 +101,23 @@ class ApiClient {
     );
   }
 
+  /// Helper PATCH request
+  Future<Response<T>> patch<T>(
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+    CancelToken? cancelToken,
+  }) {
+    return _dio.patch<T>(
+      path,
+      data: data,
+      queryParameters: queryParameters,
+      options: options,
+      cancelToken: cancelToken,
+    );
+  }
+
   /// Helper DELETE request
   Future<Response<T>> delete<T>(
     String path, {

@@ -34,7 +34,7 @@
 | **09** | `mobile/09-cases-triage-board` | Triage board (Routine/Urgent/Critical), SOAP notes & addenda | 🟢 **Completed** |
 | **09-B** | `mobile/offline-sync-error-shielding` | Clinical error shielding, AppSnackbar, inline form validation, and real-time sync push | 🟢 **Completed** |
 | **10** | `mobile/10-case-study-pdf-export` | Case study PDF generator with owner anonymization toggle | 🟡 **Ready to Start** |
-| **11** | `mobile/11-staff-and-doctor-profile` | Doctor profile, on-duty toggle & Owner staff CRUD (Create/Edit/PIN) | ⚪ Pending |
+| **11** | `mobile/11-staff-and-doctor-profile` | Doctor profile, on-duty toggle & Owner staff CRUD (Create/Edit/PIN) | 🟢 **Completed** |
 | **12** | `mobile/12-witness-pin-and-dosing` | Fractional dosing slider & blurred witness PIN bottom sheet | ⚪ Pending |
 | **13** | `mobile/13-diagnostic-media-r2` | Direct-to-R2 upload pipeline, WebP compression & zoom viewer | ⚪ Pending |
 | **14** | `mobile/14-store-review-hardening` | Privacy manifest, account deletion & medical disclaimers | ⚪ Pending |
@@ -223,7 +223,7 @@
 
 #### Part 11: Doctor Profile & Staff Management
 * **Branch**: `mobile/11-staff-and-doctor-profile`
-* **Status**: ⚪ Pending
+* **Status**: 🟢 **Completed**
 * **Files to Create**:
   - `lib/features/staff_profile/domain/entities/staff_entity.dart` (9 roles, capabilities matrix)
   - `lib/features/staff_profile/domain/entities/vet_profile_entity.dart` (License, DEA, active workload, availability)
@@ -234,6 +234,7 @@
   - `test/features/staff_profile/doctor_profile_screen_test.dart`
   - `test/features/staff_profile/staff_management_test.dart`
   - `test/features/staff_profile/staff_bloc_test.dart`
+  - `test/features/staff_profile/staff_repository_test.dart`
 * **Backend Alignment & Real Protocol**:
   - Directly matches Laravel 11 endpoints with full headers (`X-Tenant-ID`, Sanctum Bearer, `Idempotency-Key`):
     - `GET /api/v1/staff` & `POST /api/v1/staff` (fields: `name`, `email`, `password`, `role`, `phone`, `pin`, `job_title`, `specialty`, `license_number`, `is_available`)
@@ -244,9 +245,9 @@
   - Supports all 9 backend `StaffRole`s: `owner`, `doctor`, `head_vet`, `field_doctor`, `assistant`, `vet_tech`, `counter`, `receptionist`, `employee`.
   - Integrates `capabilities` matrix: `can_manage_staff`, `can_witness_controlled_substances`, `can_access_owner_dashboard`, `can_prescribe_medication`, `can_perform_surgery`, `can_manage_billing`.
 * **Screen Request & Contract Testing Checklist (MANDATORY)**:
-  - [ ] **DoctorProfileScreen Requests**:
+  - [x] **DoctorProfileScreen Requests**:
     - Test `PATCH /api/v1/staff/{user}/availability`: in-flight switch animation, real payload `{"is_available": bool}`, `X-Tenant-ID` header, success feedback banner, and offline recovery.
-  - [ ] **StaffManagementScreen Requests**:
+  - [x] **StaffManagementScreen Requests**:
     - Test `GET /api/v1/staff`: loading skeleton, rendered staff list, error retry banner.
     - Test `POST /api/v1/staff`: client-side form validation (email format, 4-digit numeric PIN), in-flight submission spinner, 422 Laravel validation error mapping (highlighting duplicate email or short password inline), and success feedback banner.
     - Test `PATCH /api/v1/staff/{user}/status`: modal confirmation, in-flight state update, and status toggle.

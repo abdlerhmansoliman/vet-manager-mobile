@@ -23,6 +23,11 @@ class ClinicalErrorFormatter {
     // Log the raw technical error in debug mode for developer diagnostics
     debugPrint('[ClinicalErrorFormatter] Intercepted error: $error');
 
+    // If it's already a clean user-facing string
+    if (error is String && !_isRawTechnicalString(error)) {
+      return error;
+    }
+
     // 1. Domain AppException
     if (error is AppException) {
       return _formatAppException(error, fallbackMessage: fallbackMessage);
