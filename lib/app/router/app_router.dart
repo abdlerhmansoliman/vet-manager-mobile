@@ -139,8 +139,27 @@ class AppRouter {
       GoRoute(
         path: AppRoutes.doctorProfile,
         builder: (context, state) {
-          final doctor = state.extra as StaffEntity?;
+          final extra = state.extra;
+          StaffEntity? doctor;
+          String? doctorId = state.uri.queryParameters['id'] ?? state.uri.queryParameters['doctorId'];
+
+          if (extra is StaffEntity) {
+            doctor = extra;
+            doctorId = extra.id;
+          } else if (extra is String && extra.isNotEmpty) {
+            doctorId = extra;
+          }
+
+          if (doctor == null && _authBloc.state is AuthAuthenticated) {
+            final authUser = (_authBloc.state as AuthAuthenticated).session.user;
+            if (doctorId == null || doctorId == authUser.id) {
+              doctorId = authUser.id;
+              doctor = StaffEntity.fromAuthUser(authUser);
+            }
+          }
+
           return DoctorProfileScreen(
+            doctorId: doctorId,
             initialDoctor: doctor,
             repository: _staffRepository,
           );

@@ -2,6 +2,8 @@ import '../../../../app/router/app_router.dart';
 import '../../../../core/widgets/app_snackbar.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
+import '../../../auth/presentation/bloc/auth_state.dart';
+import '../../../staff_profile/domain/entities/staff_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -144,7 +146,13 @@ class _CasesBoardViewState extends State<_CasesBoardView> {
                 ),
                 tooltip: 'Practitioner Profile',
                 onPressed: () {
-                  context.push(AppRoutes.doctorProfile);
+                  final authState = context.read<AuthBloc?>()?.state;
+                  if (authState is AuthAuthenticated) {
+                    final staff = StaffEntity.fromAuthUser(authState.session.user);
+                    context.push(AppRoutes.doctorProfile, extra: staff);
+                  } else {
+                    context.push(AppRoutes.doctorProfile);
+                  }
                 },
               ),
               IconButton(
@@ -278,6 +286,7 @@ class _CasesBoardViewState extends State<_CasesBoardView> {
                       ),
           ),
           floatingActionButton: FloatingActionButton.extended(
+            heroTag: 'cases_board_triage_case_fab',
             onPressed: () => _showOpenCaseModal(context),
             backgroundColor: AppColors.primaryEmerald,
             elevation: 3,

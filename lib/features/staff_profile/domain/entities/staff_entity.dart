@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../../auth/domain/models/auth_user.dart';
 import 'vet_profile_entity.dart';
 
 /// All 9 supported backend roles in the VetManager Laravel architecture.
@@ -215,6 +216,25 @@ class StaffEntity extends Equatable {
       activeCasesCount: activeCasesCount ?? this.activeCasesCount,
       capabilities: capabilities ?? this.capabilities,
       createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  factory StaffEntity.fromAuthUser(AuthUser user) {
+    final role = StaffRole.fromString(user.role);
+    final profile = user.profile != null
+        ? VetProfileEntity.fromJson(user.profile!)
+        : null;
+    return StaffEntity(
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: role,
+      roleLabel: role.label,
+      phone: user.phone,
+      isActive: user.isActive,
+      profile: profile,
+      activeCasesCount: profile?.activeCasesCount ?? 0,
+      capabilities: StaffCapabilities.fromRole(role),
     );
   }
 

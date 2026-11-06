@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:vet_manager_mobile/core/errors/app_exceptions.dart';
+import 'package:vet_manager_mobile/features/auth/domain/models/auth_session.dart';
+import 'package:vet_manager_mobile/features/auth/domain/models/auth_user.dart';
+import 'package:vet_manager_mobile/features/auth/domain/models/clinic_tenant.dart';
+import 'package:vet_manager_mobile/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:vet_manager_mobile/features/auth/presentation/bloc/auth_state.dart';
 import 'package:vet_manager_mobile/features/staff_profile/domain/entities/staff_entity.dart';
 import 'package:vet_manager_mobile/features/staff_profile/domain/entities/vet_profile_entity.dart';
 import 'package:vet_manager_mobile/features/staff_profile/domain/repositories/staff_repository.dart';
@@ -10,6 +16,7 @@ import 'package:vet_manager_mobile/features/staff_profile/presentation/screens/d
 import 'package:vet_manager_mobile/features/staff_profile/presentation/screens/staff_management_screen.dart';
 
 class MockStaffRepository extends Mock implements IStaffRepository {}
+class MockAuthBloc extends Mock implements AuthBloc {}
 
 void main() {
   late MockStaffRepository mockRepo;
@@ -125,6 +132,58 @@ void main() {
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
       await tester.pumpAndSettle(); // Resolved
+      expect(find.text('Dr. Jane Doe'), findsOneWidget);
+      verify(() => mockRepo.getStaffMember('user-doc-1')).called(1);
+    });
+
+    testWidgets('shows empty state instead of infinite loading if no doctor or auth exists', (tester) async {
+      await tester.pumpWidget(createTestWidget(doctorId: null, initialDoctor: null));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(find.text('Practitioner profile not found'), findsOneWidget);
+    });
+
+    testWidgets('resolves practitioner profile from AuthBloc when initialDoctor and doctorId are null', (tester) async {
+      final mockAuthBloc = MockAuthBloc();
+      when(() => mockAuthBloc.state).thenReturn(
+        const AuthAuthenticated(
+          AuthSession(
+            token: 'test-tok',
+            user: AuthUser(
+              id: 'user-doc-1',
+              name: 'Dr. Jane Doe',
+              email: 'jane.doe@clinic.com',
+              role: 'veterinarian',
+              isActive: true,
+            ),
+            tenant: ClinicTenant(
+              id: 'ten-1',
+              name: 'Alpha Vet',
+              slug: 'alphavet',
+              status: 'active',
+              plan: 'pro',
+            ),
+          ),
+        ),
+      );
+      when(() => mockAuthBloc.stream).thenAnswer((_) => const Stream.empty());
+
+      when(() => mockRepo.getStaffMember('user-doc-1')).thenAnswer((_) async => sampleDoctor);
+
+      await tester.pumpWidget(
+        BlocProvider<AuthBloc>.value(
+          value: mockAuthBloc,
+          child: MaterialApp(
+            home: DoctorProfileScreen(
+              repository: mockRepo,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(CircularProgressIndicator), findsNothing);
       expect(find.text('Dr. Jane Doe'), findsOneWidget);
       verify(() => mockRepo.getStaffMember('user-doc-1')).called(1);
     });

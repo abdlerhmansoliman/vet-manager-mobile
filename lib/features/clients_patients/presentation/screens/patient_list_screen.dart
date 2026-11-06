@@ -69,6 +69,7 @@ class _PatientListScreenState extends State<PatientListScreen> {
         ),
         floatingActionButton: Builder(
           builder: (fabContext) => FloatingActionButton.extended(
+            heroTag: 'patient_list_register_patient_fab',
             onPressed: () async {
               await Navigator.of(fabContext).push(
                 MaterialPageRoute<void>(

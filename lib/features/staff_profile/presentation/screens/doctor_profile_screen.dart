@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/text_styles.dart';
 import '../../../../core/widgets/app_snackbar.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../domain/entities/staff_entity.dart';
 import '../../domain/repositories/staff_repository.dart';
 import '../bloc/staff_bloc.dart';
@@ -48,11 +50,31 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final docId = widget.doctorId ?? widget.initialDoctor?.id;
+      if (!mounted) return;
+      final docId = widget.doctorId ?? _currentDoctor?.id;
       if (docId != null && widget.initialDoctor == null) {
         _getBloc().add(LoadDoctorProfile(doctorId: docId));
       }
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_currentDoctor == null) {
+      try {
+        final authBloc = context.read<AuthBloc?>();
+        final authState = authBloc?.state;
+        if (authState is AuthAuthenticated) {
+          final authUser = authState.session.user;
+          if (widget.doctorId == null || widget.doctorId == authUser.id) {
+            _currentDoctor = StaffEntity.fromAuthUser(authUser);
+          }
+        }
+      } catch (_) {
+        // Fallback for isolated widget testing environments
+      }
+    }
   }
 
   StaffBloc _getBloc() {
@@ -116,8 +138,10 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
         }
       },
       builder: (context, state) {
+        final isPendingInitialLoad =
+            state is StaffInitial && widget.doctorId != null;
         final isLoading =
-            (state is StaffLoading || state is StaffInitial) && _currentDoctor == null;
+            (state is StaffLoading || isPendingInitialLoad) && _currentDoctor == null;
         final doc = _currentDoctor ?? state.selectedDoctor;
 
         return Scaffold(
