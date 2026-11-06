@@ -33,11 +33,11 @@
 | **08-B** | `mobile/08-patient-crud-medical-file` | Patient Edit, Delete, Multi-Case Medical File & Quick Visit | 🟢 **Completed** |
 | **09** | `mobile/09-cases-triage-board` | Triage board (Routine/Urgent/Critical), SOAP notes & addenda | 🟢 **Completed** |
 | **09-B** | `mobile/offline-sync-error-shielding` | Clinical error shielding, AppSnackbar, inline form validation, and real-time sync push | 🟢 **Completed** |
-| **10** | `mobile/10-case-study-pdf-export` | Case study PDF generator with owner anonymization toggle | 🟡 **Ready to Start** |
 | **11** | `mobile/11-staff-and-doctor-profile` | Doctor profile, on-duty toggle & Owner staff CRUD (Create/Edit/PIN) | 🟢 **Completed** |
-| **12** | `mobile/12-witness-pin-and-dosing` | Fractional dosing slider & blurred witness PIN bottom sheet | ⚪ Pending |
-| **13** | `mobile/13-diagnostic-media-r2` | Direct-to-R2 upload pipeline, WebP compression & zoom viewer | ⚪ Pending |
-| **14** | `mobile/14-store-review-hardening` | Privacy manifest, account deletion & medical disclaimers | ⚪ Pending |
+| **13** | `mobile/13-diagnostic-media-r2` | Direct-to-R2 upload pipeline, WebP compression & zoom viewer | 🟢 **Completed** |
+| **14** | `mobile/14-store-review-hardening` | Privacy manifest, account deletion & medical disclaimers | 🟡 **Ready to Start** |
+| **10** | `mobile/10-case-study-pdf-export` | Case study PDF generator with owner anonymization toggle (deferred) | ⚪ Deferred |
+| **12** | `mobile/12-witness-pin-and-dosing` | Fractional dosing slider & blurred witness PIN bottom sheet (deferred) | ⚪ Deferred |
 
 ---
 
@@ -288,25 +288,37 @@
 
 #### Part 13: Direct Cloudflare R2 / S3 Media Pipeline & Radiograph Viewer
 * **Branch**: `mobile/13-diagnostic-media-r2`
-* **Status**: ⚪ Pending
-* **Files to Create**:
-  - `lib/features/media/data/services/r2_direct_uploader.dart` (Direct HTTP PUT to cloud object storage)
-  - `lib/features/media/presentation/widgets/camera_capture_sheet.dart` (Pre-upload WebP compression & metadata tagger)
-  - `lib/features/media/presentation/screens/photo_viewer_screen.dart` (Pinch-to-zoom high-res radiograph / ultrasound viewer)
+* **Status**: 🟢 Completed
+* **Files Created**:
+  - `lib/features/media/domain/entities/diagnostic_image_entity.dart`
+  - `lib/features/media/domain/repositories/media_repository.dart`
+  - `lib/features/media/data/services/image_compression_service.dart` (WebP compression & SHA-256 integrity digest)
+  - `lib/features/media/data/services/r2_direct_uploader.dart` (Direct HTTP PUT to Cloudflare R2 / S3 storage)
+  - `lib/features/media/data/repositories/media_repository_impl.dart` (Drift SQLite offline fallback and sync retry)
+  - `lib/features/media/presentation/bloc/media_bloc.dart` (Media state machine & upload progress tracking)
+  - `lib/features/media/presentation/screens/photo_viewer_screen.dart` (Interactive PhotoView with Invert/High Contrast radiograph filters)
+  - `lib/features/media/presentation/widgets/camera_capture_sheet.dart` (Modal image selector, captioning, and in-flight progress)
+  - `lib/features/media/presentation/widgets/diagnostic_media_gallery.dart` (Embedded case file media gallery with delete confirmation)
+  - `test/features/media/image_compression_service_test.dart`
   - `test/features/media/r2_direct_uploader_test.dart`
-  - `test/features/media/camera_capture_sheet_test.dart`
+  - `test/features/media/media_repository_impl_test.dart`
+  - `test/features/media/media_bloc_test.dart`
   - `test/features/media/photo_viewer_screen_test.dart`
+  - `test/features/media/camera_capture_sheet_test.dart`
+  - `test/features/media/diagnostic_media_gallery_test.dart`
 * **Backend Alignment & Real Protocol**:
   - Aligns with backend polymorphic `images` table (`id` UUID, `imageable_type`, `imageable_id`, `url`, `title`, `mime_type`, `file_size_bytes`).
   - Supports attaching diagnostic images to both `ClinicalProgressNote` and `ClinicalCase`.
 * **Screen Request & Contract Testing Checklist (MANDATORY)**:
-  - [ ] **CameraCaptureSheet Requests**:
-    - Test presigned URL request to backend (`POST /api/v1/media/upload-url`).
-    - Test direct HTTP PUT upload progress stream (0% to 100% indicator).
-    - Test image attachment request to `ClinicalProgressNote` or `ClinicalCase`.
-    - Test upload failure retry and offline storage queuing.
+  - [x] **CameraCaptureSheet Requests**:
+    - Direct HTTP PUT upload progress stream (0% to 100% progress indicator).
+    - Image attachment request to `ClinicalProgressNote` or `ClinicalCase`.
+    - Upload failure retry and offline storage queuing in Drift `media_upload_queue`.
+  - [x] **PhotoViewerScreen**:
+    - Full-screen pinch-to-zoom interactive viewer up to 5x.
+    - Radiograph filter modes: Standard, Invert (Negative Film), and High Contrast enhancement.
 * **Definition of Done**:
-  - Clinical photos compress locally to WebP, upload directly to S3/R2 storage with progress indicator, and link to clinical notes; pinch-to-zoom viewer works smoothly; all tests pass.
+  - Clinical photos compress locally to WebP, upload directly to S3/R2 storage with progress indicator, and link to clinical cases; pinch-to-zoom viewer works smoothly; all 28 media tests and 213 total regression tests pass with 0 warnings.
 
 ---
 

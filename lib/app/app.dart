@@ -10,6 +10,7 @@ import 'theme/app_theme.dart';
 import '../features/clients_patients/domain/repositories/patient_repository.dart';
 import '../features/clinical_cases/domain/repositories/case_repository.dart';
 import '../features/staff_profile/domain/repositories/staff_repository.dart';
+import '../features/media/domain/repositories/media_repository.dart';
 
 /// Root Application Widget for VetManager Mobile Client.
 class VetManagerApp extends StatefulWidget {
@@ -18,6 +19,7 @@ class VetManagerApp extends StatefulWidget {
   final IPatientRepository? patientRepository;
   final ICaseRepository? caseRepository;
   final IStaffRepository? staffRepository;
+  final IMediaRepository? mediaRepository;
   final SyncManager? syncManager;
 
   const VetManagerApp({
@@ -27,6 +29,7 @@ class VetManagerApp extends StatefulWidget {
     this.patientRepository,
     this.caseRepository,
     this.staffRepository,
+    this.mediaRepository,
     this.syncManager,
   });
 
@@ -51,6 +54,7 @@ class _VetManagerAppState extends State<VetManagerApp> {
       patientRepository: widget.patientRepository,
       caseRepository: widget.caseRepository,
       staffRepository: widget.staffRepository,
+      mediaRepository: widget.mediaRepository,
       syncManager: widget.syncManager,
     );
     _authBloc.add(const AuthCheckRequested());

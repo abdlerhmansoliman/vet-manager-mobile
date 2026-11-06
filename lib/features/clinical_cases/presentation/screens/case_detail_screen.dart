@@ -13,6 +13,8 @@ import '../bloc/case_detail_bloc.dart';
 import '../bloc/case_detail_event.dart';
 import '../bloc/case_detail_state.dart';
 import '../widgets/soap_notes_view.dart';
+import '../../../media/domain/repositories/media_repository.dart';
+import '../../../media/presentation/widgets/diagnostic_media_gallery.dart';
 
 /// Comprehensive clinical encounter detail screen featuring real-time SOAP logs,
 /// instant triage severity switching, and append-only signed addenda.
@@ -20,25 +22,35 @@ class CaseDetailScreen extends StatelessWidget {
   final String caseId;
   final ICaseRepository? repository;
   final CaseDetailEntity? initialDetail;
+  final IMediaRepository? mediaRepository;
 
   const CaseDetailScreen({
     super.key,
     required this.caseId,
     this.repository,
     this.initialDetail,
+    this.mediaRepository,
   });
 
   @override
   Widget build(BuildContext context) {
     if (repository == null) {
       // In testing or when repository is already provided up the tree
-      return _CaseDetailView(caseId: caseId, initialDetail: initialDetail);
+      return _CaseDetailView(
+        caseId: caseId,
+        initialDetail: initialDetail,
+        mediaRepository: mediaRepository,
+      );
     }
 
     return BlocProvider<CaseDetailBloc>(
       create: (context) => CaseDetailBloc(repository: repository!)
         ..add(CaseDetailLoaded(caseId)),
-      child: _CaseDetailView(caseId: caseId, initialDetail: initialDetail),
+      child: _CaseDetailView(
+        caseId: caseId,
+        initialDetail: initialDetail,
+        mediaRepository: mediaRepository,
+      ),
     );
   }
 }
@@ -46,10 +58,12 @@ class CaseDetailScreen extends StatelessWidget {
 class _CaseDetailView extends StatefulWidget {
   final String caseId;
   final CaseDetailEntity? initialDetail;
+  final IMediaRepository? mediaRepository;
 
   const _CaseDetailView({
     required this.caseId,
     this.initialDetail,
+    this.mediaRepository,
   });
 
   @override
@@ -163,6 +177,17 @@ class _CaseDetailViewState extends State<_CaseDetailView> {
                 _buildDiagnosesCard(context, summary)
                     .animate()
                     .fadeIn(duration: 250.ms, delay: 150.ms)
+                    .slideY(begin: 0.08, end: 0, curve: Curves.easeOutQuad),
+                const SizedBox(height: 16),
+
+                // Diagnostic Media & X-Rays Section
+                DiagnosticMediaGallery(
+                  imageableType: 'clinical_case',
+                  imageableId: summary.id,
+                  repository: widget.mediaRepository,
+                )
+                    .animate()
+                    .fadeIn(duration: 250.ms, delay: 180.ms)
                     .slideY(begin: 0.08, end: 0, curve: Curves.easeOutQuad),
                 const SizedBox(height: 20),
 

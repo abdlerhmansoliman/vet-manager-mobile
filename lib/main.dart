@@ -7,6 +7,7 @@ import 'database/app_database.dart';
 import 'features/clients_patients/data/repositories/patient_repository_impl.dart';
 import 'features/clinical_cases/data/repositories/case_repository_impl.dart';
 import 'features/staff_profile/data/repositories/staff_repository_impl.dart';
+import 'features/media/data/repositories/media_repository_impl.dart';
 import 'sync/conflict_resolver.dart';
 import 'sync/sync_manager.dart';
 import 'sync/sync_pull_service.dart';
@@ -61,11 +62,16 @@ void main() async {
   );
 
   final staffRepo = StaffRepositoryImpl(apiClient: apiClient);
+  final mediaRepo = MediaRepositoryImpl(
+    db: db,
+    storageService: storageService,
+  );
 
   runApp(VetManagerApp(
     patientRepository: patientRepo,
     caseRepository: caseRepo,
     staffRepository: staffRepo,
+    mediaRepository: mediaRepo,
     syncManager: syncManager,
   ));
 }

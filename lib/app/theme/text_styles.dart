@@ -83,6 +83,8 @@ abstract final class AppTextStyles {
         height: 1.5,
       );
 
+  static TextStyle get caption => bodySmall;
+
   // --- Specialized Clinical Badges & Metric Displays ---
   static TextStyle get metricNumber => GoogleFonts.plusJakartaSans(
         fontSize: 28,

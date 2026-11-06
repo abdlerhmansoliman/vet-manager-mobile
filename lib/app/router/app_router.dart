@@ -16,6 +16,9 @@ import '../../features/staff_profile/domain/entities/staff_entity.dart';
 import '../../features/staff_profile/domain/repositories/staff_repository.dart';
 import '../../features/staff_profile/presentation/screens/doctor_profile_screen.dart';
 import '../../features/staff_profile/presentation/screens/staff_management_screen.dart';
+import '../../features/media/domain/entities/diagnostic_image_entity.dart';
+import '../../features/media/domain/repositories/media_repository.dart';
+import '../../features/media/presentation/screens/photo_viewer_screen.dart';
 
 abstract class AppRoutes {
   static const String login = '/login';
@@ -26,6 +29,7 @@ abstract class AppRoutes {
   static const String caseDetail = '/cases/:id';
   static const String doctorProfile = '/profile';
   static const String staffManagement = '/staff';
+  static const String photoViewer = '/photo-viewer';
   static const String home = '/';
 }
 
@@ -34,6 +38,7 @@ class AppRouter {
   final IPatientRepository? _patientRepository;
   final ICaseRepository? _caseRepository;
   final IStaffRepository? _staffRepository;
+  final IMediaRepository? _mediaRepository;
   final SyncManager? _syncManager;
 
   AppRouter({
@@ -41,11 +46,13 @@ class AppRouter {
     IPatientRepository? patientRepository,
     ICaseRepository? caseRepository,
     IStaffRepository? staffRepository,
+    IMediaRepository? mediaRepository,
     SyncManager? syncManager,
   })  : _authBloc = authBloc,
         _patientRepository = patientRepository,
         _caseRepository = caseRepository,
         _staffRepository = staffRepository,
+        _mediaRepository = mediaRepository,
         _syncManager = syncManager;
 
   late final GoRouter router = GoRouter(
@@ -133,7 +140,18 @@ class AppRouter {
         path: AppRoutes.caseDetail,
         builder: (context, state) {
           final caseId = state.pathParameters['id'] ?? '';
-          return CaseDetailScreen(caseId: caseId, repository: _caseRepository);
+          return CaseDetailScreen(
+            caseId: caseId,
+            repository: _caseRepository,
+            mediaRepository: _mediaRepository,
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.photoViewer,
+        builder: (context, state) {
+          final image = state.extra as DiagnosticImageEntity;
+          return PhotoViewerScreen(image: image);
         },
       ),
       GoRoute(
