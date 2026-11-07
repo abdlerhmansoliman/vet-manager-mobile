@@ -51,6 +51,7 @@ class _VetManagerAppState extends State<VetManagerApp> {
 
     _appRouter = AppRouter(
       authBloc: _authBloc,
+      authRepository: widget.authRepository,
       patientRepository: widget.patientRepository,
       caseRepository: widget.caseRepository,
       staffRepository: widget.staffRepository,

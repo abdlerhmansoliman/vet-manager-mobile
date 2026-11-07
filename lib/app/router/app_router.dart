@@ -19,6 +19,9 @@ import '../../features/staff_profile/presentation/screens/staff_management_scree
 import '../../features/media/domain/entities/diagnostic_image_entity.dart';
 import '../../features/media/domain/repositories/media_repository.dart';
 import '../../features/media/presentation/screens/photo_viewer_screen.dart';
+import '../../features/settings/presentation/screens/delete_account_screen.dart';
+import '../../features/settings/presentation/screens/medical_disclaimer_screen.dart';
+import '../../features/auth/data/auth_repository.dart';
 
 abstract class AppRoutes {
   static const String login = '/login';
@@ -30,11 +33,14 @@ abstract class AppRoutes {
   static const String doctorProfile = '/profile';
   static const String staffManagement = '/staff';
   static const String photoViewer = '/photo-viewer';
+  static const String deleteAccount = '/settings/delete-account';
+  static const String medicalDisclaimer = '/settings/disclaimer';
   static const String home = '/';
 }
 
 class AppRouter {
   final AuthBloc _authBloc;
+  final IAuthRepository? _authRepository;
   final IPatientRepository? _patientRepository;
   final ICaseRepository? _caseRepository;
   final IStaffRepository? _staffRepository;
@@ -43,12 +49,14 @@ class AppRouter {
 
   AppRouter({
     required AuthBloc authBloc,
+    IAuthRepository? authRepository,
     IPatientRepository? patientRepository,
     ICaseRepository? caseRepository,
     IStaffRepository? staffRepository,
     IMediaRepository? mediaRepository,
     SyncManager? syncManager,
   })  : _authBloc = authBloc,
+        _authRepository = authRepository,
         _patientRepository = patientRepository,
         _caseRepository = caseRepository,
         _staffRepository = staffRepository,
@@ -188,6 +196,19 @@ class AppRouter {
         builder: (context, state) {
           return StaffManagementScreen(
             repository: _staffRepository,
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.medicalDisclaimer,
+        builder: (context, state) => const MedicalDisclaimerScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.deleteAccount,
+        builder: (context, state) {
+          return DeleteAccountScreen(
+            authRepository: _authRepository,
+            authBloc: _authBloc,
           );
         },
       ),

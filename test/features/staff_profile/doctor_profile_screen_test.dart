@@ -14,6 +14,8 @@ import 'package:vet_manager_mobile/features/staff_profile/domain/entities/vet_pr
 import 'package:vet_manager_mobile/features/staff_profile/domain/repositories/staff_repository.dart';
 import 'package:vet_manager_mobile/features/staff_profile/presentation/screens/doctor_profile_screen.dart';
 import 'package:vet_manager_mobile/features/staff_profile/presentation/screens/staff_management_screen.dart';
+import 'package:vet_manager_mobile/features/settings/presentation/screens/delete_account_screen.dart';
+import 'package:vet_manager_mobile/features/settings/presentation/screens/medical_disclaimer_screen.dart';
 
 class MockStaffRepository extends Mock implements IStaffRepository {}
 class MockAuthBloc extends Mock implements AuthBloc {}
@@ -288,6 +290,44 @@ void main() {
       // Verifies StaffManagementScreen opened
       expect(find.byType(StaffManagementScreen), findsOneWidget);
       expect(find.text('Clinic Staff Directory'), findsOneWidget);
+    });
+  });
+
+  group('DoctorProfileScreen Store Review & Legal Compliance', () {
+    testWidgets('renders Legal & Account Privacy section and navigates to MedicalDisclaimerScreen', (tester) async {
+      await tester.pumpWidget(createTestWidget(initialDoctor: sampleDoctor));
+      await tester.pumpAndSettle();
+
+      final disclaimerBtn = find.byKey(const Key('view_medical_disclaimer_button'));
+      await tester.ensureVisible(disclaimerBtn);
+      await tester.pumpAndSettle();
+
+      expect(disclaimerBtn, findsOneWidget);
+      expect(find.text('Medical & Legal Disclaimer'), findsOneWidget);
+
+      await tester.tap(disclaimerBtn);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(MedicalDisclaimerScreen), findsOneWidget);
+      expect(find.text('Clinical Decision Support'), findsOneWidget);
+    });
+
+    testWidgets('navigates to DeleteAccountScreen from Legal & Account Privacy section', (tester) async {
+      await tester.pumpWidget(createTestWidget(initialDoctor: sampleDoctor));
+      await tester.pumpAndSettle();
+
+      final deleteBtn = find.byKey(const Key('delete_account_profile_button'));
+      await tester.ensureVisible(deleteBtn);
+      await tester.pumpAndSettle();
+
+      expect(deleteBtn, findsOneWidget);
+      expect(find.text('Delete Practitioner Account'), findsOneWidget);
+
+      await tester.tap(deleteBtn);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(DeleteAccountScreen), findsOneWidget);
+      expect(find.text('Permanent & Irreversible Action'), findsOneWidget);
     });
   });
 }

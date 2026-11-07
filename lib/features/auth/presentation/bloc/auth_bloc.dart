@@ -23,6 +23,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthLogoutRequested>(_onLogoutRequested);
     on<AuthClinicsRequested>(_onClinicsRequested);
     on<AuthSwitchClinicRequested>(_onSwitchClinicRequested);
+    on<AuthDeleteAccountRequested>(_onDeleteAccountRequested);
   }
 
   Future<void> _onCheckRequested(
@@ -199,6 +200,30 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     } catch (_) {}
     await _authRepository.logout();
     emit(const AuthUnauthenticated());
+  }
+
+  Future<void> _onDeleteAccountRequested(
+    AuthDeleteAccountRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    final previousState = state;
+    emit(const AuthLoading(message: 'Deleting account & purging credentials...'));
+    try {
+      await _authRepository.deleteAccount(password: event.password);
+      try {
+        await _authRepository.setBiometricUnlockEnabled(false);
+      } catch (_) {}
+      emit(const AuthUnauthenticated());
+    } catch (e) {
+      final shielded = ClinicalErrorFormatter.format(
+        e,
+        fallbackMessage: 'Unable to delete account. Please verify your password.',
+      );
+      emit(AuthFailure(
+        message: shielded,
+        fallbackState: previousState,
+      ));
+    }
   }
 
   Future<void> _onClinicsRequested(

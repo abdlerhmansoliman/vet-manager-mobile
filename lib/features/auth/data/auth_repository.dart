@@ -25,6 +25,9 @@ abstract class IAuthRepository {
   Future<bool> authenticateWithBiometrics({String reason});
   Future<bool> isBiometricUnlockEnabled();
   Future<void> setBiometricUnlockEnabled(bool enabled);
+
+  /// Self-service account deletion (App Store Guideline 5.1.1(v) & Google Play Store Policy)
+  Future<void> deleteAccount({required String password});
 }
 
 class AuthRepository implements IAuthRepository {
@@ -169,5 +172,23 @@ class AuthRepository implements IAuthRepository {
   @override
   Future<void> setBiometricUnlockEnabled(bool enabled) {
     return _storageService.setBiometricEnabled(enabled);
+  }
+
+  @override
+  Future<void> deleteAccount({required String password}) async {
+    try {
+      await _apiClient.delete<Map<String, dynamic>>(
+        '/auth/account',
+        data: {
+          'password': password,
+        },
+      );
+      await _storageService.clearSession();
+    } on DioException catch (e) {
+      throw ErrorInterceptor.parseDioException(e);
+    } catch (e) {
+      if (e is AppException) rethrow;
+      throw UnknownException(message: 'Failed to delete account: $e');
+    }
   }
 }

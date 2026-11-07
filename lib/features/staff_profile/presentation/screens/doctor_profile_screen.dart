@@ -13,6 +13,8 @@ import '../bloc/staff_bloc.dart';
 import '../bloc/staff_event.dart';
 import '../bloc/staff_state.dart';
 import 'staff_management_screen.dart';
+import '../../../settings/presentation/screens/delete_account_screen.dart';
+import '../../../settings/presentation/screens/medical_disclaimer_screen.dart';
 
 /// Doctor and Practitioner Profile Screen.
 ///
@@ -256,6 +258,13 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
           _buildCapabilitiesCard(doc)
               .animate()
               .fadeIn(duration: 450.ms)
+              .slideY(begin: 0.08, end: 0, curve: Curves.easeOutQuad),
+          const SizedBox(height: 16),
+
+          // Legal, Disclaimer & Account Privacy
+          _buildLegalAndPrivacySection()
+              .animate()
+              .fadeIn(duration: 500.ms)
               .slideY(begin: 0.08, end: 0, curve: Curves.easeOutQuad),
           const SizedBox(height: 24),
 
@@ -788,6 +797,150 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
             style: AppTextStyles.bodySmall.copyWith(
               color: isAuthorized ? AppColors.badgeStableMintText : AppColors.textMuted,
               fontWeight: isAuthorized ? FontWeight.w600 : FontWeight.w400,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLegalAndPrivacySection() {
+    return Container(
+      key: const Key('doctor_profile_legal_section'),
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceWhite,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.borderWarm),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Legal & Account Privacy',
+            style: AppTextStyles.titleLarge.copyWith(fontSize: 16),
+          ),
+          const SizedBox(height: 14),
+
+          // Medical Disclaimer Row
+          InkWell(
+            key: const Key('view_medical_disclaimer_button'),
+            borderRadius: BorderRadius.circular(12),
+            onTap: () {
+              Navigator.of(context).push<void>(
+                MaterialPageRoute<void>(
+                  builder: (_) => const MedicalDisclaimerScreen(),
+                ),
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryEmerald.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.health_and_safety_rounded,
+                      color: AppColors.primaryEmerald,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Medical & Legal Disclaimer',
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textCharcoal,
+                          ),
+                        ),
+                        Text(
+                          'Guideline 1.4.1 & Veterinary Regulatory Notice',
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.textMuted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(
+                    Icons.chevron_right_rounded,
+                    color: AppColors.textMuted,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const Divider(height: 20, color: AppColors.borderWarm),
+
+          // Delete Account Row
+          InkWell(
+            key: const Key('delete_account_profile_button'),
+            borderRadius: BorderRadius.circular(12),
+            onTap: () {
+              Navigator.of(context).push<void>(
+                MaterialPageRoute<void>(
+                  builder: (_) => const DeleteAccountScreen(),
+                ),
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColors.badgeCriticalRose,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.delete_forever_rounded,
+                      color: AppColors.secondaryCoral,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Delete Practitioner Account',
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.secondaryCoral,
+                          ),
+                        ),
+                        Text(
+                          'Permanently remove login credentials and data',
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.textMuted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(
+                    Icons.chevron_right_rounded,
+                    color: AppColors.textMuted,
+                  ),
+                ],
+              ),
             ),
           ),
         ],

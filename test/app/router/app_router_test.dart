@@ -118,5 +118,61 @@ void main() {
       expect(find.text('Dr. John Miller'), findsOneWidget);
       expect(find.byType(CircularProgressIndicator), findsNothing);
     });
+
+    testWidgets('routes to MedicalDisclaimerScreen on /settings/disclaimer', (tester) async {
+      when(() => mockAuthBloc.state).thenReturn(const AuthAuthenticated(sampleSession));
+      when(() => mockAuthBloc.stream).thenAnswer((_) => Stream.value(const AuthAuthenticated(sampleSession)));
+
+      final appRouter = AppRouter(
+        authBloc: mockAuthBloc,
+        caseRepository: mockCaseRepo,
+        patientRepository: mockPatientRepo,
+        staffRepository: mockStaffRepo,
+      );
+
+      await tester.pumpWidget(
+        BlocProvider<AuthBloc>.value(
+          value: mockAuthBloc,
+          child: MaterialApp.router(
+            routerConfig: appRouter.router,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      appRouter.router.go(AppRoutes.medicalDisclaimer);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Medical & Legal Disclaimer'), findsOneWidget);
+      expect(find.text('Clinical Decision Support'), findsOneWidget);
+    });
+
+    testWidgets('routes to DeleteAccountScreen on /settings/delete-account', (tester) async {
+      when(() => mockAuthBloc.state).thenReturn(const AuthAuthenticated(sampleSession));
+      when(() => mockAuthBloc.stream).thenAnswer((_) => Stream.value(const AuthAuthenticated(sampleSession)));
+
+      final appRouter = AppRouter(
+        authBloc: mockAuthBloc,
+        caseRepository: mockCaseRepo,
+        patientRepository: mockPatientRepo,
+        staffRepository: mockStaffRepo,
+      );
+
+      await tester.pumpWidget(
+        BlocProvider<AuthBloc>.value(
+          value: mockAuthBloc,
+          child: MaterialApp.router(
+            routerConfig: appRouter.router,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      appRouter.router.go(AppRoutes.deleteAccount);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Delete Account'), findsOneWidget);
+      expect(find.text('Permanent & Irreversible Action'), findsOneWidget);
+    });
   });
 }

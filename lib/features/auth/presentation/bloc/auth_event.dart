@@ -85,3 +85,14 @@ class AuthSwitchClinicRequested extends AuthEvent {
   List<Object?> get props => [targetTenant, password];
 }
 
+/// Dispatched when clinician requests permanent account deletion.
+class AuthDeleteAccountRequested extends AuthEvent {
+  final String password;
+
+  const AuthDeleteAccountRequested(this.password);
+
+  @override
+  List<Object?> get props => [password];
+}
+
+
