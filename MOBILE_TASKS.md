@@ -35,6 +35,7 @@
 | **09-B** | `mobile/offline-sync-error-shielding` | Clinical error shielding, AppSnackbar, inline form validation, and real-time sync push | 🟢 **Completed** |
 | **11** | `mobile/11-staff-and-doctor-profile` | Doctor profile, on-duty toggle & Owner staff CRUD (Create/Edit/PIN) | 🟢 **Completed** |
 | **13** | `mobile/13-diagnostic-media-r2` | Direct-to-R2 upload pipeline, WebP compression & zoom viewer | 🟢 **Completed** |
+| **13-B** | `mobile/multi-clinic-switcher` | Multi-Clinic Switcher (Practice Selection & Tenant Re-authentication) | 🟢 **Completed** |
 | **14** | `mobile/14-store-review-hardening` | Privacy manifest, account deletion & medical disclaimers | 🟡 **Ready to Start** |
 | **10** | `mobile/10-case-study-pdf-export` | Case study PDF generator with owner anonymization toggle (deferred) | ⚪ Deferred |
 | **12** | `mobile/12-witness-pin-and-dosing` | Fractional dosing slider & blurred witness PIN bottom sheet (deferred) | ⚪ Deferred |
@@ -319,6 +320,32 @@
     - Radiograph filter modes: Standard, Invert (Negative Film), and High Contrast enhancement.
 * **Definition of Done**:
   - Clinical photos compress locally to WebP, upload directly to S3/R2 storage with progress indicator, and link to clinical cases; pinch-to-zoom viewer works smoothly; all 28 media tests and 213 total regression tests pass with 0 warnings.
+
+---
+
+#### Part 13-B: Multi-Clinic Switcher (Practice Selection & Tenant Re-authentication)
+* **Branch**: `mobile/multi-clinic-switcher`
+* **Status**: 🟢 Completed
+* **Files Created / Modified**:
+  - `lib/features/auth/presentation/widgets/clinic_switcher_bottom_sheet.dart` (Modal bottom sheet showing active practice badge, other practice cards, password prompt, and switcher button)
+  - `lib/features/auth/presentation/widgets/clinic_switcher_pill.dart` (Interactive AppBar pill displaying active clinic with one-tap switcher modal opening)
+  - `lib/features/auth/presentation/bloc/auth_event.dart` (`AuthClinicsRequested`, `AuthSwitchClinicRequested`)
+  - `lib/features/auth/presentation/bloc/auth_state.dart` (`availableClinics`, `isSwitchingClinic`, `switchingError`, `copyWith`)
+  - `lib/features/auth/presentation/bloc/auth_bloc.dart` (Tenancy switching handler with re-authentication and secure storage update)
+  - `lib/features/clinical_cases/presentation/screens/cases_board_screen.dart` (AppBar switcher pill integration)
+  - `lib/features/staff_profile/presentation/screens/doctor_profile_screen.dart` (Doctor profile clinic card and switch action)
+  - `test/features/auth/clinic_switcher_test.dart` (Full unit & widget tests covering BLoC transitions, bottom sheet rendering, switch interaction, error shielding, and pill trigger)
+* **Backend Alignment & Real Protocol**:
+  - Re-authenticates via real backend `POST /api/v1/auth/login` scoped with target `X-Tenant-ID`.
+  - Mints new tenant-scoped Sanctum Bearer token and updates `SecureStorageService` (`_kAuthToken`, `_kTenantId`).
+  - Seamlessly updates `TenantInterceptor` so subsequent network requests are routed to the switched clinic practice.
+* **Screen Request & Contract Testing Checklist (MANDATORY)**:
+  - [x] **In-flight Loading State**: Disables switch buttons and displays progress bar during authentication.
+  - [x] **Payload & Contract Integrity**: Verifies target tenant ID, password, and tenant-scoped login payload.
+  - [x] **Success Transition**: Immediately updates active session, dismisses bottom sheet, and shows success snackbar.
+  - [x] **Failure & Error Shielding**: Tests 401 unauthenticated and bad credentials shielded through `ClinicalErrorFormatter`.
+* **Definition of Done**:
+  - Multi-clinic veterinarians can view active and associated practices, seamlessly re-authenticate into another clinic, and have the app context immediately synchronize; all 8 switcher tests and all 225 project tests pass.
 
 ---
 
