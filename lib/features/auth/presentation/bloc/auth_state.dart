@@ -77,11 +77,34 @@ class AuthBiometricUnlockRequired extends AuthState {
 /// Fully authenticated session.
 class AuthAuthenticated extends AuthState {
   final AuthSession session;
+  final List<ClinicTenant> availableClinics;
+  final bool isSwitchingClinic;
+  final String? switchingError;
 
-  const AuthAuthenticated(this.session);
+  const AuthAuthenticated(
+    this.session, {
+    this.availableClinics = const [],
+    this.isSwitchingClinic = false,
+    this.switchingError,
+  });
+
+  AuthAuthenticated copyWith({
+    AuthSession? session,
+    List<ClinicTenant>? availableClinics,
+    bool? isSwitchingClinic,
+    String? switchingError,
+    bool clearSwitchingError = false,
+  }) {
+    return AuthAuthenticated(
+      session ?? this.session,
+      availableClinics: availableClinics ?? this.availableClinics,
+      isSwitchingClinic: isSwitchingClinic ?? this.isSwitchingClinic,
+      switchingError: clearSwitchingError ? null : (switchingError ?? this.switchingError),
+    );
+  }
 
   @override
-  List<Object?> get props => [session];
+  List<Object?> get props => [session, availableClinics, isSwitchingClinic, switchingError];
 }
 
 /// Error state.

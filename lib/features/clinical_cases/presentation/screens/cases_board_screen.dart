@@ -3,6 +3,7 @@ import '../../../../core/widgets/app_snackbar.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
+import '../../../auth/presentation/widgets/clinic_switcher_pill.dart';
 import '../../../staff_profile/domain/entities/staff_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -129,12 +130,20 @@ class _CasesBoardViewState extends State<_CasesBoardView> {
                       border: InputBorder.none,
                     ),
                   )
-                : Text(
-                    'Triage Board',
-                    style: AppTextStyles.titleMedium.copyWith(
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.textCharcoal,
-                    ),
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Triage Board',
+                        style: AppTextStyles.titleMedium.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.textCharcoal,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      const ClinicSwitcherPill(),
+                    ],
                   ),
             actions: [
               IconButton(

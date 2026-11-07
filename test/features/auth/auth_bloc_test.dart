@@ -144,7 +144,10 @@ void main() {
       )),
       expect: () => [
         const AuthLoading(message: 'Verifying credentials & tenant scope...'),
-        const AuthAuthenticated(sampleSession),
+        const AuthAuthenticated(
+          sampleSession,
+          availableClinics: [sampleTenantA],
+        ),
       ],
     );
   });

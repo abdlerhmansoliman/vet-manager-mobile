@@ -6,6 +6,7 @@ import '../../../../app/theme/text_styles.dart';
 import '../../../../core/widgets/app_snackbar.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
+import '../../../auth/presentation/widgets/clinic_switcher_bottom_sheet.dart';
 import '../../domain/entities/staff_entity.dart';
 import '../../domain/repositories/staff_repository.dart';
 import '../bloc/staff_bloc.dart';
@@ -223,6 +224,13 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
               .slideY(begin: 0.08, end: 0, curve: Curves.easeOutQuad),
           const SizedBox(height: 16),
 
+          // Clinical Practice Tenancy & Multi-Clinic Switcher
+          _buildClinicTenancyCard()
+              .animate()
+              .fadeIn(duration: 280.ms)
+              .slideY(begin: 0.08, end: 0, curve: Curves.easeOutQuad),
+          const SizedBox(height: 16),
+
           // Real-time Availability Toggle Card
           _buildAvailabilityToggleCard(doc, isAvailable)
               .animate()
@@ -359,6 +367,104 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
                   ),
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildClinicTenancyCard() {
+    final authState = context.watch<AuthBloc?>()?.state;
+    final currentTenant = authState is AuthAuthenticated ? authState.session.tenant : null;
+    final clinicName = currentTenant?.name ?? 'Assigned Practice';
+    final clinicSlug = currentTenant?.slug ?? 'default';
+
+    return Container(
+      key: const Key('doctor_profile_clinic_card'),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceWhite,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.borderWarm),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: AppColors.primaryEmerald.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.domain_rounded,
+                  color: AppColors.primaryEmerald,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Clinical Practice',
+                      style: AppTextStyles.titleMedium.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textCharcoal,
+                      ),
+                    ),
+                    Text(
+                      clinicName,
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primaryEmerald,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: AppColors.backgroundCream,
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: AppColors.borderWarm),
+                ),
+                child: Text(
+                  clinicSlug,
+                  style: AppTextStyles.caption.copyWith(
+                    color: AppColors.textMuted,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            key: const Key('switch_clinic_profile_button'),
+            onPressed: () => ClinicSwitcherBottomSheet.show(context),
+            icon: const Icon(Icons.swap_horiz_rounded, size: 18),
+            label: const Text('Switch Clinical Practice'),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.primaryEmerald,
+              side: const BorderSide(color: AppColors.primaryEmerald),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
             ),
           ),
         ],

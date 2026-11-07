@@ -1,11 +1,14 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/errors/app_exceptions.dart';
+import '../../../../core/errors/clinical_error_formatter.dart';
 import '../../data/auth_repository.dart';
+import '../../domain/models/clinic_tenant.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final IAuthRepository _authRepository;
+  List<ClinicTenant> _cachedDiscoveredTenants = [];
 
   AuthBloc({
     required IAuthRepository authRepository,
@@ -18,6 +21,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthLoginSubmitted>(_onLoginSubmitted);
     on<AuthBiometricUnlockAttempted>(_onBiometricUnlockAttempted);
     on<AuthLogoutRequested>(_onLogoutRequested);
+    on<AuthClinicsRequested>(_onClinicsRequested);
+    on<AuthSwitchClinicRequested>(_onSwitchClinicRequested);
   }
 
   Future<void> _onCheckRequested(
@@ -53,6 +58,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     try {
       final tenants = await _authRepository.resolveTenants(email);
+      _cachedDiscoveredTenants = tenants;
 
       if (tenants.isEmpty) {
         emit(AuthFailure(
@@ -140,7 +146,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         await _authRepository.setBiometricUnlockEnabled(true);
       }
 
-      emit(AuthAuthenticated(session));
+      final clinics = _cachedDiscoveredTenants.isNotEmpty
+          ? _cachedDiscoveredTenants
+          : [session.tenant];
+
+      emit(AuthAuthenticated(session, availableClinics: clinics));
     } on AppException catch (e) {
       emit(AuthFailure(
         message: e.message,
@@ -189,5 +199,70 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     } catch (_) {}
     await _authRepository.logout();
     emit(const AuthUnauthenticated());
+  }
+
+  Future<void> _onClinicsRequested(
+    AuthClinicsRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    if (state is! AuthAuthenticated) return;
+    final current = state as AuthAuthenticated;
+
+    try {
+      final clinics = await _authRepository.resolveTenants(current.session.user.email);
+      if (clinics.isNotEmpty) {
+        _cachedDiscoveredTenants = clinics;
+        emit(current.copyWith(availableClinics: clinics));
+      }
+    } catch (_) {
+      if (current.availableClinics.isEmpty) {
+        emit(current.copyWith(availableClinics: [current.session.tenant]));
+      }
+    }
+  }
+
+  Future<void> _onSwitchClinicRequested(
+    AuthSwitchClinicRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    if (state is! AuthAuthenticated) return;
+    final current = state as AuthAuthenticated;
+
+    emit(current.copyWith(isSwitchingClinic: true, clearSwitchingError: true));
+
+    try {
+      final newSession = await _authRepository.login(
+        email: current.session.user.email,
+        password: event.password,
+        tenantId: event.targetTenant.id,
+      );
+
+      final currentClinics = current.availableClinics.isNotEmpty
+          ? current.availableClinics
+          : _cachedDiscoveredTenants;
+
+      final available = currentClinics.isNotEmpty
+          ? currentClinics
+          : [newSession.tenant];
+
+      emit(AuthAuthenticated(
+        newSession,
+        availableClinics: available,
+        isSwitchingClinic: false,
+      ));
+    } on AppException catch (e) {
+      emit(current.copyWith(
+        isSwitchingClinic: false,
+        switchingError: ClinicalErrorFormatter.format(e),
+      ));
+    } catch (e) {
+      emit(current.copyWith(
+        isSwitchingClinic: false,
+        switchingError: ClinicalErrorFormatter.format(
+          e,
+          fallbackMessage: 'Unable to switch clinical practice. Please check credentials.',
+        ),
+      ));
+    }
   }
 }

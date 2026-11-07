@@ -549,5 +549,140 @@ void main() {
       final product = await dao.getProductById(productId);
       expect(product!.currentStockQty, Decimal.parse('20.0'));
     });
+
+    test('administerDose rejects zero and negative dose quantities with ArgumentError', () async {
+      expect(
+        () => dao.administerDose(
+          tenantId: 'tenant-1',
+          productId: 'prod-1',
+          containerId: 'vial-1',
+          doseQuantity: Decimal.zero,
+          recordedByUserId: 'vet-1',
+        ),
+        throwsA(isA<ArgumentError>()),
+      );
+
+      expect(
+        () => dao.administerDose(
+          tenantId: 'tenant-1',
+          productId: 'prod-1',
+          containerId: 'vial-1',
+          doseQuantity: Decimal.parse('-1.5'),
+          recordedByUserId: 'vet-1',
+        ),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
+
+    test('administerDose throws StateError when container balance is insufficient', () async {
+      final now = DateTime.now();
+      const productId = 'prod-insufficient';
+      const batchId = 'batch-insufficient';
+      const containerId = 'vial-insufficient';
+
+      await db.into(db.inventoryProductsTable).insert(
+            InventoryProductsTableCompanion.insert(
+              id: productId,
+              tenantId: 'tenant-1',
+              sku: 'INSUF-1',
+              name: 'Insufficient Prod',
+              currentStockQty: Value(Decimal.parse('1.0')),
+              createdAt: now,
+              updatedAt: now,
+            ),
+          );
+
+      await db.into(db.inventoryBatchesTable).insert(
+            InventoryBatchesTableCompanion.insert(
+              id: batchId,
+              tenantId: 'tenant-1',
+              productId: productId,
+              lotNumber: 'LOT-INSUF',
+              expiresAt: DateTime(2028, 1, 1),
+              initialBaseQty: Decimal.parse('1.0'),
+              remainingBaseQty: Decimal.parse('1.0'),
+              createdAt: now,
+              updatedAt: now,
+            ),
+          );
+
+      await db.into(db.inventoryContainersTable).insert(
+            InventoryContainersTableCompanion.insert(
+              id: containerId,
+              tenantId: 'tenant-1',
+              productId: productId,
+              batchId: batchId,
+              barcode: 'BAR-INSUF',
+              initialVolume: Decimal.parse('1.0'),
+              remainingBalance: Decimal.parse('1.0'),
+              status: const Value('open'),
+              createdAt: now,
+              updatedAt: now,
+            ),
+          );
+
+      // Attempting to administer 1.0001 from a 1.0 balance must fail
+      expect(
+        () => dao.administerDose(
+          tenantId: 'tenant-1',
+          productId: productId,
+          containerId: containerId,
+          doseQuantity: Decimal.parse('1.0001'),
+          recordedByUserId: 'vet-1',
+        ),
+        throwsA(isA<StateError>()),
+      );
+    });
+
+    test('voidDoseTransaction throws StateError on missing or non-consumption ledger entry', () async {
+      expect(
+        () => dao.voidDoseTransaction(
+          tenantId: 'tenant-1',
+          originalLedgerId: 'non-existent-ledger-entry',
+          voidedByUserId: 'vet-supervisor',
+          voidReason: 'Mistake',
+        ),
+        throwsA(isA<StateError>()),
+      );
+    });
+
+    test('getActiveBatchesFEFO strictly excludes expired, quarantined, recalled and depleted batches', () async {
+      final now = DateTime.now();
+      const productId = 'prod-filter-test';
+
+      await db.into(db.inventoryProductsTable).insert(
+            InventoryProductsTableCompanion.insert(
+              id: productId,
+              tenantId: 'tenant-1',
+              sku: 'FIL-01',
+              name: 'Filter Test Medication',
+              createdAt: now,
+              updatedAt: now,
+            ),
+          );
+
+      final statuses = ['active', 'expired', 'quarantined', 'recalled', 'depleted'];
+      for (int i = 0; i < statuses.length; i++) {
+        await db.into(db.inventoryBatchesTable).insert(
+              InventoryBatchesTableCompanion.insert(
+                id: 'batch-$i',
+                tenantId: 'tenant-1',
+                productId: productId,
+                lotNumber: 'LOT-$i',
+                expiresAt: DateTime(2028, i + 1, 1),
+                status: Value(statuses[i]),
+                initialBaseQty: Decimal.parse('10.0'),
+                remainingBaseQty: Decimal.parse('10.0'),
+                createdAt: now,
+                updatedAt: now,
+              ),
+            );
+      }
+
+      final activeBatches = await dao.getActiveBatchesFEFO(productId);
+      expect(activeBatches.length, 1);
+      expect(activeBatches.first.id, 'batch-0');
+      expect(activeBatches.first.status, 'active');
+    });
   });
 }

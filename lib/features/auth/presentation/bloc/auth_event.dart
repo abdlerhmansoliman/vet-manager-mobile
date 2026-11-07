@@ -65,3 +65,23 @@ class AuthBiometricUnlockAttempted extends AuthEvent {
 class AuthLogoutRequested extends AuthEvent {
   const AuthLogoutRequested();
 }
+
+/// Dispatched to refresh or discover all clinics associated with the current clinician's email.
+class AuthClinicsRequested extends AuthEvent {
+  const AuthClinicsRequested();
+}
+
+/// Dispatched when clinician switches active clinic tenancy.
+class AuthSwitchClinicRequested extends AuthEvent {
+  final ClinicTenant targetTenant;
+  final String password;
+
+  const AuthSwitchClinicRequested({
+    required this.targetTenant,
+    required this.password,
+  });
+
+  @override
+  List<Object?> get props => [targetTenant, password];
+}
+
