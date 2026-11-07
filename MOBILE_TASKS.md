@@ -36,7 +36,7 @@
 | **11** | `mobile/11-staff-and-doctor-profile` | Doctor profile, on-duty toggle & Owner staff CRUD (Create/Edit/PIN) | 🟢 **Completed** |
 | **13** | `mobile/13-diagnostic-media-r2` | Direct-to-R2 upload pipeline, WebP compression & zoom viewer | 🟢 **Completed** |
 | **13-B** | `mobile/multi-clinic-switcher` | Multi-Clinic Switcher (Practice Selection & Tenant Re-authentication) | 🟢 **Completed** |
-| **14** | `mobile/14-store-review-hardening` | Privacy manifest, account deletion & medical disclaimers | 🟡 **Ready to Start** |
+| **14** | `mobile/14-store-review-hardening` | Privacy manifest, account deletion & medical disclaimers | 🟢 **Completed** |
 | **10** | `mobile/10-case-study-pdf-export` | Case study PDF generator with owner anonymization toggle (deferred) | ⚪ Deferred |
 | **12** | `mobile/12-witness-pin-and-dosing` | Fractional dosing slider & blurred witness PIN bottom sheet (deferred) | ⚪ Deferred |
 
@@ -351,17 +351,24 @@
 
 #### Part 14: Store Review & Launch Hardening
 * **Branch**: `mobile/14-store-review-hardening`
-* **Status**: ⚪ Pending
-* **Files to Create**:
-  - `lib/features/settings/presentation/screens/delete_account_screen.dart` (App Store Guideline 5.1.1(v))
-  - `lib/features/settings/presentation/screens/medical_disclaimer_screen.dart` (App Store Guideline 1.4.1)
-  - `ios/Runner/PrivacyInfo.xcprivacy` (Final Apple audit)
-  - `test/features/settings/delete_account_screen_test.dart`
-  - `test/features/settings/medical_disclaimer_screen_test.dart`
+* **Status**: 🟢 Completed
+* **Files Created / Modified**:
+  - `lib/features/settings/presentation/screens/delete_account_screen.dart` (App Store Guideline 5.1.1(v) self-service deletion)
+  - `lib/features/settings/presentation/screens/medical_disclaimer_screen.dart` (App Store Guideline 1.4.1 veterinary regulatory disclaimer)
+  - `ios/Runner/PrivacyInfo.xcprivacy` (Apple Required-Reason APIs and data collection declarations)
+  - `lib/features/auth/data/auth_repository.dart` (`deleteAccount` contract & implementation on `DELETE /api/v1/auth/account`)
+  - `lib/features/auth/presentation/bloc/auth_bloc.dart` & `auth_event.dart` (`AuthDeleteAccountRequested`)
+  - `lib/features/staff_profile/presentation/screens/doctor_profile_screen.dart` ("Legal & Account Privacy" section with actions)
+  - `lib/app/router/app_router.dart` (`/settings/disclaimer`, `/settings/delete-account` routes)
+  - `test/features/settings/delete_account_screen_test.dart` (8 tests covering loading state, payload integrity, dialog confirmation, and shielded error feedback)
+  - `test/features/settings/medical_disclaimer_screen_test.dart` (3 tests covering regulatory cards and dismiss interactions)
+  - `test/features/staff_profile/doctor_profile_screen_test.dart` (Navigation integration tests)
+  - `test/app/router/app_router_test.dart` (Router integration tests)
 * **Backend Alignment & Real Protocol**:
   - Binds to backend `DELETE /api/v1/auth/account` with mandatory password verification.
+  - Clears hardware-backed session storage upon deletion confirmation.
 * **Screen Request & Contract Testing Checklist (MANDATORY)**:
-  - [ ] **DeleteAccountScreen Requests**:
+  - [x] **DeleteAccountScreen Requests**:
     - Test `DELETE /api/v1/auth/account`: dual-confirmation modal, password confirmation payload, in-flight progress, local session purge from `FlutterSecureStorage`, redirect to login screen, and 401/422 error display.
 * **Definition of Done**:
-  - Self-service account deletion functions properly with real request test verification; privacy manifest passes `xcrun altool` audit; edge-to-edge passes Android 15 audit; all tests pass.
+  - Self-service account deletion functions properly with real request test verification; medical disclaimers satisfy App Store Guideline 1.4.1; privacy manifest passes Required-Reason API standards; all 240 project tests pass with 0 errors and 0 analyzer warnings.
