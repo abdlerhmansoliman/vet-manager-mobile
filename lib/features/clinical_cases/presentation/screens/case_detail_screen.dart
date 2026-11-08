@@ -34,22 +34,37 @@ class CaseDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (repository == null) {
+    IMediaRepository? effectiveMediaRepo = mediaRepository;
+    if (effectiveMediaRepo == null) {
+      try {
+        effectiveMediaRepo = RepositoryProvider.of<IMediaRepository>(context);
+      } catch (_) {}
+    }
+
+    ICaseRepository? effectiveCaseRepo = repository;
+    if (effectiveCaseRepo == null) {
+      try {
+        effectiveCaseRepo = RepositoryProvider.of<ICaseRepository>(context);
+      } catch (_) {}
+    }
+
+    if (effectiveCaseRepo == null) {
       // In testing or when repository is already provided up the tree
       return _CaseDetailView(
         caseId: caseId,
         initialDetail: initialDetail,
-        mediaRepository: mediaRepository,
+        mediaRepository: effectiveMediaRepo,
       );
     }
 
+    final nonNullCaseRepo = effectiveCaseRepo;
     return BlocProvider<CaseDetailBloc>(
-      create: (context) => CaseDetailBloc(repository: repository!)
+      create: (context) => CaseDetailBloc(repository: nonNullCaseRepo)
         ..add(CaseDetailLoaded(caseId)),
       child: _CaseDetailView(
         caseId: caseId,
         initialDetail: initialDetail,
-        mediaRepository: mediaRepository,
+        mediaRepository: effectiveMediaRepo,
       ),
     );
   }
@@ -71,6 +86,15 @@ class _CaseDetailView extends StatefulWidget {
 }
 
 class _CaseDetailViewState extends State<_CaseDetailView> {
+  IMediaRepository? _resolveMediaRepo(BuildContext context) {
+    if (widget.mediaRepository != null) return widget.mediaRepository;
+    try {
+      return RepositoryProvider.of<IMediaRepository>(context);
+    } catch (_) {
+      return null;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -184,7 +208,7 @@ class _CaseDetailViewState extends State<_CaseDetailView> {
                 DiagnosticMediaGallery(
                   imageableType: 'clinical_case',
                   imageableId: summary.id,
-                  repository: widget.mediaRepository,
+                  repository: widget.mediaRepository ?? _resolveMediaRepo(context),
                 )
                     .animate()
                     .fadeIn(duration: 250.ms, delay: 180.ms)

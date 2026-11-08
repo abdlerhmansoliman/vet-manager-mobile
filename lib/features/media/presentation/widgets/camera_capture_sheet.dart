@@ -79,8 +79,8 @@ class _CameraCaptureSheetState extends State<CameraCaptureSheet> {
     return BlocConsumer<MediaBloc, MediaState>(
       listener: (context, state) {
         if (state is MediaOperationSuccess) {
-          AppSnackbar.showSuccess(context, state.message);
           Navigator.of(context).pop();
+          AppSnackbar.showSuccess(context, state.message);
         } else if (state is MediaFailure) {
           AppSnackbar.showError(context, state.message);
         }
@@ -272,6 +272,38 @@ class _CameraCaptureSheetState extends State<CameraCaptureSheet> {
                     ),
                   ),
                   const SizedBox(height: 16),
+                ],
+
+                // Inline error notice if upload operation encountered a problem
+                if (state is MediaFailure) ...[
+                  Container(
+                    key: const Key('media_upload_error_banner'),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: AppColors.badgeCriticalRose,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.error_outline_rounded,
+                          color: AppColors.badgeCriticalRoseText,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            state.message,
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: AppColors.badgeCriticalRoseText,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 14),
                 ],
 
                 // Action button

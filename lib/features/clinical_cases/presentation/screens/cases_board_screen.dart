@@ -12,6 +12,7 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/text_styles.dart';
 import '../../../../core/widgets/animated_pressable.dart';
 import '../../domain/entities/case_entity.dart';
+import '../../../media/domain/repositories/media_repository.dart';
 import '../../domain/repositories/case_repository.dart';
 import '../bloc/cases_board_bloc.dart';
 import '../bloc/cases_board_event.dart';
@@ -21,12 +22,14 @@ import '../widgets/case_card.dart';
 /// Clinical Triage Board screen presenting Routine, Urgent, and Critical encounters.
 class CasesBoardScreen extends StatelessWidget {
   final ICaseRepository? repository;
+  final IMediaRepository? mediaRepository;
   final List<CaseSummaryEntity>? initialCases;
   final VoidCallback? onSync;
 
   const CasesBoardScreen({
     super.key,
     this.repository,
+    this.mediaRepository,
     this.initialCases,
     this.onSync,
   });
@@ -34,7 +37,11 @@ class CasesBoardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (repository == null) {
-      return _CasesBoardView(initialCases: initialCases, onSync: onSync);
+      return _CasesBoardView(
+        initialCases: initialCases,
+        mediaRepository: mediaRepository,
+        onSync: onSync,
+      );
     }
 
     return BlocProvider<CasesBoardBloc>(
@@ -42,6 +49,7 @@ class CasesBoardScreen extends StatelessWidget {
         ..add(const CasesBoardStarted()),
       child: _CasesBoardView(
         repository: repository,
+        mediaRepository: mediaRepository,
         initialCases: initialCases,
         onSync: onSync,
       ),
@@ -51,11 +59,13 @@ class CasesBoardScreen extends StatelessWidget {
 
 class _CasesBoardView extends StatefulWidget {
   final ICaseRepository? repository;
+  final IMediaRepository? mediaRepository;
   final List<CaseSummaryEntity>? initialCases;
   final VoidCallback? onSync;
 
   const _CasesBoardView({
     this.repository,
+    this.mediaRepository,
     this.initialCases,
     this.onSync,
   });
@@ -289,6 +299,7 @@ class _CasesBoardViewState extends State<_CasesBoardView> {
                           return CaseCard(
                             clinicalCase: cases[index],
                             repository: widget.repository,
+                            mediaRepository: widget.mediaRepository,
                             index: index,
                           );
                         },

@@ -129,6 +129,7 @@ class AppRouter {
             initialIndex: 1,
             caseRepository: _caseRepository,
             patientRepository: _patientRepository,
+            mediaRepository: _mediaRepository,
             syncManager: _syncManager,
           );
         },
@@ -140,6 +141,7 @@ class AppRouter {
             initialIndex: 0,
             caseRepository: _caseRepository,
             patientRepository: _patientRepository,
+            mediaRepository: _mediaRepository,
             syncManager: _syncManager,
           );
         },

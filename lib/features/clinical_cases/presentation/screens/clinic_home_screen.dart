@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/text_styles.dart';
 import '../../../../sync/sync_manager.dart';
 import '../../../clients_patients/domain/repositories/patient_repository.dart';
 import '../../../clients_patients/presentation/screens/patient_list_screen.dart';
+import '../../../media/domain/repositories/media_repository.dart';
 import '../../domain/repositories/case_repository.dart';
 import 'cases_board_screen.dart';
 
@@ -12,6 +14,7 @@ import 'cases_board_screen.dart';
 class ClinicHomeScreen extends StatefulWidget {
   final ICaseRepository? caseRepository;
   final IPatientRepository? patientRepository;
+  final IMediaRepository? mediaRepository;
   final SyncManager? syncManager;
   final int initialIndex;
 
@@ -19,6 +22,7 @@ class ClinicHomeScreen extends StatefulWidget {
     super.key,
     this.caseRepository,
     this.patientRepository,
+    this.mediaRepository,
     this.syncManager,
     this.initialIndex = 0,
   });
@@ -38,8 +42,19 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
     widget.syncManager?.syncNow();
   }
 
+  IMediaRepository? _resolveMediaRepo(BuildContext context) {
+    if (widget.mediaRepository != null) return widget.mediaRepository;
+    try {
+      return RepositoryProvider.of<IMediaRepository>(context);
+    } catch (_) {
+      return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final effectiveMediaRepo = _resolveMediaRepo(context);
+
     return Scaffold(
       backgroundColor: AppColors.backgroundCream,
       body: IndexedStack(
@@ -47,12 +62,14 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
         children: [
           CasesBoardScreen(
             repository: widget.caseRepository,
+            mediaRepository: effectiveMediaRepo,
             onSync: () => widget.syncManager?.syncNow(),
           ),
           if (widget.patientRepository != null)
             PatientListScreen(
               repository: widget.patientRepository!,
               caseRepository: widget.caseRepository,
+              mediaRepository: effectiveMediaRepo,
               onSync: () => widget.syncManager?.syncNow(),
             )
           else

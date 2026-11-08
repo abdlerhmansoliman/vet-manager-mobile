@@ -1,12 +1,14 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/text_styles.dart';
 import '../../../../core/widgets/animal_species_avatar.dart';
 import '../../domain/entities/patient_entity.dart';
 import '../../domain/repositories/patient_repository.dart';
 import '../../../clinical_cases/domain/repositories/case_repository.dart';
+import '../../../media/domain/repositories/media_repository.dart';
 import '../screens/patient_detail_screen.dart';
 
 /// Clinical patient card featuring seamless [OpenContainer] Material motion transform.
@@ -15,6 +17,7 @@ class PatientCard extends StatelessWidget {
   final int index;
   final IPatientRepository? repository;
   final ICaseRepository? caseRepository;
+  final IMediaRepository? mediaRepository;
 
   const PatientCard({
     super.key,
@@ -22,6 +25,7 @@ class PatientCard extends StatelessWidget {
     this.index = 0,
     this.repository,
     this.caseRepository,
+    this.mediaRepository,
   });
 
   @override
@@ -192,10 +196,17 @@ class PatientCard extends StatelessWidget {
           );
         },
         openBuilder: (context, closeContainer) {
+          IMediaRepository? effectiveMediaRepo = mediaRepository;
+          if (effectiveMediaRepo == null) {
+            try {
+              effectiveMediaRepo = RepositoryProvider.of<IMediaRepository>(context);
+            } catch (_) {}
+          }
           return PatientDetailScreen(
             patient: patient,
             repository: repository,
             caseRepository: caseRepository,
+            mediaRepository: effectiveMediaRepo,
           );
         },
       ),

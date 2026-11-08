@@ -142,7 +142,7 @@ void main() {
       expect(find.text('Diagnostic image attached successfully.'), findsOneWidget);
     });
 
-    testWidgets('shows error snackbar on upload failure (error shielding)', (tester) async {
+    testWidgets('shows error banner and snackbar on upload failure (error shielding)', (tester) async {
       whenListen(
         mockMediaBloc,
         Stream.fromIterable([
@@ -155,7 +155,9 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
 
-      expect(find.text('Storage quota exceeded. Please check clinic plan.'), findsOneWidget);
+      expect(find.byKey(const Key('media_upload_error_banner')), findsOneWidget);
+      expect(find.byType(SnackBar), findsOneWidget);
+      expect(find.text('Storage quota exceeded. Please check clinic plan.'), findsNWidgets(2));
     });
   });
 }

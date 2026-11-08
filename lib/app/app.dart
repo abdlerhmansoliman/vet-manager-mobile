@@ -71,7 +71,18 @@ class _VetManagerAppState extends State<VetManagerApp> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<AuthBloc>.value(
+    final repoProviders = <RepositoryProvider>[
+      if (widget.caseRepository != null)
+        RepositoryProvider<ICaseRepository>.value(value: widget.caseRepository!),
+      if (widget.patientRepository != null)
+        RepositoryProvider<IPatientRepository>.value(value: widget.patientRepository!),
+      if (widget.staffRepository != null)
+        RepositoryProvider<IStaffRepository>.value(value: widget.staffRepository!),
+      if (widget.mediaRepository != null)
+        RepositoryProvider<IMediaRepository>.value(value: widget.mediaRepository!),
+    ];
+
+    final app = BlocProvider<AuthBloc>.value(
       value: _authBloc,
       child: MaterialApp.router(
         title: 'VetManager',
@@ -81,6 +92,15 @@ class _VetManagerAppState extends State<VetManagerApp> {
         themeMode: ThemeMode.light,
         routerConfig: _appRouter.router,
       ),
+    );
+
+    if (repoProviders.isEmpty) {
+      return app;
+    }
+
+    return MultiRepositoryProvider(
+      providers: repoProviders,
+      child: app,
     );
   }
 }

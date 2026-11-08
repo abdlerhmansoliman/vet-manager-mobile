@@ -1,10 +1,12 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/text_styles.dart';
 import '../../../../core/widgets/animal_species_avatar.dart';
 import '../../../../core/widgets/triage_priority_badge.dart';
+import '../../../media/domain/repositories/media_repository.dart';
 import '../../domain/entities/case_entity.dart';
 import '../../domain/repositories/case_repository.dart';
 import '../screens/case_detail_screen.dart';
@@ -13,12 +15,14 @@ import '../screens/case_detail_screen.dart';
 class CaseCard extends StatelessWidget {
   final CaseSummaryEntity clinicalCase;
   final ICaseRepository? repository;
+  final IMediaRepository? mediaRepository;
   final int index;
 
   const CaseCard({
     super.key,
     required this.clinicalCase,
     this.repository,
+    this.mediaRepository,
     this.index = 0,
   });
 
@@ -220,9 +224,22 @@ class CaseCard extends StatelessWidget {
           );
         },
         openBuilder: (context, closeContainer) {
+          IMediaRepository? effectiveMediaRepo = mediaRepository;
+          if (effectiveMediaRepo == null) {
+            try {
+              effectiveMediaRepo = RepositoryProvider.of<IMediaRepository>(context);
+            } catch (_) {}
+          }
+          ICaseRepository? effectiveCaseRepo = repository;
+          if (effectiveCaseRepo == null) {
+            try {
+              effectiveCaseRepo = RepositoryProvider.of<ICaseRepository>(context);
+            } catch (_) {}
+          }
           return CaseDetailScreen(
             caseId: clinicalCase.id,
-            repository: repository,
+            repository: effectiveCaseRepo,
+            mediaRepository: effectiveMediaRepo,
           );
         },
       ),

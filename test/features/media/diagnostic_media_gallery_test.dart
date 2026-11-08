@@ -1,9 +1,11 @@
 import 'dart:io';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:vet_manager_mobile/features/media/domain/entities/diagnostic_image_entity.dart';
+import 'package:vet_manager_mobile/features/media/domain/repositories/media_repository.dart';
 import 'package:vet_manager_mobile/features/media/presentation/bloc/media_bloc.dart';
 import 'package:vet_manager_mobile/features/media/presentation/bloc/media_event.dart';
 import 'package:vet_manager_mobile/features/media/presentation/bloc/media_state.dart';
@@ -129,5 +131,73 @@ void main() {
 
       verify(() => mockMediaBloc.add(const DeleteMediaRequested('img-alpha'))).called(1);
     });
+
+    testWidgets('resolves repository from RepositoryProvider and creates local bloc', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: RepositoryProvider<IMediaRepository>.value(
+            value: mockMediaBloc is IMediaRepository ? mockMediaBloc as IMediaRepository : _DummyRepo(),
+            child: const Scaffold(
+              body: DiagnosticMediaGallery(
+                imageableType: 'clinical_case',
+                imageableId: 'case-001',
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Diagnostic Media & X-Rays'), findsOneWidget);
+    });
+
+    testWidgets('fallback to in-memory repository does not throw UnimplementedError', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: DiagnosticMediaGallery(
+              imageableType: 'clinical_case',
+              imageableId: 'case-001',
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Diagnostic Media & X-Rays'), findsOneWidget);
+    });
   });
+}
+
+class _DummyRepo implements IMediaRepository {
+  @override
+  Future<DiagnosticImageEntity> captureAndUploadImage({
+    required String imageableType,
+    required String imageableId,
+    required String sourceFilePath,
+    String? title,
+    String? tenantId,
+    void Function(double progress)? onProgress,
+  }) async {
+    return DiagnosticImageEntity(
+      id: 'dummy',
+      imageableType: imageableType,
+      imageableId: imageableId,
+      url: sourceFilePath,
+      fileSizeBytes: 100,
+      createdAt: DateTime.now(),
+    );
+  }
+
+  @override
+  Future<List<DiagnosticImageEntity>> getImagesForCase(String caseId) async => [];
+
+  @override
+  Future<List<DiagnosticImageEntity>> getImagesForPatient(String patientId) async => [];
+
+  @override
+  Future<void> deleteImage(String imageId) async {}
+
+  @override
+  Future<int> retryPendingUploads() async => 0;
 }

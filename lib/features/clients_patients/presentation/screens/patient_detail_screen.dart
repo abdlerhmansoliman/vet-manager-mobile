@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/text_styles.dart';
 import '../../../../core/widgets/animal_species_avatar.dart';
@@ -7,6 +8,7 @@ import '../../../../core/widgets/triage_priority_badge.dart';
 import '../../../clinical_cases/domain/entities/case_entity.dart';
 import '../../../clinical_cases/domain/repositories/case_repository.dart';
 import '../../../clinical_cases/presentation/screens/case_detail_screen.dart';
+import '../../../media/domain/repositories/media_repository.dart';
 import '../../domain/entities/patient_entity.dart';
 import '../../domain/repositories/patient_repository.dart';
 import 'create_patient_screen.dart';
@@ -24,12 +26,14 @@ class PatientDetailScreen extends StatefulWidget {
   final PatientEntity patient;
   final IPatientRepository? repository;
   final ICaseRepository? caseRepository;
+  final IMediaRepository? mediaRepository;
 
   const PatientDetailScreen({
     super.key,
     required this.patient,
     this.repository,
     this.caseRepository,
+    this.mediaRepository,
   });
 
   @override
@@ -38,6 +42,15 @@ class PatientDetailScreen extends StatefulWidget {
 
 class _PatientDetailScreenState extends State<PatientDetailScreen> {
   late PatientEntity _patient;
+
+  IMediaRepository? _resolveMediaRepo() {
+    if (widget.mediaRepository != null) return widget.mediaRepository;
+    try {
+      return RepositoryProvider.of<IMediaRepository>(context);
+    } catch (_) {
+      return null;
+    }
+  }
   int _selectedTabIndex = 0; // 0: Demographics & Owner, 1: Visits & Clinical Cases
 
   @override
@@ -267,6 +280,7 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
                                 builder: (context) => CaseDetailScreen(
                                   caseId: newCase.id,
                                   repository: widget.caseRepository,
+                                  mediaRepository: _resolveMediaRepo(),
                                 ),
                               ),
                             );
@@ -589,6 +603,7 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
                     builder: (context) => CaseDetailScreen(
                       caseId: c.id,
                       repository: widget.caseRepository,
+                      mediaRepository: _resolveMediaRepo(),
                     ),
                   ),
                 );

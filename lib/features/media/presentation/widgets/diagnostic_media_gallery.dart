@@ -12,8 +12,10 @@ import '../bloc/media_state.dart';
 import '../screens/photo_viewer_screen.dart';
 import 'camera_capture_sheet.dart';
 
-class _EmptyMediaRepository implements IMediaRepository {
-  const _EmptyMediaRepository();
+class _InMemoryMediaRepository implements IMediaRepository {
+  final List<DiagnosticImageEntity> _images = [];
+
+  _InMemoryMediaRepository();
 
   @override
   Future<DiagnosticImageEntity> captureAndUploadImage({
@@ -24,17 +26,33 @@ class _EmptyMediaRepository implements IMediaRepository {
     String? tenantId,
     void Function(double progress)? onProgress,
   }) async {
-    throw UnimplementedError();
+    final image = DiagnosticImageEntity(
+      id: 'local_${DateTime.now().millisecondsSinceEpoch}',
+      imageableType: imageableType,
+      imageableId: imageableId,
+      url: sourceFilePath,
+      localPath: sourceFilePath,
+      title: title,
+      mimeType: 'image/jpeg',
+      fileSizeBytes: File(sourceFilePath).existsSync() ? File(sourceFilePath).lengthSync() : 0,
+      createdAt: DateTime.now(),
+    );
+    _images.insert(0, image);
+    return image;
   }
 
   @override
-  Future<List<DiagnosticImageEntity>> getImagesForCase(String caseId) async => const [];
+  Future<List<DiagnosticImageEntity>> getImagesForCase(String caseId) async =>
+      _images.where((img) => img.imageableType == 'clinical_case' && img.imageableId == caseId).toList();
 
   @override
-  Future<List<DiagnosticImageEntity>> getImagesForPatient(String patientId) async => const [];
+  Future<List<DiagnosticImageEntity>> getImagesForPatient(String patientId) async =>
+      _images.where((img) => img.imageableType == 'patient' && img.imageableId == patientId).toList();
 
   @override
-  Future<void> deleteImage(String imageId) async {}
+  Future<void> deleteImage(String imageId) async {
+    _images.removeWhere((img) => img.id == imageId);
+  }
 
   @override
   Future<int> retryPendingUploads() async => 0;
@@ -61,17 +79,27 @@ class DiagnosticMediaGallery extends StatefulWidget {
 
 class _DiagnosticMediaGalleryState extends State<DiagnosticMediaGallery> {
   MediaBloc? _localBloc;
+  bool _isInitialized = false;
 
   @override
-  void initState() {
-    super.initState();
-    if (widget.bloc == null) {
-      final repo = widget.repository ?? const _EmptyMediaRepository();
-      _localBloc = MediaBloc(repository: repo);
-      if (widget.imageableType == 'clinical_case') {
-        _localBloc!.add(LoadCaseMediaRequested(widget.imageableId));
-      } else {
-        _localBloc!.add(LoadPatientMediaRequested(widget.imageableId));
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInitialized) {
+      _isInitialized = true;
+      if (widget.bloc == null) {
+        IMediaRepository? repo = widget.repository;
+        if (repo == null) {
+          try {
+            repo = RepositoryProvider.of<IMediaRepository>(context);
+          } catch (_) {}
+        }
+        repo ??= _InMemoryMediaRepository();
+        _localBloc = MediaBloc(repository: repo);
+        if (widget.imageableType == 'clinical_case') {
+          _localBloc!.add(LoadCaseMediaRequested(widget.imageableId));
+        } else {
+          _localBloc!.add(LoadPatientMediaRequested(widget.imageableId));
+        }
       }
     }
   }

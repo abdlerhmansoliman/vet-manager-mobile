@@ -6,6 +6,7 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/text_styles.dart';
 import '../../domain/repositories/patient_repository.dart';
 import '../../../clinical_cases/domain/repositories/case_repository.dart';
+import '../../../media/domain/repositories/media_repository.dart';
 import '../bloc/patient_list_bloc.dart';
 import '../bloc/patient_list_event.dart';
 import '../bloc/patient_list_state.dart';
@@ -16,12 +17,14 @@ import 'create_patient_screen.dart';
 class PatientListScreen extends StatefulWidget {
   final IPatientRepository repository;
   final ICaseRepository? caseRepository;
+  final IMediaRepository? mediaRepository;
   final VoidCallback? onSync;
 
   const PatientListScreen({
     super.key,
     required this.repository,
     this.caseRepository,
+    this.mediaRepository,
     this.onSync,
   });
 
@@ -344,6 +347,7 @@ class _PatientListScreenState extends State<PatientListScreen> {
                 index: index,
                 repository: widget.repository,
                 caseRepository: widget.caseRepository,
+                mediaRepository: widget.mediaRepository,
               );
             },
           ),

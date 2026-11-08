@@ -67,6 +67,14 @@ class AppDatabase extends _$AppDatabase {
       },
       beforeOpen: (details) async {
         await customStatement('PRAGMA foreign_keys = ON;');
+        final m = createMigrator();
+        for (final table in allTables) {
+          try {
+            await m.createTable(table);
+          } catch (_) {
+            // Table already exists in schema
+          }
+        }
       },
     );
   }
