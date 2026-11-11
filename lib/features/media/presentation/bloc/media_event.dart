@@ -17,6 +17,16 @@ class LoadCaseMediaRequested extends MediaEvent {
   List<Object?> get props => [caseId];
 }
 
+/// Request to load images attached to a specific visit encounter.
+class LoadVisitMediaRequested extends MediaEvent {
+  final String visitId;
+
+  const LoadVisitMediaRequested(this.visitId);
+
+  @override
+  List<Object?> get props => [visitId];
+}
+
 /// Request to load images attached to a patient file.
 class LoadPatientMediaRequested extends MediaEvent {
   final String patientId;
@@ -32,17 +42,19 @@ class UploadMediaRequested extends MediaEvent {
   final String imageableType;
   final String imageableId;
   final String sourceFilePath;
+  final String? parentCaseId;
   final String? title;
 
   const UploadMediaRequested({
     required this.imageableType,
     required this.imageableId,
     required this.sourceFilePath,
+    this.parentCaseId,
     this.title,
   });
 
   @override
-  List<Object?> get props => [imageableType, imageableId, sourceFilePath, title];
+  List<Object?> get props => [imageableType, imageableId, sourceFilePath, parentCaseId, title];
 }
 
 /// Real-time progress update during direct cloud upload.

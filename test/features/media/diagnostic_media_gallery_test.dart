@@ -175,6 +175,7 @@ class _DummyRepo implements IMediaRepository {
     required String imageableType,
     required String imageableId,
     required String sourceFilePath,
+    String? parentCaseId,
     String? title,
     String? tenantId,
     void Function(double progress)? onProgress,
@@ -191,6 +192,9 @@ class _DummyRepo implements IMediaRepository {
 
   @override
   Future<List<DiagnosticImageEntity>> getImagesForCase(String caseId) async => [];
+
+  @override
+  Future<List<DiagnosticImageEntity>> getImagesForVisit(String visitId) async => [];
 
   @override
   Future<List<DiagnosticImageEntity>> getImagesForPatient(String patientId) async => [];

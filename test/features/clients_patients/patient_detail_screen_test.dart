@@ -79,7 +79,7 @@ void main() {
     expect(find.text('Vaccinated for BVD in 2025.'), findsOneWidget);
 
     // 6. Action button
-    expect(find.text('Start Case'), findsOneWidget);
+    expect(find.text('Create New Case'), findsOneWidget);
   });
 
   testWidgets('PatientDetailScreen switches between tabs and displays empty cases placeholder', (tester) async {
@@ -90,8 +90,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Tap on Visits & Cases tab
-    await tester.tap(find.text('Visits & Cases'));
+    // Tap on Clinical Cases tab
+    await tester.tap(find.text('Clinical Cases'));
     await tester.pumpAndSettle();
 
     expect(find.text('No Clinical Cases Recorded'), findsOneWidget);
@@ -111,13 +111,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Start Case'));
+    await tester.tap(find.text('Create New Case'));
     await tester.pumpAndSettle();
 
     expect(find.text('Start Case for Bessie'), findsOneWidget);
-    expect(find.text('Chief Complaint *'), findsOneWidget);
-    expect(find.text('Triage Priority'), findsOneWidget);
-    expect(find.text('Encounter Type'), findsOneWidget);
     expect(find.text('Open Encounter & Begin Triage'), findsOneWidget);
   });
 

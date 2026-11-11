@@ -51,7 +51,7 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
       return null;
     }
   }
-  int _selectedTabIndex = 0; // 0: Demographics & Owner, 1: Visits & Clinical Cases
+  int _selectedTabIndex = 0; // 0: Demographics & Owner, 1: Clinical Cases
 
   @override
   void initState() {
@@ -133,6 +133,59 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
     }
   }
 
+  Future<void> _handleCreateCase({
+    required String complaint,
+    required String priority,
+    required String caseType,
+  }) async {
+    if (widget.caseRepository == null) {
+      AppSnackbar.showInfo(
+        context,
+        'Starting encounter for ${_patient.nameOrTag}...',
+      );
+      return;
+    }
+
+    try {
+      final now = DateTime.now();
+      final caseNum =
+          'CAS-${now.year}-${now.millisecondsSinceEpoch.toString().substring(7)}';
+
+      final newCase = await widget.caseRepository!.openCase(
+        patientId: _patient.id,
+        caseNumber: caseNum,
+        chiefComplaint: complaint,
+        priority: priority,
+        caseType: caseType,
+      );
+
+      if (!mounted) return;
+      AppSnackbar.showSuccess(
+        context,
+        'Case ${newCase.caseNumber} opened!',
+      );
+
+      if (!mounted) return;
+
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (context) => CaseDetailScreen(
+            caseId: newCase.id,
+            repository: widget.caseRepository,
+            mediaRepository: _resolveMediaRepo(),
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      AppSnackbar.showError(
+        context,
+        e,
+        fallbackMessage: 'Unable to open encounter. Please try again.',
+      );
+    }
+  }
+
   void _showStartCaseSheet(BuildContext context) {
     final complaintController = TextEditingController();
     String priority = 'routine';
@@ -144,8 +197,8 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
       backgroundColor: Colors.transparent,
       builder: (modalContext) {
         return StatefulBuilder(
-          builder: (context, setModalState) {
-            final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+          builder: (sheetContext, setModalState) {
+            final bottomInset = MediaQuery.of(sheetContext).viewInsets.bottom;
             return Container(
               padding: EdgeInsets.fromLTRB(20, 20, 20, 24 + bottomInset),
               decoration: const BoxDecoration(
@@ -169,7 +222,7 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
                         ),
                         IconButton(
                           icon: const Icon(Icons.close_rounded, color: AppColors.textMuted),
-                          onPressed: () => Navigator.of(context).pop(),
+                          onPressed: () => Navigator.of(sheetContext).pop(),
                         ),
                       ],
                     ),
@@ -246,58 +299,19 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
                     ),
                     const SizedBox(height: 24),
                     ElevatedButton.icon(
-                      onPressed: () async {
+                      onPressed: () {
                         final complaint = complaintController.text.trim();
                         if (complaint.isEmpty) {
-                          AppSnackbar.showWarning(context, 'Please enter a chief complaint.');
+                          AppSnackbar.showWarning(sheetContext, 'Please enter a chief complaint.');
                           return;
                         }
 
-                        Navigator.of(context).pop();
-
-                        if (widget.caseRepository != null) {
-                          try {
-                            final now = DateTime.now();
-                            final caseNum =
-                                'CAS-${now.year}-${now.millisecondsSinceEpoch.toString().substring(7)}';
-
-                            final newCase = await widget.caseRepository!.openCase(
-                              patientId: _patient.id,
-                              caseNumber: caseNum,
-                              chiefComplaint: complaint,
-                              priority: priority,
-                              caseType: caseType,
-                            );
-
-                            if (!mounted) return;
-                            AppSnackbar.showSuccess(
-                              this.context,
-                              'Encounter ${newCase.caseNumber} opened!',
-                            );
-
-                            Navigator.of(this.context).push(
-                              MaterialPageRoute<void>(
-                                builder: (context) => CaseDetailScreen(
-                                  caseId: newCase.id,
-                                  repository: widget.caseRepository,
-                                  mediaRepository: _resolveMediaRepo(),
-                                ),
-                              ),
-                            );
-                          } catch (e) {
-                            if (!mounted) return;
-                            AppSnackbar.showError(
-                              this.context,
-                              e,
-                              fallbackMessage: 'Unable to open encounter. Please try again.',
-                            );
-                          }
-                        } else {
-                          AppSnackbar.showInfo(
-                            this.context,
-                            'Starting encounter for ${_patient.nameOrTag}...',
-                          );
-                        }
+                        Navigator.of(sheetContext).pop();
+                        _handleCreateCase(
+                          complaint: complaint,
+                          priority: priority,
+                          caseType: caseType,
+                        );
                       },
                       icon: const Icon(Icons.check_circle_outline_rounded),
                       label: const Text('Open Encounter & Begin Triage'),
@@ -453,7 +467,7 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
               const SizedBox(height: 16),
               _buildMedicalHistoryCard(),
             ] else ...[
-              _buildCasesAndVisitsSection(),
+              _buildClinicalCasesSection(),
             ],
           ],
         ),
@@ -506,7 +520,7 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
                 ),
                 alignment: Alignment.center,
                 child: Text(
-                  'Visits & Cases',
+                  'Clinical Cases',
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
@@ -521,7 +535,7 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
     );
   }
 
-  Widget _buildCasesAndVisitsSection() {
+  Widget _buildClinicalCasesSection() {
     if (widget.caseRepository == null) {
       return Container(
         padding: const EdgeInsets.all(24),
@@ -532,7 +546,7 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
         ),
         child: Column(
           children: [
-            const Icon(Icons.folder_open_rounded, size: 44, color: AppColors.textMuted),
+            const Icon(Icons.medical_services_outlined, size: 44, color: AppColors.textMuted),
             const SizedBox(height: 12),
             Text(
               'No Clinical Cases Recorded',
@@ -540,7 +554,7 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
             ),
             const SizedBox(height: 6),
             Text(
-              'Every clinical encounter, diagnosis, and SOAP progress note is stored as a case for ${_patient.nameOrTag}. Tap "Start Case" below to record the first visit.',
+              'Every clinical problem, disease episode, and treatment plan for ${_patient.nameOrTag} is managed as a case. Tap "Create New Case" below to open a case.',
               style: AppTextStyles.bodySmall.copyWith(color: AppColors.textMuted),
               textAlign: TextAlign.center,
             ),
@@ -572,15 +586,15 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
             ),
             child: Column(
               children: [
-                const Icon(Icons.medical_information_outlined, size: 44, color: AppColors.primaryEmerald),
+                const Icon(Icons.medical_services_outlined, size: 44, color: AppColors.primaryEmerald),
                 const SizedBox(height: 12),
                 Text(
-                  'No Prior Encounters Recorded',
+                  'No Clinical Cases Recorded',
                   style: AppTextStyles.titleMedium.copyWith(fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'All clinical visits, vitals, and diagnoses for ${_patient.nameOrTag} will appear here in chronological order.',
+                  'All clinical cases, diagnoses, and medical problems for ${_patient.nameOrTag} will appear here in chronological order.',
                   style: AppTextStyles.bodySmall.copyWith(color: AppColors.textMuted),
                   textAlign: TextAlign.center,
                 ),
@@ -1069,7 +1083,7 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
             child: ElevatedButton.icon(
               onPressed: () => _showStartCaseSheet(context),
               icon: const Icon(Icons.medical_services_outlined, size: 20),
-              label: const Text('Start Case'),
+              label: const Text('Create New Case'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryEmerald,
                 foregroundColor: Colors.white,

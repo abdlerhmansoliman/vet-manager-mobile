@@ -12,6 +12,7 @@ import '../../features/clients_patients/domain/repositories/patient_repository.d
 import '../../features/clinical_cases/domain/repositories/case_repository.dart';
 import '../../features/clinical_cases/presentation/screens/clinic_home_screen.dart';
 import '../../features/clinical_cases/presentation/screens/case_detail_screen.dart';
+import '../../features/clinical_cases/presentation/screens/visit_detail_screen.dart';
 import '../../features/staff_profile/domain/entities/staff_entity.dart';
 import '../../features/staff_profile/domain/repositories/staff_repository.dart';
 import '../../features/staff_profile/presentation/screens/doctor_profile_screen.dart';
@@ -30,6 +31,8 @@ abstract class AppRoutes {
   static const String patients = '/patients';
   static const String cases = '/cases';
   static const String caseDetail = '/cases/:id';
+  static const String visitDetail = '/cases/:caseId/visits/:visitId';
+  static String visitDetailPath(String caseId, String visitId) => '/cases/$caseId/visits/$visitId';
   static const String doctorProfile = '/profile';
   static const String staffManagement = '/staff';
   static const String photoViewer = '/photo-viewer';
@@ -154,6 +157,18 @@ class AppRouter {
             caseId: caseId,
             repository: _caseRepository,
             mediaRepository: _mediaRepository,
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.visitDetail,
+        builder: (context, state) {
+          final caseId = state.pathParameters['caseId'] ?? '';
+          final visitId = state.pathParameters['visitId'] ?? '';
+          return VisitDetailScreen(
+            caseId: caseId,
+            visitId: visitId,
+            caseRepository: _caseRepository,
           );
         },
       ),

@@ -7,6 +7,7 @@ abstract class IMediaRepository {
     required String imageableType,
     required String imageableId,
     required String sourceFilePath,
+    String? parentCaseId,
     String? title,
     String? tenantId,
     void Function(double progress)? onProgress,
@@ -14,6 +15,9 @@ abstract class IMediaRepository {
 
   /// Retrieves diagnostic images associated with a clinical case/encounter.
   Future<List<DiagnosticImageEntity>> getImagesForCase(String caseId);
+
+  /// Retrieves diagnostic images associated with a specific visit encounter.
+  Future<List<DiagnosticImageEntity>> getImagesForVisit(String visitId);
 
   /// Retrieves diagnostic images associated with a patient file.
   Future<List<DiagnosticImageEntity>> getImagesForPatient(String patientId);

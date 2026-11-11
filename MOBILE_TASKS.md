@@ -33,6 +33,7 @@
 | **08-B** | `mobile/08-patient-crud-medical-file` | Patient Edit, Delete, Multi-Case Medical File & Quick Visit | 🟢 **Completed** |
 | **09** | `mobile/09-cases-triage-board` | Triage board (Routine/Urgent/Critical), SOAP notes & addenda | 🟢 **Completed** |
 | **09-B** | `mobile/offline-sync-error-shielding` | Clinical error shielding, AppSnackbar, inline form validation, and real-time sync push | 🟢 **Completed** |
+| **09-C** | `mobile/clinical-hierarchy-3tier-edits` | Strict 3-Tier Hierarchy (`Patient->Case->Visit`), Compact Visit Tiles, Full 3-Tier Edit & Full-Stack Parity | 🟢 **Completed** |
 | **11** | `mobile/11-staff-and-doctor-profile` | Doctor profile, on-duty toggle & Owner staff CRUD (Create/Edit/PIN) | 🟢 **Completed** |
 | **13** | `mobile/13-diagnostic-media-r2` | Direct-to-R2 upload pipeline, WebP compression & zoom viewer | 🟢 **Completed** |
 | **13-B** | `mobile/multi-clinic-switcher` | Multi-Clinic Switcher (Practice Selection & Tenant Re-authentication) | 🟢 **Completed** |
@@ -196,6 +197,24 @@
   - `test/core/widgets/app_snackbar_test.dart` (5 widget test cases)
 * **Definition of Done**:
   - Zero raw technical exceptions leak to users; inline form validations protect SQLite constraints; background sync triggers seamlessly on patient registration/update/delete; all 150 automated tests pass.
+
+---
+
+#### Part 09-C: Strict 3-Tier Clinical Hierarchy & Universal 3-Level Edits
+* **Branch**: `mobile/clinical-hierarchy-3tier-edits`
+* **Status**: 🟢 Completed
+* **Architectural Invariants & Implementations**:
+  - **Decoupled Patient Profile**: `PatientDetailScreen` strictly displays Clinical Cases ONLY (zero visits/SOAP notes/media here). Primary action: `"Create New Case"`.
+  - **Case Screen as Exclusive Visit Container**: `CaseDetailScreen` displays visits as clean, compact `VisitCard` title tiles. Zero diagnostic media here. Primary action: `"Start New Visit"`.
+  - **Visit Screen as Exclusive Clinical Encounter**: `VisitDetailScreen` exclusively contains SOAP exams, MinIO S3 media direct uploads via presigned URLs, administered doses, immutable addenda, and record signing.
+  - **Universal 3-Tier Editing**:
+    1. Patient Edit: Demographics, allergies, weight, microchip, owner contacts (`PUT /api/v1/patients/{id}`).
+    2. Case Edit: Chief Complaint (`_showEditChiefComplaintDialog`) & Diagnoses (`_showEditDiagnosesDialog`) with dedicated action keys (`PUT /api/v1/cases/{id}`).
+    3. Visit Edit: Visit Title & Type in AppBar (`_showEditVisitDialog`) before signing & locking (`PUT /api/v1/visits/{id}`).
+  - **Full-Stack Backend Parity**:
+    - Backend Visit CRUD: `GET /cases/{case}/visits`, `POST /cases/{case}/visits`, `GET /visits/{visit}`, `PUT /visits/{visit}`.
+    - Bidirectional Sync: Added `visits` deltas to `SyncController.php` and mutation ingestion to `ProcessSyncMutationsJob.php`.
+    - Automated Test Verification: **277 mobile tests passing (`flutter test`), 0 analyzer issues (`flutter analyze`), 106 backend tests passing (`php artisan test`)**.
 
 ---
 

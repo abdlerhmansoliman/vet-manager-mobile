@@ -79,4 +79,49 @@ class R2DirectUploader {
       throw NetworkException(message: 'Failed to stream media to cloud storage: $e');
     }
   }
+
+  /// Uploads [file] directly to MinIO / S3 using a Presigned URL.
+  Future<void> uploadToPresignedUrl({
+    required File file,
+    required String presignedUrl,
+    required String mimeType,
+    Map<String, dynamic>? extraHeaders,
+    void Function(double progress)? onProgress,
+  }) async {
+    try {
+      final fileLength = await file.length();
+      final headers = <String, dynamic>{
+        'Content-Type': mimeType,
+        'Content-Length': fileLength,
+        if (extraHeaders != null) ...extraHeaders,
+      };
+
+      final fileStream = file.openRead();
+
+      final response = await _dio.put<dynamic>(
+        presignedUrl,
+        data: fileStream,
+        options: Options(
+          headers: headers,
+        ),
+        onSendProgress: (sent, total) {
+          if (total > 0 && onProgress != null) {
+            onProgress(sent / total);
+          }
+        },
+      );
+
+      if (response.statusCode == null || response.statusCode! < 200 || response.statusCode! >= 300) {
+        throw ServerException(
+          message: 'MinIO S3 direct upload failed with status ${response.statusCode}.',
+          statusCode: response.statusCode,
+        );
+      }
+    } on DioException catch (e) {
+      throw ErrorInterceptor.parseDioException(e);
+    } catch (e) {
+      if (e is AppException) rethrow;
+      throw NetworkException(message: 'Failed to stream media to MinIO storage: $e');
+    }
+  }
 }

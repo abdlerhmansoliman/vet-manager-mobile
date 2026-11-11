@@ -109,3 +109,12 @@ class CaseDiagnosesUpdated extends CaseDetailEvent {
   @override
   List<Object?> get props => [provisionalDiagnosis, finalDiagnosis];
 }
+
+class CaseChiefComplaintUpdated extends CaseDetailEvent {
+  final String chiefComplaint;
+
+  const CaseChiefComplaintUpdated(this.chiefComplaint);
+
+  @override
+  List<Object?> get props => [chiefComplaint];
+}

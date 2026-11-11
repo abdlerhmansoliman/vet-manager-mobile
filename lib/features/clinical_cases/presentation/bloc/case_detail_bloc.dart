@@ -17,6 +17,7 @@ class CaseDetailBloc extends Bloc<CaseDetailEvent, CaseDetailState> {
     on<CaseSoapNoteAdded>(_onSoapNoteAdded);
     on<CaseAddendumAdded>(_onAddendumAdded);
     on<CaseDiagnosesUpdated>(_onDiagnosesUpdated);
+    on<CaseChiefComplaintUpdated>(_onChiefComplaintUpdated);
   }
 
   Future<void> _onLoaded(
@@ -152,6 +153,25 @@ class CaseDetailBloc extends Bloc<CaseDetailEvent, CaseDetailState> {
       ));
     } catch (e) {
       emit(state.copyWith(errorMessage: ClinicalErrorFormatter.format(e, fallbackMessage: 'Failed to update diagnoses. Please try again.')));
+    }
+  }
+
+  Future<void> _onChiefComplaintUpdated(
+    CaseChiefComplaintUpdated event,
+    Emitter<CaseDetailState> emit,
+  ) async {
+    final detail = state.caseDetail;
+    if (detail == null) return;
+    try {
+      await _repository.updateChiefComplaint(
+        caseId: detail.summary.id,
+        chiefComplaint: event.chiefComplaint,
+      );
+      emit(state.copyWith(
+        actionFeedback: 'Chief complaint updated successfully',
+      ));
+    } catch (e) {
+      emit(state.copyWith(errorMessage: ClinicalErrorFormatter.format(e, fallbackMessage: 'Failed to update chief complaint. Please try again.')));
     }
   }
 }

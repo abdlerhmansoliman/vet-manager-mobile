@@ -63,6 +63,7 @@ void main() async {
 
   final staffRepo = StaffRepositoryImpl(apiClient: apiClient);
   final mediaRepo = MediaRepositoryImpl(
+    apiClient: apiClient,
     db: db,
     storageService: storageService,
   );

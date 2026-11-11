@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'clinical_cases_table.dart';
+import 'visits_table.dart';
 
 /// Drift SQLite Table for Veterinary SOAP Notes & Inpatient Progress Logs.
 @DataClassName('ClinicalProgressNoteData')
@@ -12,6 +13,9 @@ class ClinicalProgressNotesTable extends Table {
 
   /// Foreign key linking note to clinical encounter
   TextColumn get caseId => text().references(ClinicalCasesTable, #id)();
+
+  /// Optional scoped visit encounter identifier
+  TextColumn get visitId => text().nullable().references(VisitsTable, #id)();
 
   /// Patient identifier
   TextColumn get patientId => text()();

@@ -13,12 +13,14 @@ import '../bloc/media_state.dart';
 class CameraCaptureSheet extends StatefulWidget {
   final String imageableType;
   final String imageableId;
+  final String? parentCaseId;
   final ImagePicker? imagePicker;
 
   const CameraCaptureSheet({
     super.key,
     required this.imageableType,
     required this.imageableId,
+    this.parentCaseId,
     this.imagePicker,
   });
 
@@ -69,6 +71,7 @@ class _CameraCaptureSheetState extends State<CameraCaptureSheet> {
             imageableType: widget.imageableType,
             imageableId: widget.imageableId,
             sourceFilePath: _selectedFile!.path,
+            parentCaseId: widget.parentCaseId,
             title: _titleController.text.trim().isNotEmpty ? _titleController.text.trim() : null,
           ),
         );

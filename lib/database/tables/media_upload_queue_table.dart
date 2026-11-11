@@ -1,8 +1,9 @@
 import 'package:drift/drift.dart';
 import 'clinical_cases_table.dart';
 import 'patients_table.dart';
+import 'visits_table.dart';
 
-/// Drift SQLite Table for Queueing Diagnostic Images & Radiographs for Direct Cloudflare R2 Upload.
+/// Drift SQLite Table for Queueing Diagnostic Images & Radiographs for MinIO S3 Upload.
 @DataClassName('MediaUploadQueueData')
 class MediaUploadQueueTable extends Table {
   @override
@@ -16,6 +17,9 @@ class MediaUploadQueueTable extends Table {
 
   /// Optional association to clinical encounter
   TextColumn get caseId => text().nullable().references(ClinicalCasesTable, #id)();
+
+  /// Optional association to specific visit
+  TextColumn get visitId => text().nullable().references(VisitsTable, #id)();
 
   /// Optional association directly to patient record
   TextColumn get patientId => text().nullable().references(PatientsTable, #id)();

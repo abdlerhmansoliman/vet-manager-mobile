@@ -8,6 +8,7 @@ import 'media_state.dart';
 class MediaBloc extends Bloc<MediaEvent, MediaState> {
   final IMediaRepository _repository;
   String? _currentCaseId;
+  String? _currentVisitId;
   String? _currentPatientId;
 
   MediaBloc({
@@ -15,11 +16,35 @@ class MediaBloc extends Bloc<MediaEvent, MediaState> {
   })  : _repository = repository,
         super(const MediaInitial()) {
     on<LoadCaseMediaRequested>(_onLoadCaseMedia);
+    on<LoadVisitMediaRequested>(_onLoadVisitMedia);
     on<LoadPatientMediaRequested>(_onLoadPatientMedia);
     on<UploadMediaRequested>(_onUploadMedia);
     on<UploadProgressUpdated>(_onUploadProgressUpdated);
     on<DeleteMediaRequested>(_onDeleteMedia);
     on<RetryPendingUploadsRequested>(_onRetryPendingUploads);
+  }
+
+  Future<void> _onLoadVisitMedia(
+    LoadVisitMediaRequested event,
+    Emitter<MediaState> emit,
+  ) async {
+    _currentVisitId = event.visitId;
+    emit(MediaLoading(images: state.images));
+
+    try {
+      final items = await _repository.getImagesForVisit(event.visitId);
+      emit(MediaLoaded(images: items));
+    } on AppException catch (e) {
+      emit(MediaFailure(
+        message: ClinicalErrorFormatter.format(e),
+        images: state.images,
+      ));
+    } catch (e) {
+      emit(MediaFailure(
+        message: ClinicalErrorFormatter.format(e, fallbackMessage: 'Failed to load visit images.'),
+        images: state.images,
+      ));
+    }
   }
 
   Future<void> _onLoadCaseMedia(
@@ -83,6 +108,7 @@ class MediaBloc extends Bloc<MediaEvent, MediaState> {
         imageableType: event.imageableType,
         imageableId: event.imageableId,
         sourceFilePath: event.sourceFilePath,
+        parentCaseId: event.parentCaseId,
         title: event.title,
         onProgress: (p) => add(UploadProgressUpdated(p)),
       );
@@ -151,7 +177,9 @@ class MediaBloc extends Bloc<MediaEvent, MediaState> {
   ) async {
     try {
       final count = await _repository.retryPendingUploads();
-      if (_currentCaseId != null) {
+      if (_currentVisitId != null) {
+        add(LoadVisitMediaRequested(_currentVisitId!));
+      } else if (_currentCaseId != null) {
         add(LoadCaseMediaRequested(_currentCaseId!));
       } else if (_currentPatientId != null) {
         add(LoadPatientMediaRequested(_currentPatientId!));

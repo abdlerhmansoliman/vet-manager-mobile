@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 /// Domain entity representing a veterinary SOAP clinical examination or immutable addendum.
 class ProgressNoteEntity extends Equatable {
   final String id;
+  final String? visitId;
   final String caseId;
   final String patientId;
   final String veterinarianId;
@@ -23,6 +24,7 @@ class ProgressNoteEntity extends Equatable {
 
   const ProgressNoteEntity({
     required this.id,
+    this.visitId,
     required this.caseId,
     required this.patientId,
     required this.veterinarianId,
@@ -65,6 +67,7 @@ class ProgressNoteEntity extends Equatable {
   @override
   List<Object?> get props => [
         id,
+        visitId,
         caseId,
         patientId,
         veterinarianId,
@@ -84,3 +87,6 @@ class ProgressNoteEntity extends Equatable {
         syncStatus,
       ];
 }
+
+/// Clinical alias for clinical progress notes.
+typedef ClinicalNote = ProgressNoteEntity;

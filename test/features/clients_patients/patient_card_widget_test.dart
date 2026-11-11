@@ -75,6 +75,6 @@ void main() {
     expect(find.text('Patient Demographics'), findsOneWidget);
     expect(find.text('HIGH-RISK ALLERGY ALERT'), findsOneWidget);
     expect(find.text('Penicillin'), findsOneWidget);
-    expect(find.text('Start Case'), findsOneWidget);
+    expect(find.text('Create New Case'), findsOneWidget);
   });
 }

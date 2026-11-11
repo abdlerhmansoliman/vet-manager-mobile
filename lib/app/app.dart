@@ -71,7 +71,7 @@ class _VetManagerAppState extends State<VetManagerApp> {
 
   @override
   Widget build(BuildContext context) {
-    final repoProviders = <RepositoryProvider>[
+    final repoProviders = <RepositoryProvider<dynamic>>[
       if (widget.caseRepository != null)
         RepositoryProvider<ICaseRepository>.value(value: widget.caseRepository!),
       if (widget.patientRepository != null)

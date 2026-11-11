@@ -16,6 +16,11 @@ Welcome to **VetManager Mobile**. This guide provides essential context, archite
   - `lib/app/`: App entrypoint, routing (`go_router`), global theme, and dependency injection setup.
 - **Offline-First Persistence**: All clinical cases, progress notes, patients, and inventory reads/writes interact with local Drift SQLite first. The background sync engine handles bidirectional synchronization.
 - **Immutable Append-Only Audit**: Progress notes, medical addenda, and pharmacy ledger entries are strictly append-only; historical clinical records are never mutated in place.
+- **Strict 3-Level Clinical Hierarchy (`Patient -> Case -> Visit`)**:
+  - Full specification detailed in [`CLINICAL_WORKFLOW_ARCHITECTURE.md`](file:///home/abdelrhaman/www/vet-manager-mobile/CLINICAL_WORKFLOW_ARCHITECTURE.md).
+  - **Level 1: Patient Profile (`PatientDetailScreen`)**: Strictly displays Clinical Cases ONLY (no visits, no media, no SOAP notes here). Primary button: `"Create New Case"`. Full edit capabilities: Demographics, weight, microchip, high-risk allergies, and owner details (`PUT /api/v1/patients/{patient}`).
+  - **Level 2: Case Detail Screen (`CaseDetailScreen`)**: Represents one medical problem/disease umbrella. Displays case details and the timeline of Visits belonging to this case as compact `VisitCard` title tiles. Zero media galleries allowed here. Primary button: `"Start New Visit"`. Full edit capabilities: Chief complaint, provisional/final diagnoses, triage priority, and case status (`PUT /api/v1/cases/{case}`).
+  - **Level 3: Visit Detail Screen (`VisitDetailScreen`)**: The EXCLUSIVE place for SOAP exams, administered doses, and uploading diagnostic media to MinIO S3 via Presigned URLs. Full edit capabilities: Visit title, visit type, and reason for visit before signing & locking (`PUT /api/v1/visits/{visit}`).
 
 ---
 
@@ -123,3 +128,39 @@ Refer to `MOBILE_TASKS.md` for active development branches, phase completion sta
    - **Sync Engine**: Offline queue dispatchers and conflict resolvers must have simulation tests proving zero clinical data loss.
    - **UI Components & Screens**: Reusable widgets, bottom sheets, and critical user flows must have widget tests verifying rendering, user input, and state responsiveness.
    - **Invariant**: All tests must pass (`flutter test`) before merging any branch into `main`.
+
+---
+
+## 6. Permanent Directives for Full-Stack Parity & Continuous Documentation
+
+> [!IMPORTANT]
+> **MANDATORY STANDING AGENT DIRECTIVE**:
+> Any modification made to the Backend (`/var/www/vet-manager`) or Mobile (`/home/abdelrhaman/www/vet-manager-mobile`) codebase MUST strictly follow these permanent rules:
+
+### 6.1 Architectural Parity Invariant
+Every clinical and domain entity must exist in perfect architectural parity between Mobile (Flutter + Drift SQLite) and Backend (Laravel 11 + MySQL + Eloquent). Whenever an entity, field, or action is added or updated on either side:
+- **Schema Parity**: Eloquent migrations and MySQL schema must correspond 1:1 with Drift SQLite tables and DAOs.
+- **Sync Engine Synchronization**: The bidirectional sync engine (`SyncController.php` delta pull & `ProcessSyncMutationsJob.php` mutation push <-> `SyncDao`, `SyncEngine`) must ingest and export the entity.
+- **Contract & DTO Parity**: Laravel Request/Action/Transformer must conform exactly with Flutter DTOs and Repositories.
+
+### 6.2 Strict 3-Tier Clinical Hierarchy & Multi-Visit Support
+1. **Level 1 (Patient Profile - `PatientDetailScreen`)**: Holds ONLY Clinical Cases. Primary action is `"Create New Case"`. Strictly NO visits, NO SOAP notes, and NO media galleries on the patient profile.
+2. **Level 2 (Case Detail Screen - `CaseDetailScreen`)**: Represents the medical problem umbrella. Holds ONLY the chronological list of Visits belonging to this case, displayed as clean, compact `VisitCard` title tiles. Primary action is `"Start New Visit"`. Strictly NO diagnostic media galleries on the case screen.
+3. **Level 3 (Visit Detail Screen - `VisitDetailScreen`)**: The EXCLUSIVE place for SOAP clinical examinations, vital signs, administered medications/doses, diagnostic media uploads to MinIO S3 via Presigned URLs, and legal record signing & locking.
+
+### 6.3 Universal 3-Level Edit Capabilities
+All three levels MUST support complete editing without violating medical record immutability:
+- **Level 1 (Patient)**: Demographics, species, breed, age, weight, microchip, high-risk allergies, and client owner information (`PUT /api/v1/patients/{patient}`).
+- **Level 2 (Case)**: Chief complaint, provisional/final diagnoses, triage priority, and encounter status (`PUT /api/v1/cases/{case}`).
+- **Level 3 (Visit)**: Visit title, visit type, and reason for visit before signing & locking (`PUT /api/v1/visits/{visit}`).
+
+### 6.4 Continuous Documentation & Roadmap Synchronization
+Whenever ANY modification is made to the backend or mobile codebase:
+- All related `.md` documentation files (`AGENTS.md`, `CLINICAL_WORKFLOW_ARCHITECTURE.md`, `CLINICAL_WORKFLOW_AND_MEDIA.md`, `API_CONTRACT.md`, `MOBILE_TASKS.md`, `walkthrough.md`) MUST be updated immediately within the same task.
+- Roadmaps, progress dashboards, and checklists must accurately reflect actual implemented states, route endpoints, and verified test counts.
+
+### 6.5 Mandatory Automated Testing (Zero Untested Code)
+- Every backend change must pass all PHPUnit feature & unit tests (`php artisan test`).
+- Every mobile change must pass static analysis (`flutter analyze` with 0 issues) and all unit/widget tests (`flutter test`).
+- Zero unverified code is ever merged or reported as complete.
+

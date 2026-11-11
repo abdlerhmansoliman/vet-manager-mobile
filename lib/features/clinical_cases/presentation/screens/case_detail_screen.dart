@@ -8,16 +8,18 @@ import '../../../../core/widgets/animal_species_avatar.dart';
 import '../../../../core/widgets/animated_pressable.dart';
 import '../../../../core/widgets/triage_priority_badge.dart';
 import '../../domain/entities/case_entity.dart';
+import '../../domain/entities/visit_entity.dart';
 import '../../domain/repositories/case_repository.dart';
 import '../bloc/case_detail_bloc.dart';
 import '../bloc/case_detail_event.dart';
 import '../bloc/case_detail_state.dart';
-import '../widgets/soap_notes_view.dart';
+import '../widgets/visit_card.dart';
+import '../widgets/start_visit_sheet.dart';
+import 'visit_detail_screen.dart';
 import '../../../media/domain/repositories/media_repository.dart';
-import '../../../media/presentation/widgets/diagnostic_media_gallery.dart';
 
-/// Comprehensive clinical encounter detail screen featuring real-time SOAP logs,
-/// instant triage severity switching, and append-only signed addenda.
+/// Comprehensive clinical encounter detail screen featuring hierarchical visits,
+/// instant triage severity switching, and diagnoses.
 class CaseDetailScreen extends StatelessWidget {
   final String caseId;
   final ICaseRepository? repository;
@@ -52,6 +54,7 @@ class CaseDetailScreen extends StatelessWidget {
       // In testing or when repository is already provided up the tree
       return _CaseDetailView(
         caseId: caseId,
+        repository: null,
         initialDetail: initialDetail,
         mediaRepository: effectiveMediaRepo,
       );
@@ -63,6 +66,7 @@ class CaseDetailScreen extends StatelessWidget {
         ..add(CaseDetailLoaded(caseId)),
       child: _CaseDetailView(
         caseId: caseId,
+        repository: nonNullCaseRepo,
         initialDetail: initialDetail,
         mediaRepository: effectiveMediaRepo,
       ),
@@ -72,11 +76,13 @@ class CaseDetailScreen extends StatelessWidget {
 
 class _CaseDetailView extends StatefulWidget {
   final String caseId;
+  final ICaseRepository? repository;
   final CaseDetailEntity? initialDetail;
   final IMediaRepository? mediaRepository;
 
   const _CaseDetailView({
     required this.caseId,
+    this.repository,
     this.initialDetail,
     this.mediaRepository,
   });
@@ -86,14 +92,15 @@ class _CaseDetailView extends StatefulWidget {
 }
 
 class _CaseDetailViewState extends State<_CaseDetailView> {
-  IMediaRepository? _resolveMediaRepo(BuildContext context) {
-    if (widget.mediaRepository != null) return widget.mediaRepository;
+  ICaseRepository? _resolveCaseRepo(BuildContext context) {
+    if (widget.repository != null) return widget.repository;
     try {
-      return RepositoryProvider.of<IMediaRepository>(context);
+      return RepositoryProvider.of<ICaseRepository>(context);
     } catch (_) {
       return null;
     }
   }
+
 
   @override
   void initState() {
@@ -191,7 +198,7 @@ class _CaseDetailViewState extends State<_CaseDetailView> {
                 const SizedBox(height: 16),
 
                 // Chief Complaint Card
-                _buildChiefComplaintCard(summary)
+                _buildChiefComplaintCard(context, summary)
                     .animate()
                     .fadeIn(duration: 250.ms, delay: 100.ms)
                     .slideY(begin: 0.08, end: 0, curve: Curves.easeOutQuad),
@@ -204,59 +211,10 @@ class _CaseDetailViewState extends State<_CaseDetailView> {
                     .slideY(begin: 0.08, end: 0, curve: Curves.easeOutQuad),
                 const SizedBox(height: 16),
 
-                // Diagnostic Media & X-Rays Section
-                DiagnosticMediaGallery(
-                  imageableType: 'clinical_case',
-                  imageableId: summary.id,
-                  repository: widget.mediaRepository ?? _resolveMediaRepo(context),
-                )
+                // Hierarchical Visits & Clinical Encounters Section
+                _buildVisitsSection(context, detail)
                     .animate()
                     .fadeIn(duration: 250.ms, delay: 180.ms)
-                    .slideY(begin: 0.08, end: 0, curve: Curves.easeOutQuad),
-                const SizedBox(height: 20),
-
-                // Embedded SOAP Notes & Addenda Section
-                SoapNotesView(
-                  notes: detail.progressNotes,
-                  defaultVetName: summary.primaryVeterinarianName,
-                  onAddSoapNote: ({
-                    subjective,
-                    objective,
-                    assessment,
-                    plan,
-                    temperatureCelsius,
-                    heartRateBpm,
-                    respiratoryRateBpm,
-                    bodyConditionScore,
-                    painScore,
-                    vetName,
-                  }) {
-                    context.read<CaseDetailBloc>().add(
-                          CaseSoapNoteAdded(
-                            subjective: subjective,
-                            objective: objective,
-                            assessment: assessment,
-                            plan: plan,
-                            temperatureCelsius: temperatureCelsius,
-                            heartRateBpm: heartRateBpm,
-                            respiratoryRateBpm: respiratoryRateBpm,
-                            bodyConditionScore: bodyConditionScore,
-                            painScore: painScore,
-                            veterinarianName: vetName,
-                          ),
-                        );
-                  },
-                  onAddAddendum: (text, vetName) {
-                    context.read<CaseDetailBloc>().add(
-                          CaseAddendumAdded(
-                            addendumText: text,
-                            veterinarianName: vetName,
-                          ),
-                        );
-                  },
-                )
-                    .animate()
-                    .fadeIn(duration: 250.ms, delay: 200.ms)
                     .slideY(begin: 0.08, end: 0, curve: Curves.easeOutQuad),
                 const SizedBox(height: 32),
               ],
@@ -264,6 +222,252 @@ class _CaseDetailViewState extends State<_CaseDetailView> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildVisitsSection(BuildContext context, CaseDetailEntity detail) {
+    final visits = detail.visits;
+    final repo = _resolveCaseRepo(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Section Header
+        Row(
+          children: [
+            const Icon(
+              Icons.calendar_month_outlined,
+              size: 20,
+              color: AppColors.primaryEmeraldDark,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'Clinical Visits & Encounters',
+              style: AppTextStyles.titleMedium.copyWith(
+                fontWeight: FontWeight.w800,
+                color: AppColors.textCharcoal,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: AppColors.primaryEmeraldLight,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                '${visits.length}',
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.primaryEmeraldDark,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+
+        // Prominent Primary Action Button: "Start New Visit" (shown when visits already exist)
+        if (visits.isNotEmpty) ...[
+          AnimatedPressable(
+            onTap: () => _handleStartNewVisit(context, detail, repo),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 13),
+              decoration: BoxDecoration(
+                color: AppColors.primaryEmerald,
+                borderRadius: BorderRadius.circular(14),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primaryEmerald.withValues(alpha: 0.22),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.add_circle_outline_rounded,
+                    size: 18,
+                    color: Colors.white,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Start New Visit',
+                    style: AppTextStyles.titleMedium.copyWith(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 14),
+        ],
+
+        // Visits List or Empty State
+        if (visits.isEmpty)
+          _buildEmptyVisitsState(context, detail, repo)
+        else
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: visits.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 12),
+            itemBuilder: (context, index) {
+              final visit = visits[index];
+              return VisitCard(
+                visit: visit,
+                animationIndex: index,
+                onTap: () => _navigateToVisit(context, visit, repo),
+              );
+            },
+          ),
+      ],
+    );
+  }
+
+  Widget _buildEmptyVisitsState(
+    BuildContext context,
+    CaseDetailEntity detail,
+    ICaseRepository? repo,
+  ) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(28),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceWhite,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.borderWarm),
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: const BoxDecoration(
+              color: AppColors.backgroundCream,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.meeting_room_outlined,
+              size: 32,
+              color: AppColors.textMuted,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'No Visits Recorded Yet',
+            style: AppTextStyles.titleMedium.copyWith(
+              fontWeight: FontWeight.w700,
+              color: AppColors.textCharcoal,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Tap below to open the first clinical visit encounter for recording SOAP examination findings, diagnostic images, medication doses, and addenda.',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.bodySmall.copyWith(
+              color: AppColors.textMuted,
+            ),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryEmerald,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            onPressed: () => _handleOpenInitialConsultation(context, detail, repo),
+            icon: const Icon(Icons.add, size: 18),
+            label: const Text('Open Initial Consultation Visit'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _handleOpenInitialConsultation(
+    BuildContext context,
+    CaseDetailEntity detail,
+    ICaseRepository? repo,
+  ) async {
+    if (repo == null) return;
+    try {
+      final newVisit = await repo.startVisit(
+        caseId: detail.summary.id,
+        patientId: detail.summary.patientId,
+        veterinarianId: detail.summary.primaryVeterinarianId,
+        veterinarianName: detail.summary.primaryVeterinarianName ?? 'Dr. Attending Clinician, DVM',
+        title: 'Initial Consultation',
+        visitType: 'consultation',
+      );
+      if (context.mounted) {
+        AppSnackbar.showSuccess(context, 'Initial Consultation opened');
+        _navigateToVisit(context, newVisit, repo);
+      }
+    } catch (e) {
+      if (context.mounted) {
+        AppSnackbar.showError(context, 'Failed to open initial visit.');
+      }
+    }
+  }
+
+  void _handleStartNewVisit(
+    BuildContext context,
+    CaseDetailEntity detail,
+    ICaseRepository? repo,
+  ) {
+    StartVisitSheet.show(
+      context: context,
+      defaultVetName: detail.summary.primaryVeterinarianName ?? 'Dr. Attending Clinician, DVM',
+      onConfirm: ({
+        required title,
+        required visitType,
+        required veterinarianName,
+      }) async {
+        if (repo == null) return;
+        try {
+          final newVisit = await repo.startVisit(
+            caseId: detail.summary.id,
+            patientId: detail.summary.patientId,
+            veterinarianId: detail.summary.primaryVeterinarianId,
+            veterinarianName: veterinarianName,
+            title: title,
+            visitType: visitType,
+          );
+          if (context.mounted) {
+            AppSnackbar.showSuccess(context, 'Visit encounter started: $title');
+            _navigateToVisit(context, newVisit, repo);
+          }
+        } catch (e) {
+          if (context.mounted) {
+            AppSnackbar.showError(context, 'Failed to start visit. Please try again.');
+          }
+        }
+      },
+    );
+  }
+
+  void _navigateToVisit(
+    BuildContext context,
+    VisitEntity visit,
+    ICaseRepository? repo,
+  ) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (ctx) => VisitDetailScreen(
+          caseId: widget.caseId,
+          visitId: visit.id,
+          caseRepository: repo,
+          initialVisit: visit,
+        ),
+      ),
     );
   }
 
@@ -523,7 +727,7 @@ class _CaseDetailViewState extends State<_CaseDetailView> {
     );
   }
 
-  Widget _buildChiefComplaintCard(CaseSummaryEntity summary) {
+  Widget _buildChiefComplaintCard(BuildContext context, CaseSummaryEntity summary) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -546,6 +750,19 @@ class _CaseDetailViewState extends State<_CaseDetailView> {
                   color: AppColors.textCharcoal,
                 ),
               ),
+              const Spacer(),
+              AnimatedPressable(
+                key: const Key('edit_chief_complaint_button'),
+                onTap: () => _showEditChiefComplaintDialog(context, summary),
+                child: const Text(
+                  'Edit',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primaryEmerald,
+                  ),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 8),
@@ -555,6 +772,58 @@ class _CaseDetailViewState extends State<_CaseDetailView> {
               color: AppColors.textCharcoal,
               height: 1.4,
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEditChiefComplaintDialog(BuildContext context, CaseSummaryEntity summary) {
+    final controller = TextEditingController(text: summary.chiefComplaint);
+    showDialog<void>(
+      context: context,
+      builder: (dlgContext) => AlertDialog(
+        backgroundColor: AppColors.surfaceWhite,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(
+          'Edit Chief Complaint',
+          style: AppTextStyles.titleMedium.copyWith(
+            fontWeight: FontWeight.w700,
+            color: AppColors.textCharcoal,
+          ),
+        ),
+        content: TextField(
+          controller: controller,
+          maxLines: 3,
+          decoration: InputDecoration(
+            hintText: 'Enter chief complaint...',
+            filled: true,
+            fillColor: AppColors.backgroundCream,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: AppColors.borderWarm),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dlgContext).pop(),
+            child: const Text('Cancel', style: TextStyle(color: AppColors.textMuted)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final text = controller.text.trim();
+              if (text.isNotEmpty) {
+                context.read<CaseDetailBloc>().add(CaseChiefComplaintUpdated(text));
+                Navigator.of(dlgContext).pop();
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryEmerald,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            child: const Text('Save'),
           ),
         ],
       ),
@@ -586,6 +855,7 @@ class _CaseDetailViewState extends State<_CaseDetailView> {
               ),
               const Spacer(),
               AnimatedPressable(
+                key: const Key('edit_diagnoses_button'),
                 onTap: () => _showEditDiagnosesDialog(context, summary),
                 child: const Text(
                   'Edit',

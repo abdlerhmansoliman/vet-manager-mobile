@@ -3,8 +3,11 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/text_styles.dart';
 import '../../../../core/widgets/animated_pressable.dart';
 import '../../../../core/widgets/blurred_bottom_sheet.dart';
+import '../../domain/entities/prescription_item.dart';
+import '../../domain/entities/veterinary_formulary.dart';
 
-/// Modal bottom sheet for recording a full veterinary SOAP progress note with vitals.
+/// Modal bottom sheet for recording a full veterinary SOAP progress note with vitals,
+/// structured medication selection, and unit dosing.
 class CreateSoapNoteSheet extends StatefulWidget {
   final String defaultVetName;
   final void Function({
@@ -18,6 +21,7 @@ class CreateSoapNoteSheet extends StatefulWidget {
     int? bodyConditionScore,
     int? painScore,
     String? vetName,
+    List<PrescriptionItem>? prescriptions,
   }) onConfirm;
 
   const CreateSoapNoteSheet({
@@ -40,6 +44,7 @@ class CreateSoapNoteSheet extends StatefulWidget {
       int? bodyConditionScore,
       int? painScore,
       String? vetName,
+      List<PrescriptionItem>? prescriptions,
     }) onConfirm,
   }) {
     return showBlurredBottomSheet(
@@ -71,6 +76,19 @@ class _CreateSoapNoteSheetState extends State<CreateSoapNoteSheet> {
   int? _bcs = 5;
   int? _painScore = 0;
 
+  // Structured Prescriptions & Medication Selection
+  final List<PrescriptionItem> _prescriptions = [];
+  final TextEditingController _medicineSearchController = TextEditingController();
+  final TextEditingController _doseController = TextEditingController();
+  final TextEditingController _instructionsController = TextEditingController();
+
+  TextEditingController? _autocompleteTextController;
+
+  String _selectedUnit = 'ml';
+  String _selectedRoute = 'PO (Oral)';
+  String _selectedFrequency = 'BID (Twice daily)';
+  String? _prescriptionError;
+
   @override
   void initState() {
     super.initState();
@@ -95,7 +113,56 @@ class _CreateSoapNoteSheetState extends State<CreateSoapNoteSheet> {
     _tempController.dispose();
     _hrController.dispose();
     _rrController.dispose();
+    _medicineSearchController.dispose();
+    _doseController.dispose();
+    _instructionsController.dispose();
     super.dispose();
+  }
+
+  void _addPrescription() {
+    final medName = _medicineSearchController.text.trim();
+    final dose = _doseController.text.trim();
+
+    if (medName.isEmpty) {
+      setState(() {
+        _prescriptionError = 'Please select or enter a medicine name';
+      });
+      return;
+    }
+    if (dose.isEmpty) {
+      setState(() {
+        _prescriptionError = 'Please enter dose quantity';
+      });
+      return;
+    }
+
+    setState(() {
+      _prescriptionError = null;
+      _prescriptions.add(
+        PrescriptionItem(
+          medicineName: medName,
+          doseQuantity: dose,
+          unit: _selectedUnit,
+          route: _selectedRoute,
+          frequency: _selectedFrequency,
+          instructions: _instructionsController.text.trim().isNotEmpty
+              ? _instructionsController.text.trim()
+              : null,
+        ),
+      );
+
+      // Reset entry inputs
+      _autocompleteTextController?.clear();
+      _medicineSearchController.clear();
+      _doseController.clear();
+      _instructionsController.clear();
+    });
+  }
+
+  void _removePrescription(int index) {
+    setState(() {
+      _prescriptions.removeAt(index);
+    });
   }
 
   void _submit() {
@@ -103,6 +170,23 @@ class _CreateSoapNoteSheetState extends State<CreateSoapNoteSheet> {
       final temp = double.tryParse(_tempController.text.trim());
       final hr = int.tryParse(_hrController.text.trim());
       final rr = int.tryParse(_rrController.text.trim());
+
+      // Combine structured prescriptions with general plan notes
+      String? combinedPlan;
+      final generalPlan = _planController.text.trim();
+
+      if (_prescriptions.isNotEmpty) {
+        final buffer = StringBuffer('Rx Prescriptions:\n');
+        for (final rx in _prescriptions) {
+          buffer.writeln(rx.formatForPlan());
+        }
+        if (generalPlan.isNotEmpty) {
+          buffer.write('\nOrders & Clinical Instructions:\n$generalPlan');
+        }
+        combinedPlan = buffer.toString().trim();
+      } else if (generalPlan.isNotEmpty) {
+        combinedPlan = generalPlan;
+      }
 
       widget.onConfirm(
         subjective: _subjectiveController.text.trim().isNotEmpty
@@ -114,15 +198,14 @@ class _CreateSoapNoteSheetState extends State<CreateSoapNoteSheet> {
         assessment: _assessmentController.text.trim().isNotEmpty
             ? _assessmentController.text.trim()
             : null,
-        plan: _planController.text.trim().isNotEmpty
-            ? _planController.text.trim()
-            : null,
+        plan: combinedPlan,
         temperatureCelsius: temp,
         heartRateBpm: hr,
         respiratoryRateBpm: rr,
         bodyConditionScore: _bcs,
         painScore: _painScore,
         vetName: _vetNameController.text.trim(),
+        prescriptions: _prescriptions.isNotEmpty ? List.unmodifiable(_prescriptions) : null,
       );
       Navigator.of(context).pop();
     }
@@ -132,7 +215,7 @@ class _CreateSoapNoteSheetState extends State<CreateSoapNoteSheet> {
   Widget build(BuildContext context) {
     return Container(
       constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.85,
+        maxHeight: MediaQuery.of(context).size.height * 0.90,
       ),
       child: Form(
         key: _formKey,
@@ -329,13 +412,33 @@ class _CreateSoapNoteSheetState extends State<CreateSoapNoteSheet> {
               ),
               const SizedBox(height: 16),
 
-              // (P) Plan
+              // (P) Plan Header
               _buildSectionHeader('P', 'Plan', 'Treatment protocols, medications, monitoring, re-check orders'),
+              const SizedBox(height: 10),
+
+              // Structured Prescription & Medicine Selector Card
+              _buildPrescriptionBuilderCard(),
+              const SizedBox(height: 12),
+
+              // List of Added Prescriptions
+              if (_prescriptions.isNotEmpty) ...[
+                _buildPrescriptionsList(),
+                const SizedBox(height: 12),
+              ],
+
+              // Additional Clinical Orders & Notes
+              Text(
+                'Additional Clinical Orders & Instructions',
+                style: AppTextStyles.bodySmall.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textCharcoal,
+                ),
+              ),
               const SizedBox(height: 6),
               TextFormField(
                 controller: _planController,
-                maxLines: 3,
-                decoration: _inputDecoration('e.g., 200ml LRS IV bolus, Maropitant 1mg/kg SQ, NPO for 12 hours...'),
+                maxLines: 2,
+                decoration: _inputDecoration('e.g., 200ml LRS IV bolus, NPO for 12 hours, recheck renal panel in 48h...'),
               ),
               const SizedBox(height: 24),
 
@@ -367,6 +470,375 @@ class _CreateSoapNoteSheetState extends State<CreateSoapNoteSheet> {
     );
   }
 
+  /// Builds the interactive medication prescription builder card
+  Widget _buildPrescriptionBuilderCard() {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceWhite,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.primaryEmerald.withValues(alpha: 0.35)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryEmeraldLight,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.medication_rounded,
+                  color: AppColors.primaryEmeraldDark,
+                  size: 18,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Prescribe Medication / Treatment',
+                style: AppTextStyles.bodyMedium.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textCharcoal,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          // Medicine Name with Autocomplete suggestions
+          Text(
+            'Select Medicine',
+            style: AppTextStyles.badgeLabel.copyWith(color: AppColors.textMuted),
+          ),
+          const SizedBox(height: 4),
+          Autocomplete<VeterinaryMedicationRef>(
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              final query = textEditingValue.text.trim().toLowerCase();
+              if (query.isEmpty) {
+                return VeterinaryFormulary.commonMedications.take(6);
+              }
+              return VeterinaryFormulary.commonMedications.where(
+                (med) =>
+                    med.name.toLowerCase().contains(query) ||
+                    med.category.toLowerCase().contains(query),
+              );
+            },
+            displayStringForOption: (option) => option.name,
+            onSelected: (option) {
+              _medicineSearchController.text = option.name;
+              setState(() {
+                _selectedUnit = option.defaultUnit;
+                _selectedRoute = option.defaultRoute;
+                _selectedFrequency = option.defaultFrequency;
+              });
+            },
+            fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
+              _autocompleteTextController = controller;
+              // Keep external controller in sync
+              controller.addListener(() {
+                _medicineSearchController.text = controller.text;
+              });
+              return TextFormField(
+                controller: controller,
+                focusNode: focusNode,
+                decoration: _inputDecoration('Search or enter medication name (e.g. Meloxicam)...')
+                    .copyWith(
+                  prefixIcon: const Icon(Icons.search_rounded, size: 20, color: AppColors.textMuted),
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 10),
+
+          // Dose Quantity & Unit Row
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Dose Quantity
+              Expanded(
+                flex: 3,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Dose / Qty', style: AppTextStyles.badgeLabel.copyWith(color: AppColors.textMuted)),
+                    const SizedBox(height: 4),
+                    TextFormField(
+                      controller: _doseController,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      decoration: _inputDecoration('e.g. 2.5 or 250'),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 10),
+
+              // Measurement Unit Dropdown
+              Expanded(
+                flex: 2,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Unit', style: AppTextStyles.badgeLabel.copyWith(color: AppColors.textMuted)),
+                    const SizedBox(height: 4),
+                    DropdownButtonFormField<String>(
+                      initialValue: _selectedUnit,
+                      decoration: _inputDecoration('Unit'),
+                      items: VeterinaryFormulary.standardUnits.map((u) {
+                        return DropdownMenuItem<String>(
+                          value: u,
+                          child: Text(u, style: const TextStyle(fontWeight: FontWeight.w600)),
+                        );
+                      }).toList(),
+                      onChanged: (v) {
+                        if (v != null) setState(() => _selectedUnit = v);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+
+          // Route & Frequency Row
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Route
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Route', style: AppTextStyles.badgeLabel.copyWith(color: AppColors.textMuted)),
+                    const SizedBox(height: 4),
+                    DropdownButtonFormField<String>(
+                      initialValue: _selectedRoute,
+                      decoration: _inputDecoration('Route'),
+                      isExpanded: true,
+                      items: VeterinaryFormulary.standardRoutes.map((r) {
+                        return DropdownMenuItem<String>(
+                          value: r,
+                          child: Text(
+                            r,
+                            style: const TextStyle(fontSize: 12),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (v) {
+                        if (v != null) setState(() => _selectedRoute = v);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 10),
+
+              // Frequency
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Frequency', style: AppTextStyles.badgeLabel.copyWith(color: AppColors.textMuted)),
+                    const SizedBox(height: 4),
+                    DropdownButtonFormField<String>(
+                      initialValue: _selectedFrequency,
+                      decoration: _inputDecoration('Frequency'),
+                      isExpanded: true,
+                      items: VeterinaryFormulary.standardFrequencies.map((f) {
+                        return DropdownMenuItem<String>(
+                          value: f,
+                          child: Text(
+                            f,
+                            style: const TextStyle(fontSize: 12),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (v) {
+                        if (v != null) setState(() => _selectedFrequency = v);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+
+          // Duration / Instructions
+          Text(
+            'Special Instructions / Duration (Optional)',
+            style: AppTextStyles.badgeLabel.copyWith(color: AppColors.textMuted),
+          ),
+          const SizedBox(height: 4),
+          TextFormField(
+            controller: _instructionsController,
+            decoration: _inputDecoration('e.g., with meals x 7 days, taper over 14 days'),
+          ),
+
+          if (_prescriptionError != null) ...[
+            const SizedBox(height: 6),
+            Text(
+              _prescriptionError!,
+              style: const TextStyle(color: Colors.red, fontSize: 12, fontWeight: FontWeight.w600),
+            ),
+          ],
+
+          const SizedBox(height: 12),
+
+          // Add Medication Button
+          AnimatedPressable(
+            onTap: _addPrescription,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              decoration: BoxDecoration(
+                color: AppColors.primaryEmeraldLight,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: AppColors.primaryEmerald),
+              ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.add_rounded, size: 18, color: AppColors.primaryEmeraldDark),
+                  SizedBox(width: 6),
+                  Text(
+                    '+ Add Medication to Plan',
+                    style: TextStyle(
+                      color: AppColors.primaryEmeraldDark,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Builds the list of added prescriptions
+  Widget _buildPrescriptionsList() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              'Prescriptions to Record',
+              style: AppTextStyles.bodySmall.copyWith(
+                fontWeight: FontWeight.w700,
+                color: AppColors.textCharcoal,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+              decoration: BoxDecoration(
+                color: AppColors.badgeStableMint,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                '${_prescriptions.length}',
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.primaryEmeraldDark,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        ..._prescriptions.asMap().entries.map((entry) {
+          final index = entry.key;
+          final rx = entry.value;
+
+          return Container(
+            margin: const EdgeInsets.only(bottom: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceWhite,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: AppColors.borderSubtle),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryEmeraldLight,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.vaccines_rounded,
+                    size: 16,
+                    color: AppColors.primaryEmeraldDark,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        rx.medicineName,
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textCharcoal,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${rx.doseQuantity} ${rx.unit} • ${rx.route} • ${rx.frequency}',
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.primaryEmeraldDark,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      if (rx.instructions != null && rx.instructions!.isNotEmpty) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          rx.instructions!,
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.textMuted,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(
+                    Icons.remove_circle_outline_rounded,
+                    color: AppColors.secondaryCoral,
+                    size: 20,
+                  ),
+                  tooltip: 'Remove',
+                  onPressed: () => _removePrescription(index),
+                ),
+              ],
+            ),
+          );
+        }),
+      ],
+    );
+  }
+
   Widget _buildSectionHeader(String letter, String title, String subtitle) {
     return Row(
       children: [
@@ -376,7 +848,6 @@ class _CreateSoapNoteSheetState extends State<CreateSoapNoteSheet> {
           decoration: const BoxDecoration(
             color: AppColors.primaryEmeraldLight,
             shape: BoxShape.circle,
-
           ),
           child: Center(
             child: Text(

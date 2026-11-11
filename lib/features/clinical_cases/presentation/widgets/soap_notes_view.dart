@@ -4,6 +4,8 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/text_styles.dart';
 import '../../../../core/widgets/animated_pressable.dart';
 import '../../domain/entities/progress_note_entity.dart';
+import '../../domain/entities/prescription_item.dart';
+import 'administer_medication_sheet.dart';
 import 'create_addendum_dialog.dart';
 import 'create_soap_note_sheet.dart';
 
@@ -24,6 +26,11 @@ class SoapNotesView extends StatelessWidget {
     String? vetName,
   }) onAddSoapNote;
   final void Function(String addendumText, String vetName) onAddAddendum;
+  final void Function({
+    required PrescriptionItem prescription,
+    required String veterinarianName,
+    String? clinicalNotes,
+  })? onAdministerMedication;
 
   const SoapNotesView({
     super.key,
@@ -31,6 +38,7 @@ class SoapNotesView extends StatelessWidget {
     this.defaultVetName,
     required this.onAddSoapNote,
     required this.onAddAddendum,
+    this.onAdministerMedication,
   });
 
   @override
@@ -77,7 +85,32 @@ class SoapNotesView extends StatelessWidget {
                   CreateSoapNoteSheet.show(
                     context: context,
                     defaultVetName: defaultVetName ?? 'Dr. Attending Clinician, DVM',
-                    onConfirm: onAddSoapNote,
+                    onConfirm: ({
+                      subjective,
+                      objective,
+                      assessment,
+                      plan,
+                      temperatureCelsius,
+                      heartRateBpm,
+                      respiratoryRateBpm,
+                      bodyConditionScore,
+                      painScore,
+                      vetName,
+                      prescriptions,
+                    }) {
+                      onAddSoapNote(
+                        subjective: subjective,
+                        objective: objective,
+                        assessment: assessment,
+                        plan: plan,
+                        temperatureCelsius: temperatureCelsius,
+                        heartRateBpm: heartRateBpm,
+                        respiratoryRateBpm: respiratoryRateBpm,
+                        bodyConditionScore: bodyConditionScore,
+                        painScore: painScore,
+                        vetName: vetName,
+                      );
+                    },
                   );
                 },
                 child: Container(
@@ -146,6 +179,42 @@ class SoapNotesView extends StatelessWidget {
             ),
           ],
         ),
+        if (onAdministerMedication != null) ...[
+          const SizedBox(height: 8),
+          AnimatedPressable(
+            onTap: () {
+              AdministerMedicationSheet.show(
+                context: context,
+                defaultVetName: defaultVetName ?? 'Dr. Attending Clinician, DVM',
+                onConfirm: onAdministerMedication!,
+              );
+            },
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceWhite,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.primaryEmerald, width: 1.2),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.vaccines_rounded, size: 16, color: AppColors.primaryEmerald),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Administer Medication / Dose',
+                    style: AppTextStyles.titleMedium.copyWith(
+                      color: AppColors.primaryEmerald,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
         const SizedBox(height: 16),
 
         // Notes List or Empty State

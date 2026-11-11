@@ -22,6 +22,7 @@ class _InMemoryMediaRepository implements IMediaRepository {
     required String imageableType,
     required String imageableId,
     required String sourceFilePath,
+    String? parentCaseId,
     String? title,
     String? tenantId,
     void Function(double progress)? onProgress,
@@ -43,7 +44,11 @@ class _InMemoryMediaRepository implements IMediaRepository {
 
   @override
   Future<List<DiagnosticImageEntity>> getImagesForCase(String caseId) async =>
-      _images.where((img) => img.imageableType == 'clinical_case' && img.imageableId == caseId).toList();
+      _images.where((img) => (img.imageableType == 'clinical_case' || img.imageableType == 'cases') && img.imageableId == caseId).toList();
+
+  @override
+  Future<List<DiagnosticImageEntity>> getImagesForVisit(String visitId) async =>
+      _images.where((img) => (img.imageableType == 'visit' || img.imageableType == 'visits') && img.imageableId == visitId).toList();
 
   @override
   Future<List<DiagnosticImageEntity>> getImagesForPatient(String patientId) async =>
@@ -62,6 +67,7 @@ class _InMemoryMediaRepository implements IMediaRepository {
 class DiagnosticMediaGallery extends StatefulWidget {
   final String imageableType;
   final String imageableId;
+  final String? parentCaseId;
   final IMediaRepository? repository;
   final MediaBloc? bloc;
 
@@ -69,6 +75,7 @@ class DiagnosticMediaGallery extends StatefulWidget {
     super.key,
     required this.imageableType,
     required this.imageableId,
+    this.parentCaseId,
     this.repository,
     this.bloc,
   });
@@ -95,8 +102,10 @@ class _DiagnosticMediaGalleryState extends State<DiagnosticMediaGallery> {
         }
         repo ??= _InMemoryMediaRepository();
         _localBloc = MediaBloc(repository: repo);
-        if (widget.imageableType == 'clinical_case') {
+        if (widget.imageableType == 'clinical_case' || widget.imageableType == 'cases') {
           _localBloc!.add(LoadCaseMediaRequested(widget.imageableId));
+        } else if (widget.imageableType == 'visit' || widget.imageableType == 'visits') {
+          _localBloc!.add(LoadVisitMediaRequested(widget.imageableId));
         } else {
           _localBloc!.add(LoadPatientMediaRequested(widget.imageableId));
         }
@@ -125,6 +134,7 @@ class _DiagnosticMediaGalleryState extends State<DiagnosticMediaGallery> {
         child: CameraCaptureSheet(
           imageableType: widget.imageableType,
           imageableId: widget.imageableId,
+          parentCaseId: widget.parentCaseId,
         ),
       ),
     );
@@ -200,27 +210,33 @@ class _DiagnosticMediaGalleryState extends State<DiagnosticMediaGallery> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryEmerald.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(10),
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryEmerald.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(
+                            Icons.perm_media_rounded,
+                            color: AppColors.primaryEmerald,
+                            size: 20,
+                          ),
                         ),
-                        child: const Icon(
-                          Icons.perm_media_rounded,
-                          color: AppColors.primaryEmerald,
-                          size: 20,
+                        const SizedBox(width: 10),
+                        Flexible(
+                          child: Text(
+                            'Diagnostic Media & X-Rays',
+                            style: AppTextStyles.titleLarge.copyWith(fontSize: 15),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 10),
-                      Text(
-                        'Diagnostic Media & X-Rays',
-                        style: AppTextStyles.titleLarge.copyWith(fontSize: 16),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
+                  const SizedBox(width: 8),
                   TextButton.icon(
                     key: const Key('add_diagnostic_media_button'),
                     onPressed: () => _openCaptureSheet(context),

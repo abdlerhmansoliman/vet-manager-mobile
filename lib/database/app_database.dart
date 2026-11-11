@@ -9,7 +9,9 @@ import 'converters/decimal_converter.dart';
 import 'tables/clients_table.dart';
 import 'tables/patients_table.dart';
 import 'tables/clinical_cases_table.dart';
+import 'tables/visits_table.dart';
 import 'tables/clinical_progress_notes_table.dart';
+import 'tables/dose_administrations_table.dart';
 import 'tables/diagnoses_table.dart';
 import 'tables/media_upload_queue_table.dart';
 import 'tables/sync_queue_table.dart';
@@ -35,7 +37,9 @@ part 'app_database.g.dart';
     ClientsTable,
     PatientsTable,
     ClinicalCasesTable,
+    VisitsTable,
     ClinicalProgressNotesTable,
+    DoseAdministrationsTable,
     DiagnosesTable,
     MediaUploadQueueTable,
     SyncQueueTable,
@@ -74,6 +78,16 @@ class AppDatabase extends _$AppDatabase {
           } catch (_) {
             // Table already exists in schema
           }
+        }
+        try {
+          await customStatement('ALTER TABLE clinical_progress_notes ADD COLUMN visit_id TEXT REFERENCES visits(id);');
+        } catch (_) {
+          // Column already exists
+        }
+        try {
+          await customStatement('ALTER TABLE media_upload_queue ADD COLUMN visit_id TEXT REFERENCES visits(id);');
+        } catch (_) {
+          // Column already exists
         }
       },
     );

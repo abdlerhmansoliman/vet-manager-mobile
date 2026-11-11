@@ -8,8 +8,11 @@ mixin _$ClinicalCaseDaoMixin on DatabaseAccessor<AppDatabase> {
   $PatientsTableTable get patientsTable => attachedDatabase.patientsTable;
   $ClinicalCasesTableTable get clinicalCasesTable =>
       attachedDatabase.clinicalCasesTable;
+  $VisitsTableTable get visitsTable => attachedDatabase.visitsTable;
   $ClinicalProgressNotesTableTable get clinicalProgressNotesTable =>
       attachedDatabase.clinicalProgressNotesTable;
+  $DoseAdministrationsTableTable get doseAdministrationsTable =>
+      attachedDatabase.doseAdministrationsTable;
   $DiagnosesTableTable get diagnosesTable => attachedDatabase.diagnosesTable;
   $SyncQueueTableTable get syncQueueTable => attachedDatabase.syncQueueTable;
   ClinicalCaseDaoManager get managers => ClinicalCaseDaoManager(this);
@@ -25,10 +28,15 @@ class ClinicalCaseDaoManager {
   $$ClinicalCasesTableTableTableManager get clinicalCasesTable =>
       $$ClinicalCasesTableTableTableManager(
           _db.attachedDatabase, _db.clinicalCasesTable);
+  $$VisitsTableTableTableManager get visitsTable =>
+      $$VisitsTableTableTableManager(_db.attachedDatabase, _db.visitsTable);
   $$ClinicalProgressNotesTableTableTableManager
       get clinicalProgressNotesTable =>
           $$ClinicalProgressNotesTableTableTableManager(
               _db.attachedDatabase, _db.clinicalProgressNotesTable);
+  $$DoseAdministrationsTableTableTableManager get doseAdministrationsTable =>
+      $$DoseAdministrationsTableTableTableManager(
+          _db.attachedDatabase, _db.doseAdministrationsTable);
   $$DiagnosesTableTableTableManager get diagnosesTable =>
       $$DiagnosesTableTableTableManager(
           _db.attachedDatabase, _db.diagnosesTable);

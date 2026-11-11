@@ -172,6 +172,42 @@ void main() {
       expect(bundle.progressNotes.first.veterinarianName, 'Dr. Evans, DVM');
       expect(bundle.diagnoses.length, 1);
       expect(bundle.diagnoses.first.diagnosis, 'Gastric Foreign Body Obstruction');
+      expect(bundle.visits.length, 1);
+      expect(bundle.visits.first.title, 'Initial Consultation');
+    });
+
+    test('getCaseDetailBundle auto-creates Initial Consultation visit if case had zero visits', () async {
+      final now = DateTime.now();
+
+      await db.into(db.clinicalCasesTable).insert(
+            ClinicalCasesTableCompanion.insert(
+              id: 'case-legacy-no-visits',
+              tenantId: 'tenant-1',
+              caseNumber: 'CAS-LEGACY-01',
+              patientId: 'p-1',
+              primaryVeterinarianId: 'vet-1',
+              chiefComplaint: 'Old legacy case without visit',
+              admittedAt: now,
+              createdAt: now,
+              updatedAt: now,
+            ),
+          );
+
+      // Verify visits are empty before
+      final beforeVisits = await dao.getVisitsForCase('case-legacy-no-visits');
+      expect(beforeVisits.isEmpty, isTrue);
+
+      // Fetch bundle -> automatically creates initial consultation visit
+      final bundle = await dao.getCaseDetailBundle('case-legacy-no-visits');
+      expect(bundle, isNotNull);
+      expect(bundle!.visits.length, 1);
+      expect(bundle.visits.first.title, 'Initial Consultation');
+      expect(bundle.visits.first.status, 'open');
+
+      // Verify it was persisted to SQLite visits table
+      final afterVisits = await dao.getVisitsForCase('case-legacy-no-visits');
+      expect(afterVisits.length, 1);
+      expect(afterVisits.first.title, 'Initial Consultation');
     });
 
     test('searchCases filters correctly by case number and chief complaint', () async {
@@ -383,6 +419,181 @@ void main() {
 
       final queue = await db.select(db.syncQueueTable).get();
       expect(queue.any((q) => q.entityId == 'case-prio-1' && q.action == 'update'), isTrue);
+    });
+
+    test('recordVisit creates visit encounter linked to case and signs/locks it', () async {
+      final now = DateTime.now();
+
+      final savedCase = await dao.recordCase(
+        tenantId: 'tenant-1',
+        caseCompanion: ClinicalCasesTableCompanion.insert(
+          id: 'case-visit-test-1',
+          tenantId: 'tenant-1',
+          caseNumber: 'CAS-VISIT-01',
+          patientId: 'p-1',
+          primaryVeterinarianId: 'vet-1',
+          chiefComplaint: 'Vomiting and diarrhea',
+          admittedAt: now,
+          createdAt: now,
+          updatedAt: now,
+        ),
+      );
+
+      final savedVisit = await dao.recordVisit(
+        tenantId: 'tenant-1',
+        visitCompanion: VisitsTableCompanion.insert(
+          id: 'visit-101',
+          tenantId: 'tenant-1',
+          caseId: savedCase.id,
+          patientId: 'p-1',
+          veterinarianId: 'vet-1',
+          veterinarianName: 'Dr. Jane Smith',
+          title: 'Initial Consultation',
+          visitType: const Value('consultation'),
+          visitDate: now,
+          createdAt: now,
+          updatedAt: now,
+        ),
+      );
+
+      expect(savedVisit.id, 'visit-101');
+      expect(savedVisit.title, 'Initial Consultation');
+      expect(savedVisit.isSigned, isFalse);
+
+      final visits = await dao.getVisitsForCase(savedCase.id);
+      expect(visits.length, 2);
+      expect(visits.any((v) => v.id == 'visit-101'), isTrue);
+
+      // Sign visit
+      await dao.signVisit(
+        visitId: 'visit-101',
+        signedBy: 'Dr. Jane Smith',
+        tenantId: 'tenant-1',
+      );
+
+      final signedVisit = await dao.getVisitById('visit-101');
+      expect(signedVisit?.isSigned, isTrue);
+      expect(signedVisit?.status, 'signed');
+      expect(signedVisit?.signedBy, 'Dr. Jane Smith');
+
+      // Record dose administration
+      final dose = await dao.recordDoseAdministration(
+        tenantId: 'tenant-1',
+        doseCompanion: DoseAdministrationsTableCompanion.insert(
+          id: 'dose-101',
+          tenantId: 'tenant-1',
+          visitId: 'visit-101',
+          caseId: savedCase.id,
+          patientId: 'p-1',
+          medicineName: 'Maropitant (Cerenia)',
+          doseQuantity: '1.0',
+          unit: 'ml',
+          route: 'SQ',
+          veterinarianId: 'vet-1',
+          veterinarianName: 'Dr. Jane Smith',
+          administeredAt: now,
+          createdAt: now,
+        ),
+      );
+
+      expect(dose.id, 'dose-101');
+      expect(dose.medicineName, 'Maropitant (Cerenia)');
+
+      final doses = await dao.getDosesForVisit('visit-101');
+      expect(doses.length, 1);
+      expect(doses.first.id, 'dose-101');
+
+      final bundle = await dao.getVisitDetailBundle('visit-101');
+      expect(bundle, isNotNull);
+      expect(bundle!.visit.id, 'visit-101');
+      expect(bundle.doseAdministrations.length, 1);
+    });
+
+    test('updateCaseChiefComplaint updates complaint and logs sync queue mutation', () async {
+      final now = DateTime.now();
+      final caseToEdit = await dao.recordCase(
+        tenantId: 'tenant-1',
+        caseCompanion: ClinicalCasesTableCompanion.insert(
+          id: 'case-complaint-1',
+          tenantId: 'tenant-1',
+          caseNumber: 'CAS-CC-001',
+          patientId: 'p-1',
+          primaryVeterinarianId: 'vet-1',
+          admittedAt: now,
+          chiefComplaint: 'Old Complaint',
+          createdAt: now,
+          updatedAt: now,
+        ),
+      );
+
+      expect(caseToEdit.chiefComplaint, 'Old Complaint');
+
+      final rows = await dao.updateCaseChiefComplaint(
+        'case-complaint-1',
+        'Updated Acute Gastroenteritis',
+        tenantId: 'tenant-1',
+      );
+
+      expect(rows, 1);
+
+      final updated = await dao.getCaseById('case-complaint-1');
+      expect(updated?.chiefComplaint, 'Updated Acute Gastroenteritis');
+
+      final syncItems = await db.select(db.syncQueueTable).get();
+      final caseSync = syncItems.where((s) => s.entityType == 'case' && s.action == 'update' && s.entityId == 'case-complaint-1');
+      expect(caseSync.isNotEmpty, isTrue);
+    });
+
+    test('updateVisitDetails updates visit title, type and logs sync queue mutation', () async {
+      final now = DateTime.now();
+      await dao.recordCase(
+        tenantId: 'tenant-1',
+        caseCompanion: ClinicalCasesTableCompanion.insert(
+          id: 'case-visit-edit',
+          tenantId: 'tenant-1',
+          caseNumber: 'CAS-VE-001',
+          patientId: 'p-1',
+          primaryVeterinarianId: 'vet-1',
+          admittedAt: now,
+          chiefComplaint: 'Observation',
+          createdAt: now,
+          updatedAt: now,
+        ),
+      );
+
+      await dao.recordVisit(
+        tenantId: 'tenant-1',
+        visitCompanion: VisitsTableCompanion.insert(
+          id: 'visit-to-edit',
+          tenantId: 'tenant-1',
+          caseId: 'case-visit-edit',
+          patientId: 'p-1',
+          veterinarianId: 'vet-1',
+          veterinarianName: 'Dr. Jane Smith',
+          title: 'Initial Encounter',
+          visitType: const Value('consultation'),
+          visitDate: now,
+          createdAt: now,
+          updatedAt: now,
+        ),
+      );
+
+      final rows = await dao.updateVisitDetails(
+        'visit-to-edit',
+        title: 'Follow-up Day 2 - Ultrasound Examination',
+        visitType: 'follow_up',
+        tenantId: 'tenant-1',
+      );
+
+      expect(rows, 1);
+
+      final updatedVisit = await dao.getVisitById('visit-to-edit');
+      expect(updatedVisit?.title, 'Follow-up Day 2 - Ultrasound Examination');
+      expect(updatedVisit?.visitType, 'follow_up');
+
+      final syncItems = await db.select(db.syncQueueTable).get();
+      final visitSync = syncItems.where((s) => s.entityType == 'visit' && s.action == 'update' && s.entityId == 'visit-to-edit');
+      expect(visitSync.isNotEmpty, isTrue);
     });
   });
 }

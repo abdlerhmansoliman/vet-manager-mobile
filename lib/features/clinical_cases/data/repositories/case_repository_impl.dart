@@ -7,6 +7,8 @@ import '../../../../database/daos/clinical_case_dao.dart';
 import '../../domain/entities/case_entity.dart';
 import '../../domain/entities/diagnosis_entity.dart';
 import '../../domain/entities/progress_note_entity.dart';
+import '../../domain/entities/visit_entity.dart';
+import '../../domain/entities/dose_administration_entity.dart';
 import '../../domain/repositories/case_repository.dart';
 
 /// Concrete implementation of [ICaseRepository] backed by Drift SQLite [ClinicalCaseDao].
@@ -62,6 +64,121 @@ class CaseRepositoryImpl implements ICaseRepository {
     final bundle = await _dao.getCaseDetailBundle(caseId);
     if (bundle == null) return null;
     return _mapDetailBundleToEntity(bundle);
+  }
+
+  @override
+  Stream<List<VisitEntity>> watchVisits(String caseId) {
+    return _dao
+        .watchVisitsForCase(caseId)
+        .map((visits) => visits.map(_mapVisitDataToEntity).toList());
+  }
+
+  @override
+  Stream<VisitEntity?> watchVisitDetail(String visitId) {
+    return _dao.watchVisitDetailBundle(visitId).map((bundle) {
+      if (bundle == null) return null;
+      return _mapVisitDetailBundleToEntity(bundle);
+    });
+  }
+
+  @override
+  Future<VisitEntity?> getVisitDetail(String visitId) async {
+    final bundle = await _dao.getVisitDetailBundle(visitId);
+    if (bundle == null) return null;
+    return _mapVisitDetailBundleToEntity(bundle);
+  }
+
+  @override
+  Future<VisitEntity> startVisit({
+    required String caseId,
+    required String patientId,
+    required String veterinarianId,
+    required String veterinarianName,
+    required String title,
+    String visitType = 'consultation',
+    DateTime? visitDate,
+  }) async {
+    final tenantId = await _getTenantId();
+    final now = DateTime.now();
+    final visitId = _uuid.v7();
+
+    final companion = VisitsTableCompanion.insert(
+      id: visitId,
+      tenantId: tenantId,
+      caseId: caseId,
+      patientId: patientId,
+      veterinarianId: veterinarianId,
+      veterinarianName: veterinarianName,
+      title: title,
+      visitType: Value(visitType),
+      status: const Value('open'),
+      isSigned: const Value(false),
+      visitDate: visitDate ?? now,
+      createdAt: now,
+      updatedAt: now,
+    );
+
+    final saved = await _dao.recordVisit(
+      tenantId: tenantId,
+      visitCompanion: companion,
+    );
+
+    return _mapVisitDataToEntity(saved);
+  }
+
+  @override
+  Future<void> signVisit({
+    required String visitId,
+    required String signedBy,
+  }) async {
+    final tenantId = await _getTenantId();
+    await _dao.signVisit(
+      visitId: visitId,
+      signedBy: signedBy,
+      tenantId: tenantId,
+    );
+  }
+
+  @override
+  Future<DoseAdministrationEntity> administerMedication({
+    required String visitId,
+    required String caseId,
+    required String patientId,
+    required String medicineName,
+    required String doseQuantity,
+    required String unit,
+    required String route,
+    String? clinicalNotes,
+    required String veterinarianId,
+    required String veterinarianName,
+  }) async {
+    final tenantId = await _getTenantId();
+    final now = DateTime.now();
+    final doseId = _uuid.v7();
+
+    final companion = DoseAdministrationsTableCompanion.insert(
+      id: doseId,
+      tenantId: tenantId,
+      visitId: visitId,
+      caseId: caseId,
+      patientId: patientId,
+      medicineName: medicineName,
+      doseQuantity: doseQuantity,
+      unit: unit,
+      route: route,
+      clinicalNotes: clinicalNotes != null ? Value(clinicalNotes) : const Value.absent(),
+      veterinarianId: veterinarianId,
+      veterinarianName: veterinarianName,
+      administeredAt: now,
+      createdAt: now,
+    );
+
+    final saved = await _dao.recordDoseAdministration(
+      tenantId: tenantId,
+      doseCompanion: companion,
+    );
+
+    return _mapDoseDataToEntity(saved);
   }
 
   @override
@@ -139,6 +256,7 @@ class CaseRepositoryImpl implements ICaseRepository {
   @override
   Future<ProgressNoteEntity> addSoapNote({
     required String caseId,
+    String? visitId,
     required String patientId,
     required String veterinarianId,
     required String veterinarianName,
@@ -160,6 +278,7 @@ class CaseRepositoryImpl implements ICaseRepository {
     final companion = ClinicalProgressNotesTableCompanion.insert(
       id: noteId,
       caseId: caseId,
+      visitId: visitId != null ? Value(visitId) : const Value.absent(),
       patientId: patientId,
       veterinarianId: veterinarianId,
       veterinarianName: veterinarianName,
@@ -189,6 +308,7 @@ class CaseRepositoryImpl implements ICaseRepository {
   @override
   Future<ProgressNoteEntity> addAddendum({
     required String caseId,
+    String? visitId,
     required String patientId,
     required String veterinarianId,
     required String veterinarianName,
@@ -202,6 +322,7 @@ class CaseRepositoryImpl implements ICaseRepository {
     final companion = ClinicalProgressNotesTableCompanion.insert(
       id: noteId,
       caseId: caseId,
+      visitId: visitId != null ? Value(visitId) : const Value.absent(),
       patientId: patientId,
       veterinarianId: veterinarianId,
       veterinarianName: veterinarianName,
@@ -257,6 +378,34 @@ class CaseRepositoryImpl implements ICaseRepository {
       caseId,
       provisionalDiagnosis: provisionalDiagnosis,
       finalDiagnosis: finalDiagnosis,
+      tenantId: tenantId,
+    );
+  }
+
+  @override
+  Future<void> updateChiefComplaint({
+    required String caseId,
+    required String chiefComplaint,
+  }) async {
+    final tenantId = await _getTenantId();
+    await _dao.updateCaseChiefComplaint(
+      caseId,
+      chiefComplaint,
+      tenantId: tenantId,
+    );
+  }
+
+  @override
+  Future<void> updateVisitDetails({
+    required String visitId,
+    String? title,
+    String? visitType,
+  }) async {
+    final tenantId = await _getTenantId();
+    await _dao.updateVisitDetails(
+      visitId,
+      title: title,
+      visitType: visitType,
       tenantId: tenantId,
     );
   }
@@ -325,12 +474,79 @@ class CaseRepositoryImpl implements ICaseRepository {
           : const [],
       progressNotes: bundle.progressNotes.map(_mapProgressNoteDataToEntity).toList(),
       diagnoses: bundle.diagnoses.map(_mapDiagnosisDataToEntity).toList(),
+      visits: bundle.visits.map(_mapVisitDataToEntity).toList(),
+    );
+  }
+
+  VisitEntity _mapVisitDataToEntity(VisitData v) {
+    return VisitEntity(
+      id: v.id,
+      tenantId: v.tenantId,
+      caseId: v.caseId,
+      patientId: v.patientId,
+      veterinarianId: v.veterinarianId,
+      veterinarianName: v.veterinarianName,
+      title: v.title,
+      visitType: v.visitType,
+      status: v.status,
+      isSigned: v.isSigned,
+      signedAt: v.signedAt,
+      signedBy: v.signedBy,
+      visitDate: v.visitDate,
+      createdAt: v.createdAt,
+      updatedAt: v.updatedAt,
+      syncStatus: v.syncStatus,
+    );
+  }
+
+  VisitEntity _mapVisitDetailBundleToEntity(VisitDetailBundle b) {
+    return VisitEntity(
+      id: b.visit.id,
+      tenantId: b.visit.tenantId,
+      caseId: b.visit.caseId,
+      patientId: b.visit.patientId,
+      veterinarianId: b.visit.veterinarianId,
+      veterinarianName: b.visit.veterinarianName,
+      title: b.visit.title,
+      visitType: b.visit.visitType,
+      status: b.visit.status,
+      isSigned: b.visit.isSigned,
+      signedAt: b.visit.signedAt,
+      signedBy: b.visit.signedBy,
+      visitDate: b.visit.visitDate,
+      createdAt: b.visit.createdAt,
+      updatedAt: b.visit.updatedAt,
+      syncStatus: b.visit.syncStatus,
+      soapNote: b.soapNote != null ? _mapProgressNoteDataToEntity(b.soapNote!) : null,
+      addenda: b.addenda.map(_mapProgressNoteDataToEntity).toList(),
+      doseAdministrations: b.doseAdministrations.map(_mapDoseDataToEntity).toList(),
+    );
+  }
+
+  DoseAdministrationEntity _mapDoseDataToEntity(DoseAdministrationData d) {
+    return DoseAdministrationEntity(
+      id: d.id,
+      tenantId: d.tenantId,
+      visitId: d.visitId,
+      caseId: d.caseId,
+      patientId: d.patientId,
+      medicineName: d.medicineName,
+      doseQuantity: d.doseQuantity,
+      unit: d.unit,
+      route: d.route,
+      clinicalNotes: d.clinicalNotes,
+      veterinarianId: d.veterinarianId,
+      veterinarianName: d.veterinarianName,
+      administeredAt: d.administeredAt,
+      createdAt: d.createdAt,
+      syncStatus: d.syncStatus,
     );
   }
 
   ProgressNoteEntity _mapProgressNoteDataToEntity(ClinicalProgressNoteData n) {
     return ProgressNoteEntity(
       id: n.id,
+      visitId: n.visitId,
       caseId: n.caseId,
       patientId: n.patientId,
       veterinarianId: n.veterinarianId,

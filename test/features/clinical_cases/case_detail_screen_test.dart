@@ -4,9 +4,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:vet_manager_mobile/features/clinical_cases/domain/entities/case_entity.dart';
 import 'package:vet_manager_mobile/features/clinical_cases/domain/entities/progress_note_entity.dart';
+import 'package:vet_manager_mobile/features/clinical_cases/domain/entities/visit_entity.dart';
 import 'package:vet_manager_mobile/features/clinical_cases/domain/repositories/case_repository.dart';
 import 'package:vet_manager_mobile/features/clinical_cases/presentation/screens/case_detail_screen.dart';
-import 'package:vet_manager_mobile/features/clinical_cases/presentation/widgets/soap_notes_view.dart';
+import 'package:vet_manager_mobile/features/clinical_cases/presentation/screens/visit_detail_screen.dart';
+import 'package:vet_manager_mobile/features/clinical_cases/presentation/widgets/start_visit_sheet.dart';
+import 'package:vet_manager_mobile/features/clinical_cases/presentation/widgets/visit_card.dart';
 
 class MockCaseRepository extends Mock implements ICaseRepository {}
 
@@ -44,49 +47,50 @@ void main() {
     updatedAt: now,
   );
 
+  final sampleVisit = VisitEntity(
+    id: 'vis-test-1',
+    caseId: 'case-test-1',
+    patientId: 'pat-101',
+    veterinarianId: 'vet-1',
+    veterinarianName: 'Dr. Anna Stone',
+    title: 'Follow-up Visit - Nov 11, 2026',
+    visitType: 'follow_up',
+    status: 'open',
+    isSigned: false,
+    visitDate: now,
+    createdAt: now,
+    updatedAt: now,
+    soapNote: ProgressNoteEntity(
+      id: 'note-1',
+      visitId: 'vis-test-1',
+      caseId: 'case-test-1',
+      patientId: 'pat-101',
+      veterinarianId: 'vet-1',
+      veterinarianName: 'Dr. Anna Stone',
+      subjective: 'Owner reports rapid breathing while resting',
+      temperatureCelsius: 38.6,
+      heartRateBpm: 144,
+      recordedAt: now,
+      createdAt: now,
+    ),
+  );
+
   final sampleDetail = CaseDetailEntity(
     summary: sampleSummary,
     allergies: const ['Cephalexin'],
-    progressNotes: [
-      ProgressNoteEntity(
-        id: 'note-1',
-        caseId: 'case-test-1',
-        patientId: 'pat-101',
-        veterinarianId: 'vet-1',
-        veterinarianName: 'Dr. Anna Stone',
-        noteType: 'soap',
-        subjective: 'Owner reports rapid breathing while resting',
-        objective: 'Tachypneic, crackles audible in bilateral ventral lung fields',
-        temperatureCelsius: 38.6,
-        heartRateBpm: 144,
-        respiratoryRateBpm: 48,
-        bodyConditionScore: 5,
-        painScore: 0,
-        recordedAt: now,
-        createdAt: now,
-      ),
-      ProgressNoteEntity(
-        id: 'note-2',
-        caseId: 'case-test-1',
-        patientId: 'pat-101',
-        veterinarianId: 'vet-1',
-        veterinarianName: 'Dr. Anna Stone',
-        noteType: 'addendum',
-        assessment: 'Patient placed in oxygen cage with 40% FiO2. Furosemide administered.',
-        recordedAt: now.add(const Duration(minutes: 30)),
-        createdAt: now.add(const Duration(minutes: 30)),
-      ),
-    ],
     diagnoses: const [],
+    visits: [sampleVisit],
   );
 
   setUp(() {
     mockRepo = MockCaseRepository();
     when(() => mockRepo.watchCaseDetail('case-test-1'))
         .thenAnswer((_) => Stream.value(sampleDetail));
+    when(() => mockRepo.watchVisitDetail('vis-test-1'))
+        .thenAnswer((_) => Stream.value(sampleVisit));
   });
 
-  testWidgets('CaseDetailScreen renders patient demographics, allergies, diagnoses, and SOAP notes', (tester) async {
+  testWidgets('CaseDetailScreen renders patient demographics, allergies, diagnoses, and Visits list', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: CaseDetailScreen(
@@ -120,9 +124,12 @@ void main() {
     expect(find.text('Congestive Heart Failure'), findsOneWidget);
     expect(find.text('Dilated Cardiomyopathy'), findsOneWidget);
 
-    expect(find.byType(SoapNotesView), findsOneWidget);
-    expect(find.text('IMMUTABLE ADDENDUM'), findsOneWidget);
-    expect(find.text('SOAP PROGRESS NOTE'), findsOneWidget);
+    // Hierarchical Visits section
+    expect(find.text('Clinical Visits & Encounters'), findsOneWidget);
+    expect(find.text('Start New Visit'), findsOneWidget);
+    expect(find.byType(VisitCard), findsOneWidget);
+    expect(find.text('Follow-up Visit - Nov 11, 2026'), findsOneWidget);
+    expect(find.text('ACTIVE ENCOUNTER'), findsOneWidget);
   });
 
   testWidgets('CaseDetailScreen priority switcher triggers repository update', (tester) async {
@@ -184,13 +191,73 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.ensureVisible(find.text('Edit'));
-    await tester.tap(find.text('Edit'));
+    final diagBtn = find.byKey(const Key('edit_diagnoses_button'));
+    await tester.ensureVisible(diagBtn);
+    await tester.tap(diagBtn);
     await tester.pumpAndSettle();
 
     expect(find.text('Update Diagnoses'), findsOneWidget);
     expect(find.byType(AlertDialog), findsOneWidget);
     expect(find.text('Save'), findsOneWidget);
+  });
+
+  testWidgets('CaseDetailScreen edit chief complaint button opens edit dialog', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: CaseDetailScreen(
+          caseId: 'case-test-1',
+          repository: mockRepo,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final ccBtn = find.byKey(const Key('edit_chief_complaint_button'));
+    await tester.ensureVisible(ccBtn);
+    await tester.tap(ccBtn);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Edit Chief Complaint'), findsOneWidget);
+    expect(find.byType(AlertDialog), findsOneWidget);
     expect(find.text('Save'), findsOneWidget);
+  });
+
+  testWidgets('Tapping VisitCard navigates to VisitDetailScreen', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: CaseDetailScreen(
+          caseId: 'case-test-1',
+          repository: mockRepo,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.byType(VisitCard));
+    await tester.tap(find.byType(VisitCard));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(VisitDetailScreen), findsOneWidget);
+    expect(find.text('Follow-up Visit - Nov 11, 2026'), findsWidgets);
+  });
+
+  testWidgets('Tapping Start New Visit opens StartVisitSheet', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: CaseDetailScreen(
+          caseId: 'case-test-1',
+          repository: mockRepo,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.text('Start New Visit'));
+    await tester.tap(find.text('Start New Visit'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(StartVisitSheet), findsOneWidget);
+    expect(find.text('Start New Visit Encounter'), findsOneWidget);
+    expect(find.text('Begin Visit Encounter'), findsOneWidget);
   });
 }

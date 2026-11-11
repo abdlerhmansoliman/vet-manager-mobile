@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'progress_note_entity.dart';
 import 'diagnosis_entity.dart';
+import 'visit_entity.dart';
 
 /// Clinical summary entity for triage boards and case cards.
 class CaseSummaryEntity extends Equatable {
@@ -96,20 +97,22 @@ class CaseSummaryEntity extends Equatable {
       ];
 }
 
-/// Comprehensive relational encounter entity including notes, vitals, and diagnoses.
+/// Comprehensive relational encounter entity including notes, vitals, visits, and diagnoses.
 class CaseDetailEntity extends Equatable {
   final CaseSummaryEntity summary;
   final String? clientAddress;
   final List<String> allergies;
   final List<ProgressNoteEntity> progressNotes;
   final List<DiagnosisEntity> diagnoses;
+  final List<VisitEntity> visits;
 
   const CaseDetailEntity({
     required this.summary,
     this.clientAddress,
     this.allergies = const [],
-    required this.progressNotes,
+    this.progressNotes = const [],
     required this.diagnoses,
+    this.visits = const [],
   });
 
   List<ProgressNoteEntity> get soapNotes =>
@@ -125,5 +128,6 @@ class CaseDetailEntity extends Equatable {
         allergies,
         progressNotes,
         diagnoses,
+        visits,
       ];
 }
