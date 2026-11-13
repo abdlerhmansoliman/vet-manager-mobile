@@ -31,8 +31,14 @@ class IdempotencyInterceptor extends Interceptor {
 
     // Only inject idempotency keys on mutating HTTP verbs
     if (_mutatingMethods.contains(method)) {
-      final existingKey = options.headers[headerIdempotencyKey];
-      if (existingKey == null || existingKey.toString().trim().isEmpty) {
+      final existingKey = options.headers[headerIdempotencyKey] ??
+          options.headers[headerIdempotencyKey.toLowerCase()] ??
+          options.extra['idempotency_key'] ??
+          options.extra['idempotencyKey'];
+
+      if (existingKey != null && existingKey.toString().trim().isNotEmpty) {
+        options.headers[headerIdempotencyKey] = existingKey.toString().trim();
+      } else {
         final newKey = _customGenerator != null
             ? _customGenerator()
             : _uuid.v7();

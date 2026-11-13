@@ -1,3 +1,6 @@
+import '../core/localization/locale_cubit.dart';
+import '../core/localization/locale_state.dart';
+import '../l10n/app_localizations.dart';
 import '../sync/sync_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,6 +19,7 @@ import '../features/media/domain/repositories/media_repository.dart';
 class VetManagerApp extends StatefulWidget {
   final IAuthRepository? authRepository;
   final AuthBloc? authBloc;
+  final LocaleCubit? localeCubit;
   final IPatientRepository? patientRepository;
   final ICaseRepository? caseRepository;
   final IStaffRepository? staffRepository;
@@ -26,6 +30,7 @@ class VetManagerApp extends StatefulWidget {
     super.key,
     this.authRepository,
     this.authBloc,
+    this.localeCubit,
     this.patientRepository,
     this.caseRepository,
     this.staffRepository,
@@ -39,6 +44,7 @@ class VetManagerApp extends StatefulWidget {
 
 class _VetManagerAppState extends State<VetManagerApp> {
   late final AuthBloc _authBloc;
+  late final LocaleCubit _localeCubit;
   late final AppRouter _appRouter;
 
   @override
@@ -48,6 +54,8 @@ class _VetManagerAppState extends State<VetManagerApp> {
         AuthBloc(
           authRepository: widget.authRepository ?? AuthRepository(),
         );
+
+    _localeCubit = widget.localeCubit ?? LocaleCubit();
 
     _appRouter = AppRouter(
       authBloc: _authBloc,
@@ -66,6 +74,9 @@ class _VetManagerAppState extends State<VetManagerApp> {
     if (widget.authBloc == null) {
       _authBloc.close();
     }
+    if (widget.localeCubit == null) {
+      _localeCubit.close();
+    }
     super.dispose();
   }
 
@@ -82,15 +93,25 @@ class _VetManagerAppState extends State<VetManagerApp> {
         RepositoryProvider<IMediaRepository>.value(value: widget.mediaRepository!),
     ];
 
-    final app = BlocProvider<AuthBloc>.value(
-      value: _authBloc,
-      child: MaterialApp.router(
-        title: 'VetManager',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.lightTheme,
-        darkTheme: AppTheme.darkTheme,
-        themeMode: ThemeMode.light,
-        routerConfig: _appRouter.router,
+    final app = MultiBlocProvider(
+      providers: [
+        BlocProvider<AuthBloc>.value(value: _authBloc),
+        BlocProvider<LocaleCubit>.value(value: _localeCubit),
+      ],
+      child: BlocBuilder<LocaleCubit, LocaleState>(
+        builder: (context, localeState) {
+          return MaterialApp.router(
+            title: 'VetManager',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.lightThemeForLocale(localeState.locale),
+            darkTheme: AppTheme.darkTheme,
+            themeMode: ThemeMode.light,
+            locale: localeState.locale,
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            routerConfig: _appRouter.router,
+          );
+        },
       ),
     );
 

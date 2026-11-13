@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/text_styles.dart';
+import '../../../../core/localization/l10n_extensions.dart';
 import '../../../../core/widgets/animal_species_avatar.dart';
 import '../../../../core/widgets/triage_priority_badge.dart';
 import '../../../clinical_cases/domain/entities/case_entity.dart';
@@ -96,7 +97,7 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel', style: TextStyle(color: AppColors.textMuted)),
+            child: Text(context.l10n.cancel, style: const TextStyle(color: AppColors.textMuted)),
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
@@ -105,7 +106,7 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
               foregroundColor: Colors.white,
               elevation: 0,
             ),
-            child: const Text('Delete Patient'),
+            child: Text(context.l10n.deletePatient),
           ),
         ],
       ),
@@ -498,7 +499,7 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
                 ),
                 alignment: Alignment.center,
                 child: Text(
-                  'Details & Owner',
+                  context.l10n.detailsAndOwner,
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
@@ -520,7 +521,7 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
                 ),
                 alignment: Alignment.center,
                 child: Text(
-                  'Clinical Cases',
+                  context.l10n.clinicalCases,
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
@@ -1083,7 +1084,7 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
             child: ElevatedButton.icon(
               onPressed: () => _showStartCaseSheet(context),
               icon: const Icon(Icons.medical_services_outlined, size: 20),
-              label: const Text('Create New Case'),
+              label: Text(context.l10n.createNewCase),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryEmerald,
                 foregroundColor: Colors.white,

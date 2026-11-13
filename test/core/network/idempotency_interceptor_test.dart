@@ -67,5 +67,20 @@ void main() {
 
       expect(options.headers['Idempotency-Key'], equals('client-preset-idempotency-key'));
     });
+
+    test('preserves idempotency_key from options.extra without regenerating', () {
+      final interceptor = IdempotencyInterceptor(
+        customGenerator: () => 'freshly-generated-key',
+      );
+      final options = RequestOptions(
+        method: 'POST',
+        path: '/sync/push',
+        extra: {'idempotency_key': 'persistent-sync-queue-uuid-v7'},
+      );
+
+      interceptor.onRequest(options, mockHandler);
+
+      expect(options.headers['Idempotency-Key'], equals('persistent-sync-queue-uuid-v7'));
+    });
   });
 }

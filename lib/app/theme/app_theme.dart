@@ -6,7 +6,13 @@ import 'text_styles.dart';
 /// Complete Material 3 Theme Specification for VetManager.
 abstract final class AppTheme {
   /// Primary Warm & Cheerful Light Theme
-  static ThemeData get lightTheme {
+  static ThemeData get lightTheme => lightThemeForLocale();
+
+  /// Primary Warm & Cheerful Light Theme with Locale-aware typography
+  static ThemeData lightThemeForLocale([Locale? locale]) {
+    final isArabic = locale?.languageCode == 'ar';
+    AppTextStyles.activeLanguageCode = isArabic ? 'ar' : 'en';
+
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,

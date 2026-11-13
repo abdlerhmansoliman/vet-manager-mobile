@@ -3,6 +3,7 @@ import '../config/app_env.dart';
 import '../storage/secure_storage_service.dart';
 import 'error_interceptor.dart';
 import 'idempotency_interceptor.dart';
+import 'locale_interceptor.dart';
 import 'tenant_interceptor.dart';
 
 /// Central HTTP Client for VetManager Mobile Application.
@@ -10,6 +11,7 @@ import 'tenant_interceptor.dart';
 /// Pre-configured with:
 /// - Base URL configuration
 /// - 15-second connect/receive timeouts
+/// - [LocaleInterceptor] for Accept-Language header injection
 /// - [TenantInterceptor] for automatic tenant & auth header injection
 /// - [IdempotencyInterceptor] for UUID v7 idempotency protection on state changes
 /// - [ErrorInterceptor] for mapping HTTP errors to domain exceptions
@@ -19,12 +21,15 @@ class ApiClient {
 
   final Dio _dio;
   final ISecureStorageService _storageService;
+  final String Function()? _localeProvider;
 
   ApiClient({
     String baseUrl = defaultBaseUrl,
     ISecureStorageService? storageService,
+    String Function()? localeProvider,
     Dio? dio,
   })  : _storageService = storageService ?? SecureStorageService(),
+        _localeProvider = localeProvider,
         _dio = dio ??
             Dio(
               BaseOptions(
@@ -43,6 +48,7 @@ class ApiClient {
 
   void _setupInterceptors() {
     _dio.interceptors.addAll([
+      LocaleInterceptor(localeProvider: _localeProvider ?? () => 'en'),
       TenantInterceptor(storageService: _storageService),
       IdempotencyInterceptor(),
       ErrorInterceptor(),

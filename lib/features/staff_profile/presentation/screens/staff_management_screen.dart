@@ -10,6 +10,7 @@ import '../bloc/staff_bloc.dart';
 import '../bloc/staff_event.dart';
 import '../bloc/staff_state.dart';
 import 'doctor_profile_screen.dart';
+import '../../../../core/localization/l10n_extensions.dart';
 
 /// Clinic Owner & Head Vet Staff Management Screen.
 ///
@@ -115,14 +116,14 @@ class _StaffManagementScreenState extends State<StaffManagementScreen> {
               onPressed: () => Navigator.of(context).maybePop(),
             ),
             title: Text(
-              'Clinic Staff Directory',
+              context.l10n.clinicStaffDirectory,
               style: AppTextStyles.titleLarge.copyWith(color: AppColors.textCharcoal),
             ),
             actions: [
               IconButton(
                 key: const Key('refresh_staff_button'),
                 icon: const Icon(Icons.refresh_rounded, color: AppColors.primaryEmerald),
-                tooltip: 'Refresh',
+                tooltip: context.l10n.retry,
                 onPressed: _onRefresh,
               ),
             ],
@@ -163,7 +164,7 @@ class _StaffManagementScreenState extends State<StaffManagementScreen> {
             backgroundColor: AppColors.primaryEmerald,
             foregroundColor: Colors.white,
             icon: const Icon(Icons.person_add_rounded),
-            label: const Text('Add Staff Member'),
+            label: Text(context.l10n.addStaffMember),
           ),
         );
       },
@@ -180,7 +181,7 @@ class _StaffManagementScreenState extends State<StaffManagementScreen> {
             key: const Key('staff_search_field'),
             onChanged: (val) => setState(() => _searchQuery = val.trim()),
             decoration: InputDecoration(
-              hintText: 'Search by name, role, email, or specialty...',
+              hintText: context.l10n.searchStaffHint,
               hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.textMuted),
               prefixIcon: const Icon(Icons.search_rounded, color: AppColors.textMuted),
               filled: true,
@@ -206,19 +207,19 @@ class _StaffManagementScreenState extends State<StaffManagementScreen> {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                _buildRoleFilterChip(label: 'All Staff', role: null),
+                _buildRoleFilterChip(label: context.l10n.allStaff, role: null),
                 const SizedBox(width: 8),
-                _buildRoleFilterChip(label: 'Veterinarians', role: StaffRole.doctor),
+                _buildRoleFilterChip(label: context.l10n.roleVeterinarian, role: StaffRole.doctor),
                 const SizedBox(width: 8),
-                _buildRoleFilterChip(label: 'Head Vets', role: StaffRole.headVet),
+                _buildRoleFilterChip(label: context.l10n.headVets, role: StaffRole.headVet),
                 const SizedBox(width: 8),
-                _buildRoleFilterChip(label: 'Field Vets', role: StaffRole.fieldDoctor),
+                _buildRoleFilterChip(label: context.l10n.fieldVets, role: StaffRole.fieldDoctor),
                 const SizedBox(width: 8),
-                _buildRoleFilterChip(label: 'Vet Techs', role: StaffRole.vetTech),
+                _buildRoleFilterChip(label: context.l10n.vetTechs, role: StaffRole.vetTech),
                 const SizedBox(width: 8),
-                _buildRoleFilterChip(label: 'Assistants', role: StaffRole.assistant),
+                _buildRoleFilterChip(label: context.l10n.assistants, role: StaffRole.assistant),
                 const SizedBox(width: 8),
-                _buildRoleFilterChip(label: 'Receptionists', role: StaffRole.receptionist),
+                _buildRoleFilterChip(label: context.l10n.receptionists, role: StaffRole.receptionist),
               ],
             ),
           ),
@@ -326,7 +327,9 @@ class _StaffManagementScreenState extends State<StaffManagementScreen> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
-                              staff.isActive ? 'Active' : 'Suspended',
+                              staff.isActive
+                                  ? context.l10n.active
+                                  : context.l10n.suspended,
                               style: AppTextStyles.badgeLabel.copyWith(
                                 color: staff.isActive
                                     ? AppColors.badgeStableMintText
@@ -338,7 +341,7 @@ class _StaffManagementScreenState extends State<StaffManagementScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        staff.roleLabel,
+                        context.formatStaffRole(staff.role.value),
                         style: AppTextStyles.bodySmall.copyWith(
                           color: AppColors.primaryEmerald,
                           fontWeight: FontWeight.w600,
@@ -391,7 +394,9 @@ class _StaffManagementScreenState extends State<StaffManagementScreen> {
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    staff.isAvailable ? 'On-Duty' : 'Off-Duty',
+                                    staff.isAvailable
+                                        ? context.l10n.onDutyAvailability
+                                        : context.l10n.unavailableForTriage,
                                     style: AppTextStyles.bodySmall.copyWith(
                                       color: staff.isAvailable
                                           ? AppColors.primaryEmerald
@@ -418,7 +423,7 @@ class _StaffManagementScreenState extends State<StaffManagementScreen> {
                                       size: 12, color: AppColors.primaryEmerald),
                                   const SizedBox(width: 4),
                                   Text(
-                                    'DEA Witness',
+                                    context.l10n.deaWitness,
                                     style: AppTextStyles.bodySmall.copyWith(
                                       color: AppColors.textCharcoal,
                                       fontSize: 11,
@@ -566,7 +571,7 @@ class _StaffManagementScreenState extends State<StaffManagementScreen> {
         children: [
           const Icon(Icons.people_outline_rounded, size: 54, color: AppColors.textMuted),
           const SizedBox(height: 12),
-          Text('No staff members found', style: AppTextStyles.titleLarge),
+          Text(context.l10n.noStaffFound, style: AppTextStyles.titleLarge),
           const SizedBox(height: 6),
           Text(
             _searchQuery.isNotEmpty
@@ -594,7 +599,7 @@ class _StaffManagementScreenState extends State<StaffManagementScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.cancel),
           ),
           ElevatedButton(
             key: const Key('confirm_status_toggle_button'),
@@ -628,7 +633,7 @@ class _StaffManagementScreenState extends State<StaffManagementScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.cancel),
           ),
           ElevatedButton(
             key: const Key('confirm_delete_staff_button'),
@@ -817,7 +822,9 @@ class _StaffFormSheetState extends State<_StaffFormSheet> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        isEdit ? 'Edit Staff Member' : 'Register New Staff Member',
+                        isEdit
+                            ? context.l10n.editStaffMember
+                            : context.l10n.registerNewStaff,
                         style: AppTextStyles.headlineSmall.copyWith(fontSize: 18),
                       ),
                       IconButton(
@@ -1057,7 +1064,9 @@ class _StaffFormSheetState extends State<_StaffFormSheet> {
                                       ),
                                     )
                                   : Text(
-                                      isEdit ? 'Update Staff Member' : 'Register Staff Member',
+                                      isEdit
+                                          ? context.l10n.saveStaffMember
+                                          : context.l10n.registerStaff,
                                       style: AppTextStyles.titleMedium.copyWith(color: Colors.white),
                                     ),
                             ),

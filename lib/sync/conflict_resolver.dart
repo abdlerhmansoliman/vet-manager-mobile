@@ -136,7 +136,16 @@ class ConflictResolver {
         break;
 
       case PushAckStatus.rejected:
-        // Clinical records are never dropped, but log the error if rejected
+        // Mutation rejected by server (e.g. visit locked/signed, or validation failed).
+        if (ack.entityType == 'visit' || ack.entityType == 'visits') {
+          await (db.update(db.visitsTable)..where((v) => v.id.equals(ack.entityId))).write(
+            const VisitsTableCompanion(syncStatus: Value('failed')),
+          );
+        } else if (ack.entityType == 'clinical_progress_note' || ack.entityType == 'progress_note') {
+          await (db.update(db.clinicalProgressNotesTable)..where((n) => n.id.equals(ack.entityId))).write(
+            const ClinicalProgressNotesTableCompanion(syncStatus: Value('failed')),
+          );
+        }
         break;
     }
   }
@@ -160,6 +169,13 @@ class ConflictResolver {
       case 'case':
         await (db.update(db.clinicalCasesTable)..where((c) => c.id.equals(entityId))).write(
           ClinicalCasesTableCompanion(syncStatus: const Value('synced'), lastSyncedAt: Value(now)),
+        );
+        break;
+
+      case 'visit':
+      case 'visits':
+        await (db.update(db.visitsTable)..where((v) => v.id.equals(entityId))).write(
+          const VisitsTableCompanion(syncStatus: Value('synced')),
         );
         break;
 
@@ -366,7 +382,43 @@ class ConflictResolver {
         }
       }
 
-      // 4. Clinical Progress Notes (Append-Only: never overwrite signed clinical notes)
+      // 4. Clinical Visits
+      if (deltas['visits'] is List) {
+        for (final item in deltas['visits'] as List) {
+          if (item is Map<String, dynamic>) {
+            final visitId = item['id']?.toString() ?? '';
+            final caseId = item['case_id']?.toString() ?? '';
+            if (visitId.isEmpty || caseId.isEmpty) continue;
+
+            final caseExists = await (db.select(db.clinicalCasesTable)..where((c) => c.id.equals(caseId))).getSingleOrNull();
+            if (caseExists == null) continue;
+
+            await db.into(db.visitsTable).insertOnConflictUpdate(
+                  VisitsTableCompanion(
+                    id: Value(visitId),
+                    tenantId: Value(tenantId),
+                    caseId: Value(caseId),
+                    patientId: Value(caseExists.patientId),
+                    veterinarianId: Value(caseExists.primaryVeterinarianId),
+                    veterinarianName: Value(caseExists.primaryVeterinarianName ?? 'Attending Clinician'),
+                    title: Value(item['title']?.toString() ?? 'Visit'),
+                    visitType: Value(item['visit_type']?.toString() ?? 'consultation'),
+                    status: Value(item['status']?.toString() ?? 'open'),
+                    isSigned: Value(item['is_signed'] == 1 || item['is_signed'] == true),
+                    signedAt: Value(DateTime.tryParse(item['signed_at']?.toString() ?? '')),
+                    signedBy: Value(item['signed_by']?.toString()),
+                    visitDate: Value(DateTime.tryParse(item['visit_date']?.toString() ?? '') ?? now),
+                    createdAt: Value(DateTime.tryParse(item['created_at']?.toString() ?? '') ?? now),
+                    updatedAt: Value(DateTime.tryParse(item['updated_at']?.toString() ?? '') ?? now),
+                    deletedAt: Value(DateTime.tryParse(item['deleted_at']?.toString() ?? '')),
+                    syncStatus: const Value('synced'),
+                  ),
+                );
+          }
+        }
+      }
+
+      // 5. Clinical Progress Notes (Append-Only: never overwrite signed clinical notes)
       if (deltas['progress_notes'] is List) {
         for (final item in deltas['progress_notes'] as List) {
           if (item is Map<String, dynamic>) {
@@ -426,6 +478,7 @@ class ConflictResolver {
                     ClinicalProgressNotesTableCompanion(
                       id: Value(noteId),
                       caseId: Value(caseId),
+                      visitId: Value(item['visit_id']?.toString()),
                       patientId: Value(patientId),
                       veterinarianId: Value(vetId),
                       veterinarianName: Value(vetName),

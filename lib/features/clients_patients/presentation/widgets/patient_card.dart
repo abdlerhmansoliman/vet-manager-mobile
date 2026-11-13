@@ -4,6 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/text_styles.dart';
+import '../../../../core/localization/l10n_extensions.dart';
 import '../../../../core/widgets/animal_species_avatar.dart';
 import '../../domain/entities/patient_entity.dart';
 import '../../domain/repositories/patient_repository.dart';
@@ -101,7 +102,7 @@ class PatientCard extends StatelessWidget {
                         Row(
                           children: [
                             Text(
-                              patient.species,
+                              context.formatSpecies(patient.species),
                               style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,

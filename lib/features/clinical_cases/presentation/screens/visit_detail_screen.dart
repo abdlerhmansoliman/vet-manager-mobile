@@ -18,6 +18,7 @@ import '../widgets/create_soap_note_sheet.dart';
 import '../widgets/dose_administration_card.dart';
 import '../widgets/immutable_addendum_card.dart';
 import '../widgets/soap_progress_card.dart';
+import '../../../../core/localization/l10n_extensions.dart';
 
 /// Clinical Encounter Hub displaying medical data strictly scoped to a specific Visit.
 class VisitDetailScreen extends StatelessWidget {
@@ -145,7 +146,7 @@ class _VisitDetailViewState extends State<_VisitDetailView> {
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  visit.visitTypeDisplay,
+                  context.formatVisitType(visit.visitType),
                   style: AppTextStyles.bodySmall.copyWith(
                     color: AppColors.textMuted,
                     fontSize: 11,
@@ -157,7 +158,7 @@ class _VisitDetailViewState extends State<_VisitDetailView> {
               if (!visit.isLocked)
                 IconButton(
                   icon: const Icon(Icons.edit_outlined, color: AppColors.primaryEmerald),
-                  tooltip: 'Edit Visit',
+                  tooltip: context.l10n.editVisit,
                   onPressed: () => _showEditVisitDialog(context, visit),
                 ),
               Padding(
@@ -240,7 +241,7 @@ class _VisitDetailViewState extends State<_VisitDetailView> {
             const Icon(Icons.lock_rounded, size: 11, color: Color(0xFF065F46)),
             const SizedBox(width: 4),
             Text(
-              'LOCKED',
+              context.l10n.locked,
               style: AppTextStyles.badgeLabel.copyWith(
                 color: const Color(0xFF065F46),
                 fontSize: 10,
@@ -264,7 +265,7 @@ class _VisitDetailViewState extends State<_VisitDetailView> {
           const Icon(Icons.pending_actions_rounded, size: 11, color: AppColors.badgeObsAmberText),
           const SizedBox(width: 4),
           Text(
-            'ACTIVE',
+            context.l10n.activeBadge,
             style: AppTextStyles.badgeLabel.copyWith(
               color: AppColors.badgeObsAmberText,
               fontSize: 10,
@@ -325,7 +326,7 @@ class _VisitDetailViewState extends State<_VisitDetailView> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Encounter Date: ${_formatDate(visit.visitDate)}',
+                      '${context.l10n.encounterDate}: ${_formatDate(visit.visitDate)}',
                       style: AppTextStyles.bodySmall.copyWith(
                         color: AppColors.textMuted,
                       ),
@@ -343,7 +344,7 @@ class _VisitDetailViewState extends State<_VisitDetailView> {
               const Icon(Icons.person_pin_rounded, size: 14, color: AppColors.textMuted),
               const SizedBox(width: 4),
               Text(
-                'Attending: ${visit.veterinarianName}',
+                '${context.l10n.attendingClinician}: ${visit.veterinarianName}',
                 style: AppTextStyles.bodySmall.copyWith(
                   fontWeight: FontWeight.w600,
                   color: AppColors.textCharcoal,
@@ -354,7 +355,7 @@ class _VisitDetailViewState extends State<_VisitDetailView> {
                 const Icon(Icons.lock_clock_rounded, size: 13, color: Color(0xFF065F46)),
                 const SizedBox(width: 4),
                 Text(
-                  'Signed & Finalized',
+                  context.l10n.signedAndFinalized,
                   style: AppTextStyles.bodySmall.copyWith(
                     color: const Color(0xFF065F46),
                     fontWeight: FontWeight.w700,
@@ -448,7 +449,9 @@ class _VisitDetailViewState extends State<_VisitDetailView> {
                         const Icon(Icons.add_circle_outline_rounded, size: 16, color: Colors.white),
                         const SizedBox(width: 6),
                         Text(
-                          visit.hasSoap ? 'Edit SOAP Exam' : 'Record SOAP Exam',
+                          visit.hasSoap
+                              ? context.l10n.editSoapExam
+                              : context.l10n.recordSoapExam,
                           style: AppTextStyles.titleMedium.copyWith(
                             color: Colors.white,
                             fontSize: 13,
@@ -498,7 +501,7 @@ class _VisitDetailViewState extends State<_VisitDetailView> {
                         const Icon(Icons.note_add_outlined, size: 16, color: AppColors.secondaryCoral),
                         const SizedBox(width: 6),
                         Text(
-                          'Append Addendum',
+                          context.l10n.appendAddendum,
                           style: AppTextStyles.titleMedium.copyWith(
                             color: AppColors.secondaryCoral,
                             fontSize: 13,
@@ -548,7 +551,7 @@ class _VisitDetailViewState extends State<_VisitDetailView> {
                       const Icon(Icons.vaccines_rounded, size: 16, color: AppColors.primaryEmerald),
                       const SizedBox(width: 6),
                       Text(
-                        'Administer Dose',
+                        context.l10n.administerDose,
                         style: AppTextStyles.titleMedium.copyWith(
                           color: AppColors.primaryEmerald,
                           fontSize: 13,
@@ -586,7 +589,7 @@ class _VisitDetailViewState extends State<_VisitDetailView> {
                   const Icon(Icons.lock_outline_rounded, size: 15, color: Color(0xFF059669)),
                   const SizedBox(width: 6),
                   Text(
-                    'Sign & Lock Visit Record',
+                    context.l10n.signAndLockVisit,
                     style: AppTextStyles.titleMedium.copyWith(
                       color: const Color(0xFF059669),
                       fontSize: 12,
@@ -611,7 +614,7 @@ class _VisitDetailViewState extends State<_VisitDetailView> {
             const Icon(Icons.assignment_outlined, size: 18, color: AppColors.primaryEmeraldDark),
             const SizedBox(width: 6),
             Text(
-              'SOAP Physical Examination',
+              context.l10n.soapPhysicalExam,
               style: AppTextStyles.titleMedium.copyWith(
                 fontWeight: FontWeight.w700,
                 color: AppColors.textCharcoal,
@@ -650,7 +653,7 @@ class _VisitDetailViewState extends State<_VisitDetailView> {
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  'No SOAP Exam Recorded Yet',
+                  context.l10n.noSoapExamRecordedYet,
                   style: AppTextStyles.titleMedium.copyWith(
                     fontWeight: FontWeight.w700,
                     color: AppColors.textCharcoal,
@@ -659,7 +662,7 @@ class _VisitDetailViewState extends State<_VisitDetailView> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Tap "Record SOAP Exam" above to document vitals, subjective observations, assessment, and treatment plan.',
+                  context.l10n.noSoapExamDesc,
                   textAlign: TextAlign.center,
                   style: AppTextStyles.bodySmall.copyWith(
                     color: AppColors.textMuted,
@@ -681,7 +684,7 @@ class _VisitDetailViewState extends State<_VisitDetailView> {
             const Icon(Icons.vaccines_outlined, size: 18, color: AppColors.primaryEmeraldDark),
             const SizedBox(width: 6),
             Text(
-              'Administered Medications',
+              context.l10n.administeredMedications,
               style: AppTextStyles.titleMedium.copyWith(
                 fontWeight: FontWeight.w700,
                 color: AppColors.textCharcoal,
@@ -721,7 +724,7 @@ class _VisitDetailViewState extends State<_VisitDetailView> {
                 const Icon(Icons.info_outline_rounded, size: 16, color: AppColors.textMuted),
                 const SizedBox(width: 6),
                 Text(
-                  'No medications administered during this visit.',
+                  context.l10n.noMedicationsAdministered,
                   style: AppTextStyles.bodySmall.copyWith(
                     color: AppColors.textMuted,
                   ),
@@ -755,7 +758,7 @@ class _VisitDetailViewState extends State<_VisitDetailView> {
             const Icon(Icons.note_alt_outlined, size: 18, color: AppColors.badgeObsAmberText),
             const SizedBox(width: 6),
             Text(
-              'Immutable Addenda',
+              context.l10n.immutableAddenda,
               style: AppTextStyles.titleMedium.copyWith(
                 fontWeight: FontWeight.w700,
                 color: AppColors.textCharcoal,
@@ -797,8 +800,8 @@ class _VisitDetailViewState extends State<_VisitDetailView> {
                 Flexible(
                   child: Text(
                     visit.isLocked
-                        ? 'No addendums appended to this signed record.'
-                        : 'Addendums can be appended once the encounter is signed.',
+                        ? context.l10n.noAddendaSigned
+                        : context.l10n.addendaCanBeAppendedOnceSigned,
                     style: AppTextStyles.bodySmall.copyWith(
                       color: AppColors.textMuted,
                     ),
@@ -840,7 +843,7 @@ class _VisitDetailViewState extends State<_VisitDetailView> {
           backgroundColor: AppColors.surfaceWhite,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: Text(
-            'Edit Visit Details',
+            context.l10n.editVisitDetails,
             style: AppTextStyles.titleMedium.copyWith(
               fontWeight: FontWeight.w700,
               color: AppColors.textCharcoal,
@@ -851,7 +854,7 @@ class _VisitDetailViewState extends State<_VisitDetailView> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Visit Title',
+                context.l10n.visitTitle,
                 style: AppTextStyles.bodySmall.copyWith(
                   fontWeight: FontWeight.w600,
                   color: AppColors.textCharcoal,
@@ -872,7 +875,7 @@ class _VisitDetailViewState extends State<_VisitDetailView> {
               ),
               const SizedBox(height: 16),
               Text(
-                'Visit Type',
+                context.l10n.visitType,
                 style: AppTextStyles.bodySmall.copyWith(
                   fontWeight: FontWeight.w600,
                   color: AppColors.textCharcoal,
@@ -889,12 +892,12 @@ class _VisitDetailViewState extends State<_VisitDetailView> {
                     borderSide: const BorderSide(color: AppColors.borderWarm),
                   ),
                 ),
-                items: const [
-                  DropdownMenuItem(value: 'consultation', child: Text('Consultation')),
-                  DropdownMenuItem(value: 'follow_up', child: Text('Follow-up')),
-                  DropdownMenuItem(value: 'emergency', child: Text('Emergency')),
-                  DropdownMenuItem(value: 'surgery_recheck', child: Text('Surgery Re-check')),
-                  DropdownMenuItem(value: 'routine', child: Text('Routine Checkup')),
+                items: [
+                  DropdownMenuItem(value: 'consultation', child: Text(context.l10n.consultation)),
+                  DropdownMenuItem(value: 'follow_up', child: Text(context.l10n.followUp)),
+                  DropdownMenuItem(value: 'emergency', child: Text(context.l10n.emergency)),
+                  DropdownMenuItem(value: 'surgery_recheck', child: Text(context.l10n.surgeryRecheck)),
+                  DropdownMenuItem(value: 'routine', child: Text(context.l10n.routineCheckup)),
                 ],
                 onChanged: (val) {
                   if (val != null) {
@@ -907,7 +910,7 @@ class _VisitDetailViewState extends State<_VisitDetailView> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(dlgContext).pop(),
-              child: const Text('Cancel', style: TextStyle(color: AppColors.textMuted)),
+              child: Text(context.l10n.cancel, style: const TextStyle(color: AppColors.textMuted)),
             ),
             ElevatedButton(
               onPressed: () {
@@ -927,7 +930,7 @@ class _VisitDetailViewState extends State<_VisitDetailView> {
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               ),
-              child: const Text('Save'),
+              child: Text(context.l10n.save),
             ),
           ],
         ),

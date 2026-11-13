@@ -330,4 +330,38 @@ void main() {
       expect(find.text('Permanent & Irreversible Action'), findsOneWidget);
     });
   });
+
+  group('DoctorProfileScreen Language Selection & Preferences', () {
+    testWidgets('renders language preference card and opens language selector modal', (tester) async {
+      await tester.pumpWidget(createTestWidget(initialDoctor: sampleDoctor));
+      await tester.pumpAndSettle();
+
+      final prefSection = find.byKey(const Key('doctor_profile_preferences_section'));
+      await tester.ensureVisible(prefSection);
+      await tester.pumpAndSettle();
+
+      expect(prefSection, findsOneWidget);
+      expect(find.text('App Language'), findsOneWidget);
+
+      final changeLangBtn = find.byKey(const Key('change_language_button'));
+      expect(changeLangBtn, findsOneWidget);
+
+      await tester.tap(changeLangBtn);
+      await tester.pumpAndSettle();
+
+      // Verify language options modal is displayed
+      expect(find.byKey(const Key('select_language_en')), findsOneWidget);
+      expect(find.byKey(const Key('select_language_ar')), findsOneWidget);
+      expect(find.text('Select Language'), findsOneWidget);
+      expect(find.text('English'), findsWidgets);
+      expect(find.text('العربية'), findsOneWidget);
+
+      // Tap Arabic option
+      await tester.tap(find.byKey(const Key('select_language_ar')));
+      await tester.pumpAndSettle();
+
+      // Modal is dismissed
+      expect(find.byKey(const Key('select_language_ar')), findsNothing);
+    });
+  });
 }

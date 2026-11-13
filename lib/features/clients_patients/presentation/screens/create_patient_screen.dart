@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/text_styles.dart';
+import '../../../../core/localization/l10n_extensions.dart';
 import '../../../../core/widgets/app_snackbar.dart';
 import '../../domain/entities/patient_entity.dart';
 import '../../domain/repositories/patient_repository.dart';
@@ -123,7 +124,7 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
     if (!_formKey.currentState!.validate()) {
       AppSnackbar.showWarning(
         context,
-        'Please review the highlighted fields before saving.',
+        context.l10n.reviewHighlightedFields,
       );
       return;
     }
@@ -183,7 +184,7 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
         if (!mounted) return;
         AppSnackbar.showSuccess(
           context,
-          'Updated ${_nameController.text.trim()} successfully!',
+          context.l10n.patientUpdatedSuccess,
         );
         Navigator.of(context).pop(updated);
       } else {
@@ -221,7 +222,7 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
         if (!mounted) return;
         AppSnackbar.showSuccess(
           context,
-          'Registered ${_nameController.text.trim()} successfully!',
+          context.l10n.patientSavedSuccess,
         );
         Navigator.of(context).pop();
       }
@@ -246,7 +247,9 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          isEditing ? 'Edit Patient Profile' : 'Register Patient',
+          isEditing
+              ? context.l10n.editPatientProfile
+              : context.l10n.registerPatient,
           style: AppTextStyles.titleMedium.copyWith(
             fontWeight: FontWeight.w700,
             color: AppColors.textCharcoal,
@@ -258,30 +261,33 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           children: [
-            _buildSectionHeader('Patient Identity', Icons.pets_rounded),
+            _buildSectionHeader(
+              context.l10n.patientIdentity,
+              Icons.pets_rounded,
+            ),
             const SizedBox(height: 12),
             _buildCard([
               TextFormField(
                 controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Patient Name / Ear Tag *',
-                  hintText: 'e.g. Bella or EAR-104',
+                decoration: InputDecoration(
+                  labelText: '${context.l10n.patientNameOrTag} *',
+                  hintText: context.l10n.patientNameHint,
                 ),
                 validator: (val) {
                   final trimmed = val?.trim() ?? '';
                   if (trimmed.isEmpty) {
-                    return 'Please enter patient name or ear tag';
+                    return context.l10n.pleaseEnterPatientName;
                   }
                   if (trimmed.length > 100) {
-                    return 'Patient name cannot exceed 100 characters';
+                    return context.l10n.patientNameTooLong;
                   }
                   return null;
                 },
               ),
               const SizedBox(height: 14),
-              const Text(
-                'Species *',
-                style: TextStyle(
+              Text(
+                '${context.l10n.species} *',
+                style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textMuted,
@@ -294,7 +300,7 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
                 children: _speciesOptions.map((species) {
                   final isSelected = _selectedSpecies == species;
                   return ChoiceChip(
-                    label: Text(species),
+                    label: Text(context.formatSpecies(species)),
                     selected: isSelected,
                     onSelected: (selected) {
                       if (selected) setState(() => _selectedSpecies = species);
@@ -319,14 +325,14 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
               const SizedBox(height: 14),
               TextFormField(
                 controller: _breedController,
-                decoration: const InputDecoration(
-                  labelText: 'Breed',
-                  hintText: 'e.g. Golden Retriever, Holstein, Mixed',
+                decoration: InputDecoration(
+                  labelText: context.l10n.breed,
+                  hintText: context.l10n.breedHint,
                 ),
                 validator: (val) {
                   final trimmed = val?.trim() ?? '';
                   if (trimmed.length > 100) {
-                    return 'Breed cannot exceed 100 characters';
+                    return context.l10n.breedTooLong;
                   }
                   return null;
                 },
@@ -334,11 +340,14 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
               const SizedBox(height: 14),
               DropdownButtonFormField<String>(
                 initialValue: _selectedGender,
-                decoration: const InputDecoration(
-                  labelText: 'Gender & Reproductive Status',
+                decoration: InputDecoration(
+                  labelText: context.l10n.genderAndReproductiveStatus,
                 ),
                 items: _genderOptions.map((opt) {
-                  return DropdownMenuItem(value: opt.$1, child: Text(opt.$2));
+                  return DropdownMenuItem(
+                    value: opt.$1,
+                    child: Text(context.formatGender(opt.$1)),
+                  );
                 }).toList(),
                 onChanged: (val) {
                   if (val != null) setState(() => _selectedGender = val);
@@ -351,16 +360,16 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
                     child: TextFormField(
                       controller: _ageController,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Age (Years)',
-                        hintText: 'e.g. 3',
+                      decoration: InputDecoration(
+                        labelText: context.l10n.ageYears,
+                        hintText: context.l10n.ageHint,
                       ),
                       validator: (val) {
                         final trimmed = val?.trim() ?? '';
                         if (trimmed.isNotEmpty) {
                           final a = int.tryParse(trimmed);
                           if (a == null || a < 0 || a > 150) {
-                            return 'Enter valid age (0-150)';
+                            return context.l10n.enterValidAge;
                           }
                         }
                         return null;
@@ -373,16 +382,16 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
                       controller: _weightController,
                       keyboardType:
                           const TextInputType.numberWithOptions(decimal: true),
-                      decoration: const InputDecoration(
-                        labelText: 'Weight (kg)',
-                        hintText: 'e.g. 12.5',
+                      decoration: InputDecoration(
+                        labelText: context.l10n.weightKg,
+                        hintText: context.l10n.weightHint,
                       ),
                       validator: (val) {
                         final trimmed = val?.trim() ?? '';
                         if (trimmed.isNotEmpty) {
                           final w = double.tryParse(trimmed);
                           if (w == null || w <= 0 || w > 10000) {
-                            return 'Enter valid weight in kg';
+                            return context.l10n.enterValidWeight;
                           }
                         }
                         return null;
@@ -395,8 +404,10 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
               CheckboxListTile(
                 value: _isApproximateAge,
                 onChanged: (v) => setState(() => _isApproximateAge = v ?? false),
-                title: const Text('Age is estimated / approximate',
-                    style: TextStyle(fontSize: 13)),
+                title: Text(
+                  context.l10n.ageIsEstimated,
+                  style: const TextStyle(fontSize: 13),
+                ),
                 dense: true,
                 contentPadding: EdgeInsets.zero,
                 controlAffinity: ListTileControlAffinity.leading,
@@ -404,19 +415,22 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
               ),
             ]),
             const SizedBox(height: 20),
-            _buildSectionHeader('Identification & Medical', Icons.medical_information_outlined),
+            _buildSectionHeader(
+              context.l10n.identificationAndMedical,
+              Icons.medical_information_outlined,
+            ),
             const SizedBox(height: 12),
             _buildCard([
               TextFormField(
                 controller: _microchipController,
-                decoration: const InputDecoration(
-                  labelText: 'RFID Microchip Implant #',
-                  hintText: '15-digit ISO 11784/11785',
+                decoration: InputDecoration(
+                  labelText: context.l10n.rfidMicrochip,
+                  hintText: context.l10n.rfidMicrochipHint,
                 ),
                 validator: (val) {
                   final trimmed = val?.trim() ?? '';
                   if (trimmed.length > 32) {
-                    return 'Microchip ID cannot exceed 32 characters';
+                    return context.l10n.microchipTooLong;
                   }
                   return null;
                 },
@@ -424,14 +438,14 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
               const SizedBox(height: 14),
               TextFormField(
                 controller: _earTagController,
-                decoration: const InputDecoration(
-                  labelText: 'Visual Livestock Ear Tag ID',
-                  hintText: 'e.g. TAG-402',
+                decoration: InputDecoration(
+                  labelText: context.l10n.visualEarTagId,
+                  hintText: context.l10n.visualEarTagHint,
                 ),
                 validator: (val) {
                   final trimmed = val?.trim() ?? '';
                   if (trimmed.length > 64) {
-                    return 'Ear tag ID cannot exceed 64 characters';
+                    return context.l10n.earTagTooLong;
                   }
                   return null;
                 },
@@ -439,38 +453,41 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
               const SizedBox(height: 14),
               TextFormField(
                 controller: _allergiesController,
-                decoration: const InputDecoration(
-                  labelText: 'Known Drug Allergies',
-                  hintText: 'Separate with comma: Penicillin, NSAIDs',
+                decoration: InputDecoration(
+                  labelText: context.l10n.knownDrugAllergies,
+                  hintText: context.l10n.knownDrugAllergiesHint,
                 ),
               ),
               const SizedBox(height: 14),
               TextFormField(
                 controller: _notesController,
                 maxLines: 2,
-                decoration: const InputDecoration(
-                  labelText: 'Behavioral Cautions / Clinical Notes',
-                  hintText: 'e.g. Muzzle required, highly anxious',
+                decoration: InputDecoration(
+                  labelText: context.l10n.clinicalNotesInternal,
+                  hintText: context.l10n.clinicalNotesHint,
                 ),
               ),
             ]),
             const SizedBox(height: 20),
-            _buildSectionHeader('Registered Owner / Farm', Icons.person_outline_rounded),
+            _buildSectionHeader(
+              context.l10n.ownerClientDetails,
+              Icons.person_outline_rounded,
+            ),
             const SizedBox(height: 12),
             _buildCard([
               TextFormField(
                 controller: _ownerNameController,
-                decoration: const InputDecoration(
-                  labelText: 'Owner / Contact Name *',
-                  hintText: 'e.g. Sarah Connor',
+                decoration: InputDecoration(
+                  labelText: context.l10n.clientFullName,
+                  hintText: context.l10n.clientNameHint,
                 ),
                 validator: (val) {
                   final trimmed = val?.trim() ?? '';
                   if (trimmed.isEmpty) {
-                    return 'Please enter owner name';
+                    return context.l10n.pleaseEnterClientName;
                   }
                   if (trimmed.length > 191) {
-                    return 'Owner name cannot exceed 191 characters';
+                    return context.l10n.clientNameTooLong;
                   }
                   return null;
                 },
@@ -479,14 +496,15 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
               TextFormField(
                 controller: _ownerPhoneController,
                 keyboardType: TextInputType.phone,
-                decoration: const InputDecoration(
-                  labelText: 'Primary Phone Number *',
-                  hintText: 'e.g. +1-555-0199',
+                decoration: InputDecoration(
+                  labelText:
+                      '${context.l10n.primaryPhone} *',
+                  hintText: context.l10n.primaryPhoneHint,
                 ),
                 validator: (val) {
                   final trimmed = val?.trim() ?? '';
                   if (trimmed.isEmpty) {
-                    return 'Please enter primary phone number';
+                    return context.l10n.pleaseEnterPhone;
                   }
                   if (trimmed.length < 3) {
                     return 'Phone number must be at least 3 digits / characters';
@@ -500,9 +518,10 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
               const SizedBox(height: 14),
               TextFormField(
                 controller: _ownerAddressController,
-                decoration: const InputDecoration(
-                  labelText: 'Physical Address',
-                  hintText: 'Farm location or residential address',
+                decoration: InputDecoration(
+                  labelText:
+                      context.l10n.clientAddress,
+                  hintText: context.l10n.clientAddressHint,
                 ),
                 validator: (val) {
                   final trimmed = val?.trim() ?? '';
@@ -535,8 +554,11 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
                       ),
                     )
                   : Text(
-                      isEditing ? 'Save Changes' : 'Save Patient & Enqueue Sync',
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                      isEditing
+                          ? context.l10n.saveChanges
+                          : context.l10n.savePatientAndSync,
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.w700),
                     ),
             ),
           ],

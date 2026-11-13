@@ -3,6 +3,7 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/text_styles.dart';
 import '../../../../core/widgets/animated_pressable.dart';
 import '../../../../core/widgets/blurred_bottom_sheet.dart';
+import '../../../../core/localization/l10n_extensions.dart';
 
 /// Modal bottom sheet for beginning a new clinical visit encounter for a case.
 class StartVisitSheet extends StatefulWidget {
@@ -153,7 +154,7 @@ class _StartVisitSheetState extends State<StartVisitSheet> {
                   ),
                   const SizedBox(width: 10),
                   Text(
-                    'Start New Visit Encounter',
+                    context.l10n.startNewVisitEncounter,
                     style: AppTextStyles.titleMedium.copyWith(
                       fontWeight: FontWeight.w800,
                       color: AppColors.textCharcoal,
@@ -165,7 +166,7 @@ class _StartVisitSheetState extends State<StartVisitSheet> {
 
               // Encounter Type Selector
               Text(
-                'Encounter Type',
+                context.l10n.encounterType,
                 style: AppTextStyles.bodySmall.copyWith(
                   fontWeight: FontWeight.w700,
                   color: AppColors.textCharcoal,
@@ -178,7 +179,7 @@ class _StartVisitSheetState extends State<StartVisitSheet> {
                 children: _visitTypes.map((item) {
                   final isSelected = _selectedType == item['type'];
                   return ChoiceChip(
-                    label: Text(item['label']!),
+                    label: Text(context.formatVisitType(item['type']!)),
                     selected: isSelected,
                     onSelected: (_) => _onTypeSelected(item['type']!),
                     selectedColor: AppColors.primaryEmerald,
@@ -201,7 +202,7 @@ class _StartVisitSheetState extends State<StartVisitSheet> {
 
               // Title input
               Text(
-                'Visit Title / Purpose',
+                context.l10n.visitTitleOrPurpose,
                 style: AppTextStyles.bodySmall.copyWith(
                   fontWeight: FontWeight.w700,
                   color: AppColors.textCharcoal,
@@ -231,7 +232,7 @@ class _StartVisitSheetState extends State<StartVisitSheet> {
                 ),
                 validator: (val) {
                   if (val == null || val.trim().isEmpty) {
-                    return 'Please enter a visit title';
+                    return context.l10n.pleaseEnterVisitTitle;
                   }
                   return null;
                 },
@@ -240,7 +241,7 @@ class _StartVisitSheetState extends State<StartVisitSheet> {
 
               // Attending Clinician input
               Text(
-                'Attending Clinician',
+                context.l10n.attendingClinician,
                 style: AppTextStyles.bodySmall.copyWith(
                   fontWeight: FontWeight.w700,
                   color: AppColors.textCharcoal,
@@ -270,7 +271,7 @@ class _StartVisitSheetState extends State<StartVisitSheet> {
                 ),
                 validator: (val) {
                   if (val == null || val.trim().isEmpty) {
-                    return 'Please enter attending clinician name';
+                    return context.l10n.pleaseEnterVetName;
                   }
                   return null;
                 },
@@ -300,7 +301,7 @@ class _StartVisitSheetState extends State<StartVisitSheet> {
                       const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 20),
                       const SizedBox(width: 8),
                       Text(
-                        'Begin Visit Encounter',
+                        context.l10n.beginVisitEncounter,
                         style: AppTextStyles.titleMedium.copyWith(
                           color: Colors.white,
                           fontSize: 14,

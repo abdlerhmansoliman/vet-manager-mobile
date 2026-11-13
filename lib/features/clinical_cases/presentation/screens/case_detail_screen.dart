@@ -1,4 +1,5 @@
 import '../../../../core/widgets/app_snackbar.dart';
+import '../../../../core/localization/l10n_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -242,7 +243,7 @@ class _CaseDetailViewState extends State<_CaseDetailView> {
             ),
             const SizedBox(width: 8),
             Text(
-              'Clinical Visits & Encounters',
+              context.l10n.clinicalVisitsAndEncounters,
               style: AppTextStyles.titleMedium.copyWith(
                 fontWeight: FontWeight.w800,
                 color: AppColors.textCharcoal,
@@ -296,7 +297,7 @@ class _CaseDetailViewState extends State<_CaseDetailView> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'Start New Visit',
+                    context.l10n.startNewVisit,
                     style: AppTextStyles.titleMedium.copyWith(
                       color: Colors.white,
                       fontSize: 14,
@@ -361,7 +362,7 @@ class _CaseDetailViewState extends State<_CaseDetailView> {
           ),
           const SizedBox(height: 12),
           Text(
-            'No Visits Recorded Yet',
+            context.l10n.noVisitsRecordedYet,
             style: AppTextStyles.titleMedium.copyWith(
               fontWeight: FontWeight.w700,
               color: AppColors.textCharcoal,
@@ -369,7 +370,7 @@ class _CaseDetailViewState extends State<_CaseDetailView> {
           ),
           const SizedBox(height: 6),
           Text(
-            'Tap below to open the first clinical visit encounter for recording SOAP examination findings, diagnostic images, medication doses, and addenda.',
+            context.l10n.noVisitsRecordedDesc,
             textAlign: TextAlign.center,
             style: AppTextStyles.bodySmall.copyWith(
               color: AppColors.textMuted,
@@ -385,7 +386,7 @@ class _CaseDetailViewState extends State<_CaseDetailView> {
             ),
             onPressed: () => _handleOpenInitialConsultation(context, detail, repo),
             icon: const Icon(Icons.add, size: 18),
-            label: const Text('Open Initial Consultation Visit'),
+            label: Text(context.l10n.openInitialConsultation),
           ),
         ],
       ),
@@ -595,7 +596,7 @@ class _CaseDetailViewState extends State<_CaseDetailView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Triage Severity Level',
+            context.l10n.triageSeverityLevel,
             style: AppTextStyles.bodySmall.copyWith(
               fontWeight: FontWeight.w700,
               color: AppColors.textCharcoal,
@@ -606,7 +607,7 @@ class _CaseDetailViewState extends State<_CaseDetailView> {
             children: [
               _buildPriorityPill(
                 context: context,
-                label: 'Routine',
+                label: context.l10n.routinePriority,
                 priorityKey: 'routine',
                 isSelected: summary.isRoutine,
                 activeBg: AppColors.badgeStableMint,
@@ -615,7 +616,7 @@ class _CaseDetailViewState extends State<_CaseDetailView> {
               const SizedBox(width: 8),
               _buildPriorityPill(
                 context: context,
-                label: 'Urgent',
+                label: context.l10n.urgentPriority,
                 priorityKey: 'urgent',
                 isSelected: summary.isUrgent,
                 activeBg: AppColors.badgeObsAmber,
@@ -624,7 +625,7 @@ class _CaseDetailViewState extends State<_CaseDetailView> {
               const SizedBox(width: 8),
               _buildPriorityPill(
                 context: context,
-                label: 'Critical',
+                label: context.l10n.criticalPriority,
                 priorityKey: 'critical',
                 isSelected: summary.isCritical,
                 activeBg: AppColors.badgeCriticalRose,
@@ -636,7 +637,7 @@ class _CaseDetailViewState extends State<_CaseDetailView> {
           Divider(color: AppColors.borderWarm.withValues(alpha: 0.6)),
           const SizedBox(height: 10),
           Text(
-            'Encounter Status',
+            context.l10n.encounterStatus,
             style: AppTextStyles.bodySmall.copyWith(
               fontWeight: FontWeight.w700,
               color: AppColors.textCharcoal,
@@ -647,10 +648,10 @@ class _CaseDetailViewState extends State<_CaseDetailView> {
             spacing: 8,
             runSpacing: 8,
             children: [
-              _buildStatusPill(context, 'Open', 'open', summary.status == 'open'),
-              _buildStatusPill(context, 'In Progress', 'in_progress', summary.status == 'in_progress'),
-              _buildStatusPill(context, 'Under Observation', 'under_observation', summary.status == 'under_observation'),
-              _buildStatusPill(context, 'Closed', 'closed', summary.status == 'closed'),
+              _buildStatusPill(context, context.l10n.openStatus, 'open', summary.status == 'open'),
+              _buildStatusPill(context, context.l10n.inProgressStatus, 'in_progress', summary.status == 'in_progress'),
+              _buildStatusPill(context, context.l10n.underObservationStatus, 'under_observation', summary.status == 'under_observation'),
+              _buildStatusPill(context, context.l10n.closedStatus, 'closed', summary.status == 'closed'),
             ],
           ),
         ],
@@ -744,7 +745,7 @@ class _CaseDetailViewState extends State<_CaseDetailView> {
               const Icon(Icons.emergency_rounded, size: 16, color: AppColors.secondaryCoral),
               const SizedBox(width: 6),
               Text(
-                'Chief Complaint',
+                context.l10n.chiefComplaint,
                 style: AppTextStyles.bodySmall.copyWith(
                   fontWeight: FontWeight.w700,
                   color: AppColors.textCharcoal,
@@ -754,9 +755,9 @@ class _CaseDetailViewState extends State<_CaseDetailView> {
               AnimatedPressable(
                 key: const Key('edit_chief_complaint_button'),
                 onTap: () => _showEditChiefComplaintDialog(context, summary),
-                child: const Text(
-                  'Edit',
-                  style: TextStyle(
+                child: Text(
+                  context.l10n.edit,
+                  style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: AppColors.primaryEmerald,
@@ -786,7 +787,7 @@ class _CaseDetailViewState extends State<_CaseDetailView> {
         backgroundColor: AppColors.surfaceWhite,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
-          'Edit Chief Complaint',
+          context.l10n.editChiefComplaint,
           style: AppTextStyles.titleMedium.copyWith(
             fontWeight: FontWeight.w700,
             color: AppColors.textCharcoal,
@@ -796,7 +797,7 @@ class _CaseDetailViewState extends State<_CaseDetailView> {
           controller: controller,
           maxLines: 3,
           decoration: InputDecoration(
-            hintText: 'Enter chief complaint...',
+            hintText: context.l10n.enterChiefComplaintHint,
             filled: true,
             fillColor: AppColors.backgroundCream,
             border: OutlineInputBorder(
@@ -808,7 +809,7 @@ class _CaseDetailViewState extends State<_CaseDetailView> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dlgContext).pop(),
-            child: const Text('Cancel', style: TextStyle(color: AppColors.textMuted)),
+            child: Text(context.l10n.cancel, style: const TextStyle(color: AppColors.textMuted)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -823,7 +824,7 @@ class _CaseDetailViewState extends State<_CaseDetailView> {
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
-            child: const Text('Save'),
+            child: Text(context.l10n.save),
           ),
         ],
       ),
@@ -847,7 +848,7 @@ class _CaseDetailViewState extends State<_CaseDetailView> {
               const Icon(Icons.biotech_rounded, size: 18, color: AppColors.primaryEmerald),
               const SizedBox(width: 6),
               Text(
-                'Diagnoses & Hypotheses',
+                context.l10n.diagnosesAndHypotheses,
                 style: AppTextStyles.bodySmall.copyWith(
                   fontWeight: FontWeight.w700,
                   color: AppColors.textCharcoal,
@@ -857,9 +858,9 @@ class _CaseDetailViewState extends State<_CaseDetailView> {
               AnimatedPressable(
                 key: const Key('edit_diagnoses_button'),
                 onTap: () => _showEditDiagnosesDialog(context, summary),
-                child: const Text(
-                  'Edit',
-                  style: TextStyle(
+                child: Text(
+                  context.l10n.edit,
+                  style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: AppColors.primaryEmerald,
@@ -869,9 +870,15 @@ class _CaseDetailViewState extends State<_CaseDetailView> {
             ],
           ),
           const SizedBox(height: 10),
-          _diagnosisRow('Provisional Diagnosis', summary.provisionalDiagnosis ?? 'None established yet'),
+          _diagnosisRow(
+            context.l10n.provisionalDiagnosis,
+            summary.provisionalDiagnosis ?? context.l10n.noneEstablishedYet,
+          ),
           const SizedBox(height: 8),
-          _diagnosisRow('Final Diagnosis', summary.finalDiagnosis ?? 'Pending investigation/response'),
+          _diagnosisRow(
+            context.l10n.finalDiagnosis,
+            summary.finalDiagnosis ?? context.l10n.pendingInvestigation,
+          ),
         ],
       ),
     );
@@ -907,25 +914,29 @@ class _CaseDetailViewState extends State<_CaseDetailView> {
     showDialog<void>(
       context: context,
       builder: (dlgContext) => AlertDialog(
-        title: const Text('Update Diagnoses'),
+        title: Text(context.l10n.updateDiagnoses),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: provController,
-              decoration: const InputDecoration(labelText: 'Provisional Diagnosis'),
+              decoration: InputDecoration(
+                labelText: context.l10n.provisionalDiagnosis,
+              ),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: finalController,
-              decoration: const InputDecoration(labelText: 'Final Diagnosis'),
+              decoration: InputDecoration(
+                labelText: context.l10n.finalDiagnosis,
+              ),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dlgContext).pop(),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.cancel),
           ),
           FilledButton(
             onPressed: () {
@@ -937,7 +948,7 @@ class _CaseDetailViewState extends State<_CaseDetailView> {
                   );
               Navigator.of(dlgContext).pop();
             },
-            child: const Text('Save'),
+            child: Text(context.l10n.save),
           ),
         ],
       ),

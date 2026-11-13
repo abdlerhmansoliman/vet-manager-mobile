@@ -15,6 +15,10 @@ import '../bloc/staff_state.dart';
 import 'staff_management_screen.dart';
 import '../../../settings/presentation/screens/delete_account_screen.dart';
 import '../../../settings/presentation/screens/medical_disclaimer_screen.dart';
+import '../../../../core/localization/locale_cubit.dart';
+import '../../../../core/localization/locale_state.dart';
+import '../../../../core/widgets/blurred_bottom_sheet.dart';
+import '../../../../core/localization/l10n_extensions.dart';
 
 /// Doctor and Practitioner Profile Screen.
 ///
@@ -157,7 +161,7 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
               onPressed: () => Navigator.of(context).maybePop(),
             ),
             title: Text(
-              'Practitioner Profile',
+              context.l10n.practitionerProfile,
               style: AppTextStyles.titleLarge.copyWith(color: AppColors.textCharcoal),
             ),
             actions: [
@@ -165,7 +169,7 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
                 IconButton(
                   key: const Key('manage_staff_appbar_action'),
                   icon: const Icon(Icons.group_rounded, color: AppColors.primaryEmerald),
-                  tooltip: 'Manage Clinic Staff',
+                  tooltip: context.l10n.manageClinicStaff,
                   onPressed: () {
                     Navigator.of(context).push<void>(
                       MaterialPageRoute<void>(
@@ -199,10 +203,10 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
         children: [
           const Icon(Icons.person_off_rounded, size: 54, color: AppColors.textMuted),
           const SizedBox(height: 12),
-          Text('Practitioner profile not found', style: AppTextStyles.headlineSmall),
+          Text(context.l10n.practitionerNotFound, style: AppTextStyles.headlineSmall),
           const SizedBox(height: 8),
           Text(
-            'The requested staff credentials could not be loaded.',
+            context.l10n.practitionerNotFoundDesc,
             style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textMuted),
           ),
         ],
@@ -261,6 +265,13 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
               .slideY(begin: 0.08, end: 0, curve: Curves.easeOutQuad),
           const SizedBox(height: 16),
 
+          // Preferences & Localization
+          _buildPreferencesSection()
+              .animate()
+              .fadeIn(duration: 480.ms)
+              .slideY(begin: 0.08, end: 0, curve: Curves.easeOutQuad),
+          const SizedBox(height: 16),
+
           // Legal, Disclaimer & Account Privacy
           _buildLegalAndPrivacySection()
               .animate()
@@ -282,7 +293,7 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
                 );
               },
               icon: const Icon(Icons.manage_accounts_rounded, color: Colors.white),
-              label: const Text('Manage Clinic Staff Directory'),
+              label: Text(context.l10n.manageClinicStaffDirectory),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryEmerald,
                 foregroundColor: Colors.white,
@@ -367,7 +378,9 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    doc.isActive ? 'Active Staff' : 'Suspended',
+                    doc.isActive
+                        ? context.l10n.activeStaff
+                        : context.l10n.suspended,
                     style: AppTextStyles.badgeLabel.copyWith(
                       color: doc.isActive
                           ? AppColors.badgeStableMintText
@@ -386,7 +399,7 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
   Widget _buildClinicTenancyCard() {
     final authState = context.watch<AuthBloc?>()?.state;
     final currentTenant = authState is AuthAuthenticated ? authState.session.tenant : null;
-    final clinicName = currentTenant?.name ?? 'Assigned Practice';
+    final clinicName = currentTenant?.name ?? context.l10n.assignedPractice;
     final clinicSlug = currentTenant?.slug ?? 'default';
 
     return Container(
@@ -428,7 +441,7 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Clinical Practice',
+                      context.l10n.clinicalPractice,
                       style: AppTextStyles.titleMedium.copyWith(
                         fontWeight: FontWeight.w700,
                         color: AppColors.textCharcoal,
@@ -466,7 +479,7 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
             key: const Key('switch_clinic_profile_button'),
             onPressed: () => ClinicSwitcherBottomSheet.show(context),
             icon: const Icon(Icons.swap_horiz_rounded, size: 18),
-            label: const Text('Switch Clinical Practice'),
+            label: Text(context.l10n.switchClinicalPractice),
             style: OutlinedButton.styleFrom(
               foregroundColor: AppColors.primaryEmerald,
               side: const BorderSide(color: AppColors.primaryEmerald),
@@ -523,14 +536,14 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'On-Duty Availability',
+                  context.l10n.onDutyAvailability,
                   style: AppTextStyles.titleLarge.copyWith(fontSize: 16),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   isAvailable
-                      ? 'Available for consultations & triage'
-                      : 'Off-duty / Not accepting new cases',
+                      ? context.l10n.availableForTriage
+                      : context.l10n.unavailableForTriage,
                   style: AppTextStyles.bodySmall.copyWith(
                     color: isAvailable ? AppColors.primaryEmerald : AppColors.textMuted,
                     fontWeight: FontWeight.w500,
@@ -571,14 +584,14 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Clinical Workload', style: AppTextStyles.titleLarge.copyWith(fontSize: 16)),
+          Text(context.l10n.clinicalWorkload, style: AppTextStyles.titleLarge.copyWith(fontSize: 16)),
           const SizedBox(height: 14),
           Row(
             children: [
               Expanded(
                 child: _buildMetricTile(
                   icon: Icons.assignment_turned_in_rounded,
-                  label: 'Active Cases',
+                  label: context.l10n.activeCasesCount,
                   value: '${doc.activeCasesCount}',
                   color: AppColors.primaryEmerald,
                 ),
@@ -587,8 +600,10 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
               Expanded(
                 child: _buildMetricTile(
                   icon: Icons.shield_rounded,
-                  label: 'DEA Witness',
-                  value: doc.capabilities.canWitnessControlledSubstances ? 'Authorized' : 'N/A',
+                  label: context.l10n.deaWitness,
+                  value: doc.capabilities.canWitnessControlledSubstances
+                      ? context.l10n.authorized
+                      : context.l10n.notApplicable,
                   color: doc.capabilities.canWitnessControlledSubstances
                       ? AppColors.primaryEmerald
                       : AppColors.textMuted,
@@ -657,32 +672,32 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Credentials & Licensure', style: AppTextStyles.titleLarge.copyWith(fontSize: 16)),
+          Text(context.l10n.credentialsAndLicensure, style: AppTextStyles.titleLarge.copyWith(fontSize: 16)),
           const SizedBox(height: 14),
           _buildCredentialRow(
             icon: Icons.badge_outlined,
-            label: 'License Number',
-            value: profile?.licenseNumber ?? 'Not on file',
+            label: context.l10n.licenseNumber,
+            value: profile?.licenseNumber ?? context.l10n.notOnFile,
           ),
           if (profile?.deaNumber != null && profile!.deaNumber!.isNotEmpty) ...[
             const Divider(height: 20, color: AppColors.borderWarm),
             _buildCredentialRow(
               icon: Icons.verified_user_outlined,
-              label: 'DEA Registration',
+              label: context.l10n.deaRegistration,
               value: profile.deaNumber!,
             ),
           ],
           const Divider(height: 20, color: AppColors.borderWarm),
           _buildCredentialRow(
             icon: Icons.email_outlined,
-            label: 'Clinic Email',
+            label: context.l10n.clinicEmail,
             value: doc.email,
           ),
           if (doc.phone != null && doc.phone!.isNotEmpty) ...[
             const Divider(height: 20, color: AppColors.borderWarm),
             _buildCredentialRow(
               icon: Icons.phone_outlined,
-              label: 'Direct Phone',
+              label: context.l10n.directPhone,
               value: doc.phone!,
             ),
           ],
@@ -692,7 +707,7 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Biography & Experience',
+                  context.l10n.biographyAndExperience,
                   style: AppTextStyles.bodySmall.copyWith(
                     color: AppColors.textMuted,
                     fontWeight: FontWeight.w600,
@@ -754,18 +769,18 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Clinical Authorizations', style: AppTextStyles.titleLarge.copyWith(fontSize: 16)),
+          Text(context.l10n.clinicalAuthorizations, style: AppTextStyles.titleLarge.copyWith(fontSize: 16)),
           const SizedBox(height: 12),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: [
-              _buildAuthChip('Prescribe Rx', caps.canPrescribeMedication),
-              _buildAuthChip('Controlled Substances', caps.canWitnessControlledSubstances),
-              _buildAuthChip('Surgery Clearance', caps.canPerformSurgery),
-              _buildAuthChip('Staff Management', caps.canManageStaff),
-              _buildAuthChip('Billing & Invoicing', caps.canManageBilling),
-              _buildAuthChip('Owner Dashboard', caps.canAccessOwnerDashboard),
+              _buildAuthChip(context.l10n.prescribeRx, caps.canPrescribeMedication),
+              _buildAuthChip(context.l10n.controlledSubstances, caps.canWitnessControlledSubstances),
+              _buildAuthChip(context.l10n.surgeryClearance, caps.canPerformSurgery),
+              _buildAuthChip(context.l10n.staffManagement, caps.canManageStaff),
+              _buildAuthChip(context.l10n.billingAndInvoicing, caps.canManageBilling),
+              _buildAuthChip(context.l10n.ownerDashboard, caps.canAccessOwnerDashboard),
             ],
           ),
         ],
@@ -804,6 +819,253 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
     );
   }
 
+  Widget _buildPreferencesSection() {
+    final l10n = context.l10n;
+    LocaleState? localeState;
+    try {
+      localeState = context.watch<LocaleCubit?>()?.state;
+    } catch (_) {}
+    final isArabic = localeState?.isArabic ?? (Localizations.maybeLocaleOf(context)?.languageCode == 'ar');
+    final currentLangLabel = isArabic ? l10n.arabic : l10n.english;
+
+    return Container(
+      key: const Key('doctor_profile_preferences_section'),
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceWhite,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.borderWarm),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.settings,
+            style: AppTextStyles.titleLarge.copyWith(fontSize: 16),
+          ),
+          const SizedBox(height: 14),
+          InkWell(
+            key: const Key('change_language_button'),
+            borderRadius: BorderRadius.circular(12),
+            onTap: () => _showLanguageModal(context),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryEmerald.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.translate_rounded,
+                      color: AppColors.primaryEmerald,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.appLanguage,
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textCharcoal,
+                          ),
+                        ),
+                        Text(
+                          isArabic ? 'العربية (Arabic - RTL)' : 'English (LTR)',
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.textMuted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.badgeStableMint,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      currentLangLabel,
+                      style: AppTextStyles.badgeLabel.copyWith(
+                        color: AppColors.badgeStableMintText,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  const Icon(
+                    Icons.chevron_right_rounded,
+                    color: AppColors.textMuted,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showLanguageModal(BuildContext context) {
+    final l10n = context.l10n;
+    LocaleCubit? localeCubit;
+    try {
+      localeCubit = context.read<LocaleCubit?>();
+    } catch (_) {}
+    final currentCode = localeCubit?.state.locale.languageCode ??
+        Localizations.maybeLocaleOf(context)?.languageCode ??
+        'en';
+
+    showBlurredBottomSheet<void>(
+      context: context,
+      builder: (sheetContext) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                l10n.selectLanguage,
+                style: AppTextStyles.headlineSmall.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textCharcoal,
+                ),
+              ),
+              const SizedBox(height: 16),
+              // English Option
+              InkWell(
+                key: const Key('select_language_en'),
+                borderRadius: BorderRadius.circular(12),
+                onTap: () {
+                  localeCubit?.setLocale(const Locale('en'));
+                  Navigator.of(sheetContext).pop();
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  decoration: BoxDecoration(
+                    color: currentCode == 'en'
+                        ? AppColors.badgeStableMint
+                        : AppColors.backgroundCream,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: currentCode == 'en'
+                          ? AppColors.primaryEmerald
+                          : AppColors.borderWarm,
+                      width: currentCode == 'en' ? 1.5 : 1,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Text('🇺🇸', style: TextStyle(fontSize: 24)),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.english,
+                              style: AppTextStyles.titleMedium.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.textCharcoal,
+                              ),
+                            ),
+                            Text(
+                              'Default (LTR)',
+                              style: AppTextStyles.bodySmall.copyWith(
+                                color: AppColors.textMuted,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (currentCode == 'en')
+                        const Icon(
+                          Icons.check_circle_rounded,
+                          color: AppColors.primaryEmerald,
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              // Arabic Option
+              InkWell(
+                key: const Key('select_language_ar'),
+                borderRadius: BorderRadius.circular(12),
+                onTap: () {
+                  localeCubit?.setLocale(const Locale('ar'));
+                  Navigator.of(sheetContext).pop();
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  decoration: BoxDecoration(
+                    color: currentCode == 'ar'
+                        ? AppColors.badgeStableMint
+                        : AppColors.backgroundCream,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: currentCode == 'ar'
+                          ? AppColors.primaryEmerald
+                          : AppColors.borderWarm,
+                      width: currentCode == 'ar' ? 1.5 : 1,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Text('🇸🇦', style: TextStyle(fontSize: 24)),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.arabic,
+                              style: AppTextStyles.titleMedium.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.textCharcoal,
+                              ),
+                            ),
+                            Text(
+                              'Arabic (RTL)',
+                              style: AppTextStyles.bodySmall.copyWith(
+                                color: AppColors.textMuted,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (currentCode == 'ar')
+                        const Icon(
+                          Icons.check_circle_rounded,
+                          color: AppColors.primaryEmerald,
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildLegalAndPrivacySection() {
     return Container(
       key: const Key('doctor_profile_legal_section'),
@@ -824,7 +1086,7 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Legal & Account Privacy',
+            context.l10n.legalAndPrivacy,
             style: AppTextStyles.titleLarge.copyWith(fontSize: 16),
           ),
           const SizedBox(height: 14),
@@ -862,14 +1124,14 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Medical & Legal Disclaimer',
+                          context.l10n.medicalAndLegalDisclaimer,
                           style: AppTextStyles.bodyMedium.copyWith(
                             fontWeight: FontWeight.w600,
                             color: AppColors.textCharcoal,
                           ),
                         ),
                         Text(
-                          'Guideline 1.4.1 & Veterinary Regulatory Notice',
+                          context.l10n.medicalDisclaimerNotice,
                           style: AppTextStyles.bodySmall.copyWith(
                             color: AppColors.textMuted,
                           ),
@@ -920,14 +1182,14 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Delete Practitioner Account',
+                          context.l10n.deletePractitionerAccount,
                           style: AppTextStyles.bodyMedium.copyWith(
                             fontWeight: FontWeight.w600,
                             color: AppColors.secondaryCoral,
                           ),
                         ),
                         Text(
-                          'Permanently remove login credentials and data',
+                          context.l10n.deleteAccountNotice,
                           style: AppTextStyles.bodySmall.copyWith(
                             color: AppColors.textMuted,
                           ),

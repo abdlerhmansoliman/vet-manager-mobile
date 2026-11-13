@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ffi';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
+import 'package:drift/drift.dart' hide isNotNull, isNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -105,6 +106,7 @@ void main() {
       when(() => mockDio.post<Map<String, dynamic>>(
             '/sync/push',
             data: any(named: 'data'),
+            options: any(named: 'options'),
           )).thenAnswer((invocation) async {
         final body = invocation.namedArguments[#data] as Map<String, dynamic>;
         final mutations = body['mutations'] as List<dynamic>;
@@ -169,6 +171,7 @@ void main() {
       when(() => mockDio.post<Map<String, dynamic>>(
             '/sync/push',
             data: any(named: 'data'),
+            options: any(named: 'options'),
           )).thenThrow(
         DioException(
           requestOptions: RequestOptions(path: '/sync/push'),
@@ -242,7 +245,11 @@ void main() {
       when(() => mockStorage.write(any(), any())).thenAnswer((_) async {});
 
       // Mock successful push
-      when(() => mockDio.post<Map<String, dynamic>>('/sync/push', data: any(named: 'data')))
+      when(() => mockDio.post<Map<String, dynamic>>(
+            '/sync/push',
+            data: any(named: 'data'),
+            options: any(named: 'options'),
+          ))
           .thenAnswer((_) async => Response(
                 requestOptions: RequestOptions(path: '/sync/push'),
                 statusCode: 200,
@@ -289,7 +296,11 @@ void main() {
       when(() => mockStorage.read(any())).thenAnswer((_) async => null);
       when(() => mockStorage.write(any(), any())).thenAnswer((_) async {});
 
-      when(() => mockDio.post<Map<String, dynamic>>('/sync/push', data: any(named: 'data')))
+      when(() => mockDio.post<Map<String, dynamic>>(
+            '/sync/push',
+            data: any(named: 'data'),
+            options: any(named: 'options'),
+          ))
           .thenAnswer((_) async => Response(
                 requestOptions: RequestOptions(path: '/sync/push'),
                 statusCode: 200,
@@ -326,6 +337,236 @@ void main() {
       expect(manager.currentState.isOnline, isTrue);
 
       manager.dispose();
+    });
+
+    test('ingests visits deltas with soft-delete tombstones', () async {
+      const tenantId = 'tenant-visits';
+      final now = DateTime.now().toUtc();
+
+      // Seed parent client and case
+      await db.into(db.clientsTable).insert(
+            ClientsTableCompanion.insert(
+              id: 'c-1',
+              tenantId: tenantId,
+              name: 'Owner',
+              phonePrimary: '555-1234',
+              clientType: const Value('individual'),
+              createdAt: now,
+              updatedAt: now,
+            ),
+          );
+      await db.into(db.patientsTable).insert(
+            PatientsTableCompanion.insert(
+              id: 'p-1',
+              tenantId: tenantId,
+              clientId: 'c-1',
+              nameOrTag: 'Max',
+              species: 'Canine',
+              createdAt: now,
+              updatedAt: now,
+            ),
+          );
+      await db.into(db.clinicalCasesTable).insert(
+            ClinicalCasesTableCompanion.insert(
+              id: 'case-visit-1',
+              tenantId: tenantId,
+              caseNumber: 'CAS-001',
+              patientId: 'p-1',
+              primaryVeterinarianId: 'vet-1',
+              chiefComplaint: 'Limping',
+              admittedAt: now,
+              createdAt: now,
+              updatedAt: now,
+            ),
+          );
+
+      // Ingest visits delta containing an active visit and a soft-deleted visit
+      await resolver.applyServerDeltas(
+        tenantId: tenantId,
+        deltas: {
+          'visits': [
+            {
+              'id': 'v-active-1',
+              'case_id': 'case-visit-1',
+              'title': 'Active Visit',
+              'visit_type': 'consultation',
+              'status': 'open',
+              'is_signed': false,
+              'visit_date': now.toIso8601String(),
+              'created_at': now.toIso8601String(),
+              'updated_at': now.toIso8601String(),
+            },
+            {
+              'id': 'v-deleted-1',
+              'case_id': 'case-visit-1',
+              'title': 'Deleted Visit',
+              'visit_type': 'consultation',
+              'status': 'open',
+              'is_signed': false,
+              'visit_date': now.toIso8601String(),
+              'created_at': now.toIso8601String(),
+              'updated_at': now.toIso8601String(),
+              'deleted_at': now.toIso8601String(),
+            },
+          ],
+        },
+      );
+
+      final visits = await db.select(db.visitsTable).get();
+      expect(visits.length, 2);
+
+      final active = visits.firstWhere((v) => v.id == 'v-active-1');
+      expect(active.deletedAt, isNull);
+      expect(active.title, 'Active Visit');
+
+      final deleted = visits.firstWhere((v) => v.id == 'v-deleted-1');
+      expect(deleted.deletedAt, isNotNull);
+    });
+
+    test('flush marks rejected mutations as failed and prevents infinite retry loop', () async {
+      const tenantId = 'tenant-rejected';
+      final now = DateTime.now().toUtc();
+
+      await db.into(db.syncQueueTable).insert(
+            SyncQueueTableCompanion.insert(
+              id: 'mut-rejected-1',
+              tenantId: tenantId,
+              entityType: 'visit',
+              entityId: 'visit-locked-1',
+              action: 'update',
+              payload: '{"title": "Attempted Edit on Signed Visit"}',
+              clientTimestamp: now,
+              idempotencyKey: '018d4f20-8000-7000-8000-000000000077',
+              createdAt: now,
+            ),
+          );
+
+      when(() => mockDio.post<Map<String, dynamic>>(
+            '/sync/push',
+            data: any(named: 'data'),
+            options: any(named: 'options'),
+          )).thenAnswer((_) async => Response(
+            requestOptions: RequestOptions(path: '/sync/push'),
+            statusCode: 200,
+            data: {
+              'status': 'success',
+              'results': [
+                {
+                  'mutation_id': 'mut-rejected-1',
+                  'entity_type': 'visit',
+                  'entity_id': 'visit-locked-1',
+                  'status': 'rejected',
+                  'message': 'Clinical visit visit-locked-1 is signed and locked (is_signed=true).',
+                },
+              ],
+            },
+          ));
+
+      final result = await dispatcher.flush(tenantId: tenantId);
+
+      expect(result.failedCount, 1);
+      expect(result.syncedCount, 0);
+
+      // Verify item was marked failed with error message
+      final queueItem = await (db.select(db.syncQueueTable)..where((q) => q.id.equals('mut-rejected-1'))).getSingle();
+      expect(queueItem.status, 'failed');
+      expect(queueItem.lastError, contains('signed and locked'));
+
+      // Subsequent flush must ignore failed items to prevent infinite retry loop
+      final secondResult = await dispatcher.flush(tenantId: tenantId);
+      expect(secondResult.syncedCount, 0);
+      expect(secondResult.failedCount, 0);
+    });
+
+    test('flush sorts mutations in strict dependency order: Client -> Patient -> Case -> Visit', () async {
+      const tenantId = 'tenant-order';
+      final now = DateTime.now().toUtc();
+
+      // Insert in reverse order (Visit first, Client last)
+      await db.into(db.syncQueueTable).insert(
+            SyncQueueTableCompanion.insert(
+              id: 'mut-ord-visit',
+              tenantId: tenantId,
+              entityType: 'visit',
+              entityId: 'v-1',
+              action: 'create',
+              payload: '{"title": "Encounter"}',
+              clientTimestamp: now,
+              idempotencyKey: '018d4f20-8000-7000-8000-000000000004',
+              createdAt: now,
+            ),
+          );
+      await db.into(db.syncQueueTable).insert(
+            SyncQueueTableCompanion.insert(
+              id: 'mut-ord-case',
+              tenantId: tenantId,
+              entityType: 'case',
+              entityId: 'c-1',
+              action: 'create',
+              payload: '{"chief_complaint": "Exam"}',
+              clientTimestamp: now,
+              idempotencyKey: '018d4f20-8000-7000-8000-000000000003',
+              createdAt: now,
+            ),
+          );
+      await db.into(db.syncQueueTable).insert(
+            SyncQueueTableCompanion.insert(
+              id: 'mut-ord-patient',
+              tenantId: tenantId,
+              entityType: 'patient',
+              entityId: 'p-1',
+              action: 'create',
+              payload: '{"name_or_tag": "Rex"}',
+              clientTimestamp: now,
+              idempotencyKey: '018d4f20-8000-7000-8000-000000000002',
+              createdAt: now,
+            ),
+          );
+      await db.into(db.syncQueueTable).insert(
+            SyncQueueTableCompanion.insert(
+              id: 'mut-ord-client',
+              tenantId: tenantId,
+              entityType: 'client',
+              entityId: 'cl-1',
+              action: 'create',
+              payload: '{"name": "Alice"}',
+              clientTimestamp: now,
+              idempotencyKey: '018d4f20-8000-7000-8000-000000000001',
+              createdAt: now,
+            ),
+          );
+
+      when(() => mockDio.post<Map<String, dynamic>>(
+            '/sync/push',
+            data: any(named: 'data'),
+            options: any(named: 'options'),
+          )).thenAnswer((inv) async {
+        final body = inv.namedArguments[#data] as Map<String, dynamic>;
+        final mutations = body['mutations'] as List<dynamic>;
+
+        // Must be ordered: client (mut-ord-client) -> patient (mut-ord-patient) -> case (mut-ord-case) -> visit (mut-ord-visit)
+        expect(mutations[0]['entity_type'], 'client');
+        expect(mutations[1]['entity_type'], 'patient');
+        expect(mutations[2]['entity_type'], 'case');
+        expect(mutations[3]['entity_type'], 'visit');
+
+        return Response(
+          requestOptions: RequestOptions(path: '/sync/push'),
+          statusCode: 200,
+          data: {
+            'status': 'success',
+            'results': mutations.map((m) => {
+              'mutation_id': m['mutation_id'],
+              'entity_type': m['entity_type'],
+              'entity_id': m['entity_id'],
+              'status': 'applied',
+            }).toList(),
+          },
+        );
+      });
+
+      final result = await dispatcher.flush(tenantId: tenantId);
+      expect(result.syncedCount, 4);
     });
   });
 }

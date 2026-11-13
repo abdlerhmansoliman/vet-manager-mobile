@@ -1,4 +1,5 @@
 import '../../../../app/router/app_router.dart';
+import '../../../../core/localization/l10n_extensions.dart';
 import '../../../../core/widgets/app_snackbar.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
@@ -135,7 +136,7 @@ class _CasesBoardViewState extends State<_CasesBoardView> {
                     autofocus: true,
                     onChanged: _onSearchChanged,
                     decoration: InputDecoration(
-                      hintText: 'Search cases, complaints, patients...',
+                      hintText: context.l10n.searchCasesHint,
                       hintStyle: AppTextStyles.bodySmall.copyWith(color: AppColors.textLight),
                       border: InputBorder.none,
                     ),
@@ -145,7 +146,7 @@ class _CasesBoardViewState extends State<_CasesBoardView> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        'Triage Board',
+                        context.l10n.triageBoard,
                         style: AppTextStyles.titleMedium.copyWith(
                           fontWeight: FontWeight.w800,
                           color: AppColors.textCharcoal,
@@ -163,7 +164,7 @@ class _CasesBoardViewState extends State<_CasesBoardView> {
                   color: AppColors.textCharcoal,
                   size: 22,
                 ),
-                tooltip: 'Practitioner Profile',
+                tooltip: context.l10n.practitionerProfile,
                 onPressed: () {
                   final authState = context.read<AuthBloc?>()?.state;
                   if (authState is AuthAuthenticated) {
@@ -180,10 +181,13 @@ class _CasesBoardViewState extends State<_CasesBoardView> {
                   color: AppColors.primaryEmerald,
                   size: 22,
                 ),
-                tooltip: 'Sync with Cloud',
+                tooltip: context.l10n.syncNow,
                 onPressed: () {
                   widget.onSync?.call();
-                  AppSnackbar.showInfo(context, 'Syncing cases and patient records...');
+                  AppSnackbar.showInfo(
+                    context,
+                    context.l10n.syncingData,
+                  );
                 },
               ),
               IconButton(
@@ -209,7 +213,7 @@ class _CasesBoardViewState extends State<_CasesBoardView> {
                   color: AppColors.textMuted,
                   size: 22,
                 ),
-                tooltip: 'Sign Out',
+                tooltip: context.l10n.logOut,
                 onPressed: () {
                   context.read<AuthBloc?>()?.add(const AuthLogoutRequested());
                 },
@@ -228,7 +232,7 @@ class _CasesBoardViewState extends State<_CasesBoardView> {
                       child: Row(
                         children: [
                           _buildFilterTab(
-                            label: 'All',
+                            label: context.l10n.all,
                             count: allCount,
                             filterKey: 'all',
                             isActive: state.activePriority == 'all',
@@ -237,7 +241,7 @@ class _CasesBoardViewState extends State<_CasesBoardView> {
                           ),
                           const SizedBox(width: 8),
                           _buildFilterTab(
-                            label: 'Critical',
+                            label: context.l10n.criticalPriority,
                             count: criticalCount,
                             filterKey: 'critical',
                             isActive: state.activePriority == 'critical',
@@ -246,7 +250,7 @@ class _CasesBoardViewState extends State<_CasesBoardView> {
                           ),
                           const SizedBox(width: 8),
                           _buildFilterTab(
-                            label: 'Urgent',
+                            label: context.l10n.urgentPriority,
                             count: urgentCount,
                             filterKey: 'urgent',
                             isActive: state.activePriority == 'urgent',
@@ -255,7 +259,7 @@ class _CasesBoardViewState extends State<_CasesBoardView> {
                           ),
                           const SizedBox(width: 8),
                           _buildFilterTab(
-                            label: 'Routine',
+                            label: context.l10n.routinePriority,
                             count: routineCount,
                             filterKey: 'routine',
                             isActive: state.activePriority == 'routine',

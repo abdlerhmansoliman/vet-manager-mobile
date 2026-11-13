@@ -4,6 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/text_styles.dart';
+import '../../../../core/localization/l10n_extensions.dart';
 import '../../domain/repositories/patient_repository.dart';
 import '../../../clinical_cases/domain/repositories/case_repository.dart';
 import '../../../media/domain/repositories/media_repository.dart';
@@ -88,9 +89,9 @@ class _PatientListScreenState extends State<PatientListScreen> {
             foregroundColor: Colors.white,
             elevation: 3,
             icon: const Icon(Icons.add_rounded),
-            label: const Text(
-              'New Patient',
-              style: TextStyle(fontWeight: FontWeight.w700),
+            label: Text(
+              context.l10n.newPatient,
+              style: const TextStyle(fontWeight: FontWeight.w700),
             ),
           ),
         ),
@@ -108,7 +109,7 @@ class _PatientListScreenState extends State<PatientListScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Patients & Clients',
+                context.l10n.patientsDirectory,
                 style: AppTextStyles.headlineMedium.copyWith(
                   fontWeight: FontWeight.w800,
                   color: AppColors.textCharcoal,
@@ -117,7 +118,7 @@ class _PatientListScreenState extends State<PatientListScreen> {
               ),
               const SizedBox(height: 2),
               Text(
-                'Offline-first animal registry',
+                context.l10n.offlineAnimalRegistry,
                 style: AppTextStyles.bodySmall.copyWith(
                   color: AppColors.textMuted,
                 ),
@@ -128,10 +129,13 @@ class _PatientListScreenState extends State<PatientListScreen> {
             children: [
               IconButton(
                 icon: const Icon(Icons.sync_rounded, color: AppColors.primaryEmerald, size: 22),
-                tooltip: 'Sync with Cloud',
+                tooltip: context.l10n.syncNow,
                 onPressed: () {
                   widget.onSync?.call();
-                  AppSnackbar.showInfo(context, 'Syncing patient directory...');
+                  AppSnackbar.showInfo(
+                    context,
+                    context.l10n.syncingData,
+                  );
                 },
               ),
               Container(
@@ -170,7 +174,7 @@ class _PatientListScreenState extends State<PatientListScreen> {
                   context.read<PatientListBloc>().add(PatientSearchQueryChanged(query));
                 },
                 decoration: InputDecoration(
-                  hintText: 'Search by patient, chip, ear tag, owner...',
+                  hintText: context.l10n.searchPatientsHint,
                   prefixIcon: const Icon(Icons.search_rounded, color: AppColors.textMuted),
                   suffixIcon: state.searchQuery.isNotEmpty
                       ? IconButton(
@@ -208,7 +212,11 @@ class _PatientListScreenState extends State<PatientListScreen> {
                   final isSelected = state.selectedSpecies.toLowerCase() == species.toLowerCase();
 
                   return ChoiceChip(
-                    label: Text(species),
+                    label: Text(
+                      species.toLowerCase() == 'all'
+                          ? context.l10n.all
+                          : context.formatSpecies(species),
+                    ),
                     selected: isSelected,
                     onSelected: (selected) {
                       if (selected) {
@@ -275,7 +283,7 @@ class _PatientListScreenState extends State<PatientListScreen> {
                       backgroundColor: AppColors.primaryEmerald,
                       foregroundColor: Colors.white,
                     ),
-                    child: const Text('Retry'),
+                    child: Text(context.l10n.retry),
                   ),
                 ],
               ),

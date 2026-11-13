@@ -38,6 +38,7 @@
 | **13** | `mobile/13-diagnostic-media-r2` | Direct-to-R2 upload pipeline, WebP compression & zoom viewer | 🟢 **Completed** |
 | **13-B** | `mobile/multi-clinic-switcher` | Multi-Clinic Switcher (Practice Selection & Tenant Re-authentication) | 🟢 **Completed** |
 | **14** | `mobile/14-store-review-hardening` | Privacy manifest, account deletion & medical disclaimers | 🟢 **Completed** |
+| **15** | `mobile/15-bilingual-localization` | Full-stack Arabic & English (`Accept-Language`, Cairo font, RTL, LocaleCubit) | 🟢 **Completed** |
 | **10** | `mobile/10-case-study-pdf-export` | Case study PDF generator with owner anonymization toggle (deferred) | ⚪ Deferred |
 | **12** | `mobile/12-witness-pin-and-dosing` | Fractional dosing slider & blurred witness PIN bottom sheet (deferred) | ⚪ Deferred |
 
@@ -138,14 +139,18 @@
 
 #### Part 07: Offline Sync Engine & Conflict Protocol
 * **Branch**: `mobile/07-offline-sync-engine`
-* **Status**: 🟢 Completed
-* **Files Created**:
+* **Status**: 🟢 Completed & Hardened
+* **Files Created / Updated**:
   - `lib/sync/sync_queue_dispatcher.dart`
   - `lib/sync/sync_pull_service.dart`
   - `lib/sync/conflict_resolver.dart`
   - `lib/sync/sync_manager.dart`
+  - `lib/core/network/idempotency_interceptor.dart`
 * **Definition of Done**:
-  - Offline mutation queue dispatches FIFO deltas to `/api/v1/sync/push` and `/pull`; conflict tests prove zero clinical data loss.
+  - Offline mutation queue dispatches FIFO deltas to `/api/v1/sync/push` and `/pull` in strict hierarchy order (`Client -> Patient -> Case -> Visit`).
+  - Persistent UUID v7 idempotency keys preserved without regeneration across retries.
+  - Signed Visit Guard and Last-Write-Wins (LWW) conflict strategy enforced with soft-delete tombstones.
+  - 281/281 mobile unit and widget tests pass with 0 analysis issues.
 
 ---
 
@@ -391,3 +396,40 @@
     - Test `DELETE /api/v1/auth/account`: dual-confirmation modal, password confirmation payload, in-flight progress, local session purge from `FlutterSecureStorage`, redirect to login screen, and 401/422 error display.
 * **Definition of Done**:
   - Self-service account deletion functions properly with real request test verification; medical disclaimers satisfy App Store Guideline 1.4.1; privacy manifest passes Required-Reason API standards; all 240 project tests pass with 0 errors and 0 analyzer warnings.
+
+---
+
+#### Part 15: Bilingual Localization (Arabic & English)
+* **Branch**: `mobile/15-bilingual-localization`
+* **Status**: 🟢 Completed
+* **Full-Stack Parity & Backend Components (`/var/www/vet-manager`)**:
+  - `app/Http/Middleware/SetLocaleMiddleware.php` (`Accept-Language` header parser & query parameter negotiator, `Content-Language` response header).
+  - `bootstrap/app.php` (Registered in global middleware priority stack and middleware alias).
+  - `lang/en/messages.php` & `lang/ar/messages.php` (Bilingual clinical dictionaries for cases, visits, triage, inventory, locked guards).
+  - `lang/en/validation.php` & `lang/ar/validation.php` (Localized Laravel 11 validation messages).
+  - `tests/Feature/LocalizationTest.php` (5 tests verifying header negotiation, query fallback, and localized validation errors).
+  - Backend test verification: 118/118 tests passed (928 assertions).
+* **Mobile Client Components (`/home/abdelrhaman/www/vet-manager-mobile`)**:
+  - `pubspec.yaml` (`generate: true`) & `l10n.yaml` (Official Flutter `gen-l10n` configuration).
+  - `lib/l10n/app_en.arb` & `lib/l10n/app_ar.arb` (Comprehensive bilingual strings covering clinical hierarchy, SOAP, triage, pharmacy, sync, auth).
+  - `lib/core/localization/locale_state.dart` (`isArabic`, `isEnglish`, `textDirection`).
+  - `lib/core/localization/locale_cubit.dart` (State management with secure storage persistence key `app_locale`).
+  - `lib/core/network/locale_interceptor.dart` (Dio interceptor attaching `Accept-Language: en` or `ar` to outgoing requests).
+  - `lib/core/network/api_client.dart` (Injected `localeProvider` and registered `LocaleInterceptor`).
+  - `lib/app/theme/text_styles.dart` & `lib/app/theme/app_theme.dart` (Dynamic typography switching: Google Fonts `Cairo` for Arabic vs `Plus Jakarta Sans` for English).
+  - `lib/app/app.dart` (Provided `LocaleCubit`, wired `BlocBuilder<LocaleCubit, LocaleState>` to `MaterialApp.router` with `supportedLocales`, `localizationsDelegates`, `locale`, and locale-aware theme).
+  - `lib/core/localization/l10n_extensions.dart` (Ergonomic `context.l10n`, `formatSpecies`, `formatGender`, `formatPriority`, and `formatStatus`).
+  - `lib/features/clients_patients/presentation/screens/create_patient_screen.dart` (Full Arabic localization of form headers, fields, species chips, gender dropdown, age/weight, microchip/ear tag, owner details, and submit action).
+  - `lib/features/clients_patients/presentation/screens/patient_list_screen.dart` & `patient_card.dart` (Localized directory headers, search hint, species chips, FAB, and card metadata).
+  - `lib/features/clients_patients/presentation/screens/patient_detail_screen.dart` (Localized tabs, delete confirmation dialog, action buttons).
+  - `lib/features/clinical_cases/presentation/screens/clinic_home_screen.dart` (Localized bottom navigation items for Triage Cases and Patients).
+  - `lib/features/clinical_cases/presentation/screens/cases_board_screen.dart` (Localized app bar, search hint, tooltips, and priority tabs: الكل، حرجة، عاجلة، عادية).
+  - `lib/features/staff_profile/presentation/screens/doctor_profile_screen.dart` ("Preferences & Localization" section and blurred modal language switcher sheet).
+  - `test/core/localization/locale_cubit_test.dart` (9 tests verifying state, persistence, fallbacks, and toggling).
+  - `test/core/network/locale_interceptor_test.dart` (2 tests verifying `Accept-Language` header injection and preservation).
+  - `test/core/localization/localization_screens_test.dart` (6 automated tests verifying Arabic and English rendering across CreatePatientScreen, CasesBoardScreen, and ClinicHomeScreen).
+  - `test/features/staff_profile/doctor_profile_screen_test.dart` (Language selection and modal bottom sheet widget tests).
+* **Definition of Done**:
+  - Full Arabic and English parity across Backend and Mobile; dynamic RTL mirroring and Cairo typography; entire UI layer translated with zero hardcoded English leaks; 100% test coverage with 300 passing mobile tests and 0 `flutter analyze` issues.
+
+

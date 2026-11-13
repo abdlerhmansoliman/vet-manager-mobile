@@ -7,8 +7,36 @@ import 'app_colors.dart';
 /// Built on the Plus Jakarta Sans geometric font family, offering high legibility
 /// under rapid scanning and multi-language support.
 abstract final class AppTextStyles {
+  /// Active language code for typography rendering ('en' or 'ar').
+  static String activeLanguageCode = 'en';
+
+  static TextStyle _font({
+    required double fontSize,
+    required FontWeight fontWeight,
+    Color? color,
+    double? letterSpacing,
+    double? height,
+  }) {
+    if (activeLanguageCode == 'ar') {
+      return GoogleFonts.cairo(
+        fontSize: fontSize,
+        fontWeight: fontWeight,
+        color: color,
+        letterSpacing: letterSpacing,
+        height: height,
+      );
+    }
+    return GoogleFonts.plusJakartaSans(
+      fontSize: fontSize,
+      fontWeight: fontWeight,
+      color: color,
+      letterSpacing: letterSpacing,
+      height: height,
+    );
+  }
+
   // --- Headline Scales ---
-  static TextStyle get displayLarge => GoogleFonts.plusJakartaSans(
+  static TextStyle get displayLarge => _font(
         fontSize: 32,
         fontWeight: FontWeight.w800,
         color: AppColors.textCharcoal,
@@ -16,7 +44,7 @@ abstract final class AppTextStyles {
         height: 1.2,
       );
 
-  static TextStyle get headlineLarge => GoogleFonts.plusJakartaSans(
+  static TextStyle get headlineLarge => _font(
         fontSize: 24,
         fontWeight: FontWeight.w700,
         color: AppColors.textCharcoal,
@@ -24,7 +52,7 @@ abstract final class AppTextStyles {
         height: 1.25,
       );
 
-  static TextStyle get headlineMedium => GoogleFonts.plusJakartaSans(
+  static TextStyle get headlineMedium => _font(
         fontSize: 20,
         fontWeight: FontWeight.w700,
         color: AppColors.textCharcoal,
@@ -32,7 +60,7 @@ abstract final class AppTextStyles {
         height: 1.3,
       );
 
-  static TextStyle get headlineSmall => GoogleFonts.plusJakartaSans(
+  static TextStyle get headlineSmall => _font(
         fontSize: 18,
         fontWeight: FontWeight.w600,
         color: AppColors.textCharcoal,
@@ -40,21 +68,21 @@ abstract final class AppTextStyles {
       );
 
   // --- Title Scales ---
-  static TextStyle get titleLarge => GoogleFonts.plusJakartaSans(
+  static TextStyle get titleLarge => _font(
         fontSize: 16,
         fontWeight: FontWeight.w600,
         color: AppColors.textCharcoal,
         height: 1.4,
       );
 
-  static TextStyle get titleMedium => GoogleFonts.plusJakartaSans(
+  static TextStyle get titleMedium => _font(
         fontSize: 14,
         fontWeight: FontWeight.w600,
         color: AppColors.textCharcoal,
         height: 1.4,
       );
 
-  static TextStyle get titleSmall => GoogleFonts.plusJakartaSans(
+  static TextStyle get titleSmall => _font(
         fontSize: 13,
         fontWeight: FontWeight.w600,
         color: AppColors.textMuted,
@@ -62,21 +90,21 @@ abstract final class AppTextStyles {
       );
 
   // --- Body Scales ---
-  static TextStyle get bodyLarge => GoogleFonts.plusJakartaSans(
+  static TextStyle get bodyLarge => _font(
         fontSize: 16,
         fontWeight: FontWeight.w400,
         color: AppColors.textCharcoal,
         height: 1.5,
       );
 
-  static TextStyle get bodyMedium => GoogleFonts.plusJakartaSans(
+  static TextStyle get bodyMedium => _font(
         fontSize: 14,
         fontWeight: FontWeight.w400,
         color: AppColors.textCharcoal,
         height: 1.5,
       );
 
-  static TextStyle get bodySmall => GoogleFonts.plusJakartaSans(
+  static TextStyle get bodySmall => _font(
         fontSize: 12,
         fontWeight: FontWeight.w400,
         color: AppColors.textMuted,
@@ -86,14 +114,14 @@ abstract final class AppTextStyles {
   static TextStyle get caption => bodySmall;
 
   // --- Specialized Clinical Badges & Metric Displays ---
-  static TextStyle get metricNumber => GoogleFonts.plusJakartaSans(
+  static TextStyle get metricNumber => _font(
         fontSize: 28,
         fontWeight: FontWeight.w800,
         color: AppColors.textCharcoal,
         letterSpacing: -0.5,
       );
 
-  static TextStyle get badgeLabel => GoogleFonts.plusJakartaSans(
+  static TextStyle get badgeLabel => _font(
         fontSize: 11,
         fontWeight: FontWeight.w700,
         letterSpacing: 0.3,

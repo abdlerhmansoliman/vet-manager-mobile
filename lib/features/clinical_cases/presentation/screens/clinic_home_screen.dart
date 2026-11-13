@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/text_styles.dart';
+import '../../../../core/localization/l10n_extensions.dart';
 import '../../../../sync/sync_manager.dart';
 import '../../../clients_patients/domain/repositories/patient_repository.dart';
 import '../../../clients_patients/presentation/screens/patient_list_screen.dart';
@@ -111,16 +112,16 @@ class _ClinicHomeScreenState extends State<ClinicHomeScreen> {
             onDestinationSelected: (index) {
               setState(() => _currentIndex = index);
             },
-            destinations: const [
+            destinations: [
               NavigationDestination(
-                icon: Icon(Icons.assignment_outlined, color: AppColors.textMuted),
-                selectedIcon: Icon(Icons.assignment_rounded, color: AppColors.primaryEmerald),
-                label: 'Triage Cases',
+                icon: const Icon(Icons.assignment_outlined, color: AppColors.textMuted),
+                selectedIcon: const Icon(Icons.assignment_rounded, color: AppColors.primaryEmerald),
+                label: context.l10n.triageCases,
               ),
               NavigationDestination(
-                icon: Icon(Icons.pets_outlined, color: AppColors.textMuted),
-                selectedIcon: Icon(Icons.pets_rounded, color: AppColors.primaryEmerald),
-                label: 'Patients',
+                icon: const Icon(Icons.pets_outlined, color: AppColors.textMuted),
+                selectedIcon: const Icon(Icons.pets_rounded, color: AppColors.primaryEmerald),
+                label: context.l10n.patients,
               ),
             ],
           ),
