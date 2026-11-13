@@ -2041,6 +2041,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter your current password to authorize deletion:'**
   String get deleteAccountPasswordPrompt;
+
+  /// No description provided for @camel.
+  ///
+  /// In en, this message translates to:
+  /// **'Camel'**
+  String get camel;
+
+  /// No description provided for @addSpecies.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Species'**
+  String get addSpecies;
+
+  /// No description provided for @newSpecies.
+  ///
+  /// In en, this message translates to:
+  /// **'New Species'**
+  String get newSpecies;
+
+  /// No description provided for @enterSpeciesName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Species Name'**
+  String get enterSpeciesName;
+
+  /// No description provided for @speciesNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Camel, Falcon, Rabbit...'**
+  String get speciesNameHint;
+
+  /// No description provided for @speciesAddedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Species added successfully'**
+  String get speciesAddedSuccessfully;
 }
 
 class _AppLocalizationsDelegate

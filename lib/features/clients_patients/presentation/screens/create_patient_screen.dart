@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/text_styles.dart';
+import '../../../../core/errors/clinical_error_formatter.dart';
 import '../../../../core/localization/l10n_extensions.dart';
 import '../../../../core/widgets/app_snackbar.dart';
 import '../../domain/entities/patient_entity.dart';
+import '../../domain/entities/species_entity.dart';
 import '../../domain/repositories/patient_repository.dart';
 
 /// Form screen allowing clinicians to register a new animal patient or edit an existing profile.
@@ -48,6 +50,13 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
   String _selectedGender = 'neutered_male';
   bool _isApproximateAge = false;
   bool _isSubmitting = false;
+  late final Stream<List<SpeciesEntity>> _speciesStream = () {
+    try {
+      return widget.repository.watchSpecies().asBroadcastStream();
+    } catch (_) {
+      return const Stream<List<SpeciesEntity>>.empty();
+    }
+  }();
 
   static const _speciesOptions = [
     'Canine',
@@ -294,33 +303,69 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
                 ),
               ),
               const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: _speciesOptions.map((species) {
-                  final isSelected = _selectedSpecies == species;
-                  return ChoiceChip(
-                    label: Text(context.formatSpecies(species)),
-                    selected: isSelected,
-                    onSelected: (selected) {
-                      if (selected) setState(() => _selectedSpecies = species);
-                    },
-                    selectedColor: AppColors.primaryEmeraldLight,
-                    backgroundColor: AppColors.backgroundCream,
-                    labelStyle: TextStyle(
-                      color: isSelected
-                          ? AppColors.primaryEmeraldDark
-                          : AppColors.textCharcoal,
-                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                      fontSize: 12,
-                    ),
-                    side: BorderSide(
-                      color: isSelected
-                          ? AppColors.primaryEmerald
-                          : AppColors.borderWarm,
-                    ),
+              StreamBuilder<List<SpeciesEntity>>(
+                stream: _speciesStream,
+                builder: (context, snapshot) {
+                  final list = snapshot.data ?? [];
+                  final speciesNames = list.isNotEmpty
+                      ? list.map((s) => s.name).toList()
+                      : _speciesOptions;
+
+                  // Keep _selectedSpecies selectable even if not yet in list
+                  final displaySpecies = List<String>.from(speciesNames);
+                  if (_selectedSpecies.isNotEmpty &&
+                      !displaySpecies.any((s) => s.toLowerCase() == _selectedSpecies.toLowerCase())) {
+                    displaySpecies.add(_selectedSpecies);
+                  }
+
+                  return Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      ...displaySpecies.map((species) {
+                        final isSelected =
+                            _selectedSpecies.toLowerCase() == species.toLowerCase();
+                        return ChoiceChip(
+                          label: Text(context.formatSpecies(species)),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            if (selected) setState(() => _selectedSpecies = species);
+                          },
+                          selectedColor: AppColors.primaryEmeraldLight,
+                          backgroundColor: AppColors.backgroundCream,
+                          labelStyle: TextStyle(
+                            color: isSelected
+                                ? AppColors.primaryEmeraldDark
+                                : AppColors.textCharcoal,
+                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                            fontSize: 12,
+                          ),
+                          side: BorderSide(
+                            color: isSelected
+                                ? AppColors.primaryEmerald
+                                : AppColors.borderWarm,
+                          ),
+                        );
+                      }),
+                      ActionChip(
+                        avatar: const Icon(Icons.add_rounded, size: 16, color: AppColors.primaryEmerald),
+                        label: Text(
+                          context.l10n.addSpecies,
+                          style: const TextStyle(
+                            color: AppColors.primaryEmerald,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12,
+                          ),
+                        ),
+                        backgroundColor: AppColors.backgroundCream,
+                        side: const BorderSide(
+                          color: AppColors.primaryEmerald,
+                        ),
+                        onPressed: _showAddSpeciesDialog,
+                      ),
+                    ],
                   );
-                }).toList(),
+                },
               ),
               const SizedBox(height: 14),
               TextFormField(
@@ -605,6 +650,125 @@ class _CreatePatientScreenState extends State<CreatePatientScreen> {
           children: children,
         ),
       ),
+    );
+  }
+
+  Future<void> _showAddSpeciesDialog() async {
+    final createdName = await showDialog<String>(
+      context: context,
+      builder: (dialogCtx) => const _AddSpeciesDialog(),
+    );
+
+    if (createdName != null && createdName.isNotEmpty) {
+      try {
+        final species = await widget.repository.createCustomSpecies(createdName);
+        if (mounted) {
+          setState(() {
+            _selectedSpecies = species.name;
+          });
+          AppSnackbar.showSuccess(context, context.l10n.speciesAddedSuccessfully);
+        }
+      } catch (e) {
+        if (mounted) {
+          AppSnackbar.showError(
+            context,
+            ClinicalErrorFormatter.format(e, fallbackMessage: 'Failed to create species'),
+          );
+        }
+      }
+    }
+  }
+}
+
+class _AddSpeciesDialog extends StatefulWidget {
+  const _AddSpeciesDialog();
+
+  @override
+  State<_AddSpeciesDialog> createState() => _AddSpeciesDialogState();
+}
+
+class _AddSpeciesDialogState extends State<_AddSpeciesDialog> {
+  final _nameController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      backgroundColor: AppColors.surfaceWhite,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      title: Row(
+        children: [
+          const Icon(Icons.pets_rounded, color: AppColors.primaryEmerald, size: 24),
+          const SizedBox(width: 8),
+          Text(
+            context.l10n.newSpecies,
+            style: AppTextStyles.titleMedium.copyWith(
+              fontWeight: FontWeight.w700,
+              color: AppColors.textCharcoal,
+            ),
+          ),
+        ],
+      ),
+      content: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              context.l10n.enterSpeciesName,
+              style: const TextStyle(fontSize: 13, color: AppColors.textMuted),
+            ),
+            const SizedBox(height: 12),
+            TextFormField(
+              controller: _nameController,
+              autofocus: true,
+              decoration: InputDecoration(
+                labelText: context.l10n.species,
+                hintText: context.l10n.speciesNameHint,
+              ),
+              validator: (val) {
+                final trimmed = val?.trim() ?? '';
+                if (trimmed.isEmpty) {
+                  return context.l10n.enterSpeciesName;
+                }
+                if (trimmed.length > 50) {
+                  return 'Species name is too long';
+                }
+                return null;
+              },
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(
+            context.l10n.cancel,
+            style: const TextStyle(color: AppColors.textMuted),
+          ),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            if (_formKey.currentState?.validate() == true) {
+              Navigator.of(context).pop(_nameController.text.trim());
+            }
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.primaryEmerald,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          ),
+          child: Text(context.l10n.save),
+        ),
+      ],
     );
   }
 }

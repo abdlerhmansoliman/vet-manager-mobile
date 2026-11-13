@@ -188,6 +188,8 @@ class SyncQueueDispatcher {
 
   int _entityTier(String entityType) {
     switch (entityType.toLowerCase()) {
+      case 'species':
+        return 0;
       case 'client':
       case 'clients':
         return 1;

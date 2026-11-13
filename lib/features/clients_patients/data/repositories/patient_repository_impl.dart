@@ -5,26 +5,73 @@ import 'package:uuid/uuid.dart';
 import '../../../../core/storage/secure_storage_service.dart';
 import '../../../../database/app_database.dart';
 import '../../../../database/daos/client_patient_dao.dart';
+import '../../../../database/daos/species_dao.dart';
 import '../../domain/entities/patient_entity.dart';
+import '../../domain/entities/species_entity.dart';
 import '../../domain/repositories/patient_repository.dart';
 import '../../../../sync/sync_manager.dart';
 
 /// Concrete implementation of [IPatientRepository] utilizing local SQLite via [ClientPatientDao].
 class PatientRepositoryImpl implements IPatientRepository {
   final ClientPatientDao _dao;
+  final SpeciesDao? _speciesDao;
   final ISecureStorageService _storageService;
   final SyncManager? _syncManager;
   final Uuid _uuid;
 
   PatientRepositoryImpl({
     required ClientPatientDao dao,
+    SpeciesDao? speciesDao,
     required ISecureStorageService storageService,
     SyncManager? syncManager,
     Uuid? uuid,
   })  : _dao = dao,
+        _speciesDao = speciesDao,
         _storageService = storageService,
         _syncManager = syncManager,
         _uuid = uuid ?? const Uuid();
+
+  SpeciesDao get _effectiveSpeciesDao => _speciesDao ?? _dao.db.speciesDao;
+
+  @override
+  Stream<List<SpeciesEntity>> watchSpecies() async* {
+    final tenantId = await _storageService.getTenantId() ?? 'default';
+    await _effectiveSpeciesDao.seedDefaultSpeciesIfEmpty(tenantId);
+    yield* _effectiveSpeciesDao
+        .watchActiveSpecies(tenantId: tenantId)
+        .map((records) => records.map(_mapSpeciesDataToEntity).toList());
+  }
+
+  @override
+  Future<List<SpeciesEntity>> getSpecies() async {
+    final tenantId = await _storageService.getTenantId() ?? 'default';
+    await _effectiveSpeciesDao.seedDefaultSpeciesIfEmpty(tenantId);
+    final records = await _effectiveSpeciesDao.getActiveSpecies(tenantId: tenantId);
+    return records.map(_mapSpeciesDataToEntity).toList();
+  }
+
+  @override
+  Future<SpeciesEntity> createCustomSpecies(String name, {String? icon}) async {
+    final tenantId = await _storageService.getTenantId() ?? 'default';
+    final data = await _effectiveSpeciesDao.createCustomSpecies(
+      tenantId: tenantId,
+      name: name,
+      icon: icon,
+    );
+    unawaited(_syncManager?.syncNow());
+    return _mapSpeciesDataToEntity(data);
+  }
+
+  static SpeciesEntity _mapSpeciesDataToEntity(SpeciesData data) {
+    return SpeciesEntity(
+      id: data.id,
+      name: data.name,
+      code: data.code,
+      icon: data.icon,
+      isSystemDefault: data.isSystemDefault,
+      isActive: data.isActive,
+    );
+  }
 
   @override
   Stream<List<PatientEntity>> watchPatients({

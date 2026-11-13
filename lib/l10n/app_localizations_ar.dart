@@ -1005,4 +1005,22 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get deleteAccountPasswordPrompt =>
       'أدخل كلمة المرور الحالية لتأكيد الحذف:';
+
+  @override
+  String get camel => 'إبل';
+
+  @override
+  String get addSpecies => 'إضافة نوع';
+
+  @override
+  String get newSpecies => 'نوع جديد';
+
+  @override
+  String get enterSpeciesName => 'أدخل اسم النوع الحيواني';
+
+  @override
+  String get speciesNameHint => 'مثال: إبل، صقر، أرنب...';
+
+  @override
+  String get speciesAddedSuccessfully => 'تمت إضافة النوع الحيواني بنجاح';
 }

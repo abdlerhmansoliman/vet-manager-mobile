@@ -1,7 +1,17 @@
 import '../entities/patient_entity.dart';
+import '../entities/species_entity.dart';
 
 /// Repository contract for Patients and Clients operations.
 abstract class IPatientRepository {
+  /// Watches the reactive list of active biological species for the current tenant.
+  Stream<List<SpeciesEntity>> watchSpecies();
+
+  /// Gets a snapshot list of active biological species for the current tenant.
+  Future<List<SpeciesEntity>> getSpecies();
+
+  /// Creates a new custom biological species offline and queues for sync.
+  Future<SpeciesEntity> createCustomSpecies(String name, {String? icon});
+
   /// Watches the reactive list of patients joined with client information.
   Stream<List<PatientEntity>> watchPatients({
     String? query,

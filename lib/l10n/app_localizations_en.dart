@@ -1014,4 +1014,22 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get deleteAccountPasswordPrompt =>
       'Enter your current password to authorize deletion:';
+
+  @override
+  String get camel => 'Camel';
+
+  @override
+  String get addSpecies => 'Add Species';
+
+  @override
+  String get newSpecies => 'New Species';
+
+  @override
+  String get enterSpeciesName => 'Enter Species Name';
+
+  @override
+  String get speciesNameHint => 'e.g. Camel, Falcon, Rabbit...';
+
+  @override
+  String get speciesAddedSuccessfully => 'Species added successfully';
 }

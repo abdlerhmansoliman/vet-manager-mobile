@@ -323,5 +323,11 @@
   "deleteAccountWarningTitle": "إجراء لا يمكن التراجع عنه",
   "deleteAccountWarningDesc": "حذف حساب الطبيب سيؤدي لإلغاء وصولك نهائياً وإنهاء جلساتك وحذف بياناتك. السجلات الطبية السريرية المعتمدة ستبقى محفوظة تلبية للمتطلبات القانونية.",
   "deleteAccountCheckbox": "أدرك أن هذا الإجراء نهائي ولا يمكن التراجع عنه بأي حال.",
-  "deleteAccountPasswordPrompt": "أدخل كلمة المرور الحالية لتأكيد الحذف:"
+  "deleteAccountPasswordPrompt": "أدخل كلمة المرور الحالية لتأكيد الحذف:",
+  "camel": "إبل",
+  "addSpecies": "إضافة نوع",
+  "newSpecies": "نوع جديد",
+  "enterSpeciesName": "أدخل اسم النوع الحيواني",
+  "speciesNameHint": "مثال: إبل، صقر، أرنب...",
+  "speciesAddedSuccessfully": "تمت إضافة النوع الحيواني بنجاح"
 }

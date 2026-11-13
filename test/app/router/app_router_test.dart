@@ -10,6 +10,7 @@ import 'package:vet_manager_mobile/features/auth/domain/models/clinic_tenant.dar
 import 'package:vet_manager_mobile/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:vet_manager_mobile/features/auth/presentation/bloc/auth_state.dart';
 import 'package:vet_manager_mobile/features/clients_patients/domain/entities/patient_entity.dart';
+import 'package:vet_manager_mobile/features/clients_patients/domain/entities/species_entity.dart';
 import 'package:vet_manager_mobile/features/clients_patients/domain/repositories/patient_repository.dart';
 import 'package:vet_manager_mobile/features/clinical_cases/domain/entities/case_entity.dart';
 import 'package:vet_manager_mobile/features/clinical_cases/domain/repositories/case_repository.dart';
@@ -60,6 +61,8 @@ void main() {
           query: any(named: 'query'),
           speciesFilter: any(named: 'speciesFilter'),
         )).thenAnswer((_) => Stream.value(<PatientEntity>[]));
+    when(() => mockPatientRepo.watchSpecies())
+        .thenAnswer((_) => Stream.value(<SpeciesEntity>[]));
   });
 
   Widget buildRouterApp({

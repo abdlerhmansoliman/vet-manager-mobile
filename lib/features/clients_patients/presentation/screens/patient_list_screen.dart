@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/text_styles.dart';
 import '../../../../core/localization/l10n_extensions.dart';
+import '../../domain/entities/species_entity.dart';
 import '../../domain/repositories/patient_repository.dart';
 import '../../../clinical_cases/domain/repositories/case_repository.dart';
 import '../../../media/domain/repositories/media_repository.dart';
@@ -35,6 +36,13 @@ class PatientListScreen extends StatefulWidget {
 
 class _PatientListScreenState extends State<PatientListScreen> {
   final _searchController = TextEditingController();
+  late final Stream<List<SpeciesEntity>> _speciesStream = () {
+    try {
+      return widget.repository.watchSpecies().asBroadcastStream();
+    } catch (_) {
+      return const Stream<List<SpeciesEntity>>.empty();
+    }
+  }();
 
   static const _speciesFilters = [
     'All',
@@ -202,39 +210,55 @@ class _PatientListScreenState extends State<PatientListScreen> {
             const SizedBox(height: 10),
             SizedBox(
               height: 40,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: _speciesFilters.length,
-                separatorBuilder: (context, index) => const SizedBox(width: 8),
-                itemBuilder: (context, index) {
-                  final species = _speciesFilters[index];
-                  final isSelected = state.selectedSpecies.toLowerCase() == species.toLowerCase();
+              child: StreamBuilder<List<SpeciesEntity>>(
+                stream: _speciesStream,
+                builder: (context, snapshot) {
+                  final dynamicSpecies = (snapshot.data ?? [])
+                      .map((s) => s.name)
+                      .toList();
+                  final filters = [
+                    'All',
+                    ...dynamicSpecies.isNotEmpty
+                        ? dynamicSpecies
+                        : _speciesFilters.skip(1),
+                  ];
 
-                  return ChoiceChip(
-                    label: Text(
-                      species.toLowerCase() == 'all'
-                          ? context.l10n.all
-                          : context.formatSpecies(species),
-                    ),
-                    selected: isSelected,
-                    onSelected: (selected) {
-                      if (selected) {
-                        context
-                            .read<PatientListBloc>()
-                            .add(PatientSpeciesFilterChanged(species));
-                      }
+                  return ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: filters.length,
+                    separatorBuilder: (context, index) => const SizedBox(width: 8),
+                    itemBuilder: (context, index) {
+                      final species = filters[index];
+                      final isSelected =
+                          state.selectedSpecies.toLowerCase() == species.toLowerCase();
+
+                      return ChoiceChip(
+                        label: Text(
+                          species.toLowerCase() == 'all'
+                              ? context.l10n.all
+                              : context.formatSpecies(species),
+                        ),
+                        selected: isSelected,
+                        onSelected: (selected) {
+                          if (selected) {
+                            context
+                                .read<PatientListBloc>()
+                                .add(PatientSpeciesFilterChanged(species));
+                          }
+                        },
+                        selectedColor: AppColors.primaryEmerald,
+                        backgroundColor: AppColors.surfaceWhite,
+                        labelStyle: TextStyle(
+                          color: isSelected ? Colors.white : AppColors.textCharcoal,
+                          fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                          fontSize: 12,
+                        ),
+                        side: BorderSide(
+                          color: isSelected ? AppColors.primaryEmerald : AppColors.borderWarm,
+                        ),
+                      );
                     },
-                    selectedColor: AppColors.primaryEmerald,
-                    backgroundColor: AppColors.surfaceWhite,
-                    labelStyle: TextStyle(
-                      color: isSelected ? Colors.white : AppColors.textCharcoal,
-                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                      fontSize: 12,
-                    ),
-                    side: BorderSide(
-                      color: isSelected ? AppColors.primaryEmerald : AppColors.borderWarm,
-                    ),
                   );
                 },
               ),

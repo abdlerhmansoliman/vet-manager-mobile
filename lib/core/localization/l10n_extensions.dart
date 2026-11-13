@@ -34,6 +34,8 @@ extension AppLocalizationsX on BuildContext {
       case 'avian':
       case 'bird':
         return l10n.avian;
+      case 'camel':
+        return l10n.camel;
       case 'other':
       default:
         if (species.trim().toLowerCase() == 'other') {

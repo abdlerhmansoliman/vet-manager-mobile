@@ -179,6 +179,12 @@ class ConflictResolver {
         );
         break;
 
+      case 'species':
+        await (db.update(db.speciesTable)..where((s) => s.id.equals(entityId))).write(
+          SpeciesTableCompanion(syncStatus: const Value('synced'), lastSyncedAt: Value(now)),
+        );
+        break;
+
       case 'clinical_progress_note':
       case 'progress_note':
         await (db.update(db.clinicalProgressNotesTable)..where((n) => n.id.equals(entityId))).write(
@@ -648,6 +654,38 @@ class ConflictResolver {
                     lastSyncedAt: Value(now),
                   ),
                 );
+          }
+        }
+      }
+
+      // 8. Species
+      if (deltas['species'] is List) {
+        for (final item in deltas['species'] as List) {
+          if (item is Map<String, dynamic>) {
+            final speciesId = item['id']?.toString() ?? '';
+            if (speciesId.isEmpty) continue;
+
+            final name = item['name']?.toString() ?? 'Species';
+            final code = (item['code']?.toString() ?? '').isNotEmpty
+                ? item['code'].toString()
+                : name.toLowerCase().replaceAll(RegExp(r'\s+'), '_');
+
+            await db.speciesDao.upsertSyncedSpecies([
+              SpeciesTableCompanion(
+                id: Value(speciesId),
+                tenantId: Value(tenantId),
+                name: Value(name),
+                code: Value(code),
+                icon: Value(item['icon']?.toString()),
+                isSystemDefault: Value(item['is_system_default'] == true || item['is_system_default'] == 1),
+                isActive: Value(item['is_active'] != false && item['is_active'] != 0),
+                createdAt: Value(DateTime.tryParse(item['created_at']?.toString() ?? '') ?? now),
+                updatedAt: Value(DateTime.tryParse(item['updated_at']?.toString() ?? '') ?? now),
+                deletedAt: Value(DateTime.tryParse(item['deleted_at']?.toString() ?? '')),
+                syncStatus: const Value('synced'),
+                lastSyncedAt: Value(now),
+              ),
+            ]);
           }
         }
       }

@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:vet_manager_mobile/features/clients_patients/domain/entities/patient_entity.dart';
+import 'package:vet_manager_mobile/features/clients_patients/domain/entities/species_entity.dart';
 import 'package:vet_manager_mobile/features/clients_patients/domain/repositories/patient_repository.dart';
 import 'package:vet_manager_mobile/features/clients_patients/presentation/screens/create_patient_screen.dart';
 
@@ -17,6 +18,15 @@ void main() {
 
   setUp(() {
     mockRepository = MockPatientRepository();
+    when(() => mockRepository.watchSpecies()).thenAnswer(
+      (_) => Stream.value(const [
+        SpeciesEntity(id: 'sp-1', name: 'Canine', code: 'canine', isSystemDefault: true),
+        SpeciesEntity(id: 'sp-2', name: 'Feline', code: 'feline', isSystemDefault: true),
+        SpeciesEntity(id: 'sp-3', name: 'Equine', code: 'equine', isSystemDefault: true),
+        SpeciesEntity(id: 'sp-4', name: 'Bovine', code: 'bovine', isSystemDefault: true),
+        SpeciesEntity(id: 'sp-5', name: 'Other', code: 'other', isSystemDefault: true),
+      ]),
+    );
   });
 
   const sampleClient = ClientSummaryEntity(
@@ -149,5 +159,51 @@ void main() {
           clientPhonePrimary: '+1-555-2026',
           clientAddress: '123 Cyberdyne Blvd',
         )).called(1);
+  });
+
+  testWidgets('Tapping Add Species opens dialog and creates custom species', (tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() => tester.view.resetPhysicalSize());
+
+    when(() => mockRepository.createCustomSpecies('Falcon')).thenAnswer(
+      (_) async => const SpeciesEntity(
+        id: 'sp-falcon',
+        name: 'Falcon',
+        code: 'falcon',
+        isSystemDefault: false,
+      ),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: CreatePatientScreen(repository: mockRepository),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Verify Add Species chip is present
+    final addSpeciesChip = find.byType(ActionChip);
+    expect(addSpeciesChip, findsOneWidget);
+
+    await tester.tap(addSpeciesChip);
+    await tester.pumpAndSettle();
+
+    // Dialog is visible
+    expect(find.byType(AlertDialog), findsOneWidget);
+
+    // Enter "Falcon"
+    await tester.enterText(
+      find.descendant(of: find.byType(AlertDialog), matching: find.byType(TextFormField)),
+      'Falcon',
+    );
+    await tester.pumpAndSettle();
+
+    // Tap Save
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+
+    verify(() => mockRepository.createCustomSpecies('Falcon')).called(1);
+    expect(find.text('Species added successfully'), findsOneWidget);
   });
 }

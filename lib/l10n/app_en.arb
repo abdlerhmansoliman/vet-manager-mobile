@@ -326,5 +326,11 @@
   "deleteAccountWarningTitle": "Irreversible Action",
   "deleteAccountWarningDesc": "Deleting your practitioner account will permanently revoke your access, invalidate all active sessions, and remove your credentials. Clinical medical records you authored will remain archived according to statutory compliance requirements.",
   "deleteAccountCheckbox": "I understand that this action is permanent and cannot be undone.",
-  "deleteAccountPasswordPrompt": "Enter your current password to authorize deletion:"
+  "deleteAccountPasswordPrompt": "Enter your current password to authorize deletion:",
+  "camel": "Camel",
+  "addSpecies": "Add Species",
+  "newSpecies": "New Species",
+  "enterSpeciesName": "Enter Species Name",
+  "speciesNameHint": "e.g. Camel, Falcon, Rabbit...",
+  "speciesAddedSuccessfully": "Species added successfully"
 }
