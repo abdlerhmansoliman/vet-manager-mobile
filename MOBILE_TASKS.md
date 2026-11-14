@@ -39,6 +39,7 @@
 | **13-B** | `mobile/multi-clinic-switcher` | Multi-Clinic Switcher (Practice Selection & Tenant Re-authentication) | 🟢 **Completed** |
 | **14** | `mobile/14-store-review-hardening` | Privacy manifest, account deletion & medical disclaimers | 🟢 **Completed** |
 | **15** | `mobile/15-bilingual-localization` | Full-stack Arabic & English (`Accept-Language`, Cairo font, RTL, LocaleCubit) | 🟢 **Completed** |
+| **WEB** | `feat/clinic-doctor-web-portal` | Vue 3 + Inertia.js Clinic Doctor Web Portal with Strict 3-Tier Hierarchy & MinIO S3 | 🟢 **Completed** |
 | **10** | `mobile/10-case-study-pdf-export` | Case study PDF generator with owner anonymization toggle (deferred) | ⚪ Deferred |
 | **12** | `mobile/12-witness-pin-and-dosing` | Fractional dosing slider & blurred witness PIN bottom sheet (deferred) | ⚪ Deferred |
 

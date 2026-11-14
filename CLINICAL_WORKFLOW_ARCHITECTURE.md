@@ -293,3 +293,25 @@ Mobile Client (Flutter)               Laravel API Backend              MinIO S3 
    flutter analyze  # Must report: No issues found!
    flutter test     # All 270+ tests must pass!
    ```
+
+---
+
+## 7. Clinic Doctor Web Portal Architecture (Vue 3 + Inertia.js)
+
+To complement the mobile app, the clinic web application in `/var/www/vet-manager` is built with **Vue 3 (Composition API `<script setup>`) + Inertia.js (`@inertiajs/vue3`) + Tailwind CSS v4 + Vite**, preserving 100% architectural parity with the 3-level clinical hierarchy:
+
+1. **Level 1: Patient Profile (`resources/js/Pages/Patients/Show.vue`)**:
+   - Displays demographics, high-risk allergies banner (`MedicalAlertBanner.vue`), microchip, client owner details, and **Clinical Cases ONLY**.
+   - Primary action: `"Create New Case"`.
+   - Strict Invariant: Zero visits, zero SOAP examinations, and zero media galleries are rendered on this screen.
+2. **Level 2: Case Detail Screen (`resources/js/Pages/Cases/Show.vue`)**:
+   - Represents the medical problem umbrella (chief complaint, triage priority badge, encounter status, provisional/final diagnoses).
+   - Displays the chronological timeline of visits as sleek, compact `VisitCard.vue` tiles.
+   - Primary action: `"Start New Visit"`.
+   - Strict Invariant: Zero diagnostic media galleries allowed on Level 2.
+3. **Level 3: Visit Workspace (`resources/js/Pages/Visits/Show.vue`)**:
+   - The **EXCLUSIVE** workspace for SOAP clinical physical exams, objective vital signs bar, medication dose administrations (eMAR with automated batch FEFO deduction via `BatchDeductionService`), diagnostic media attachments (MinIO S3), and digital signing & record locking.
+4. **Bilingual Arabic & English Support**:
+   - Dynamic `lang` and `dir="rtl|ltr"` attributes on root layout (`resources/views/app.blade.php`), Cairo font for Arabic typography, and instant locale switching (`/portal/dashboard?lang=ar`).
+5. **Automated Verification**:
+   - Covered by 12 comprehensive feature tests in `tests/Feature/ClinicWebPortalTest.php` with 141 assertions. Assets compile cleanly via `npm run build`.
