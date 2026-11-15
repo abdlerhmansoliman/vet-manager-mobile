@@ -50,6 +50,38 @@ abstract final class AppColors {
   /// Light Slate (#94A3B8) for placeholder hints and disabled states
   static const Color textLight = Color(0xFF94A3B8);
 
+  // --- Tonal Surface Containers (from Warm Clinical DESIGN.md) ---
+  /// Surface Container Lowest (#FFFFFF) - Pure white card surface
+  static const Color surfaceContainerLowest = Color(0xFFFFFFFF);
+
+  /// Surface Container Low (#F5F3F0) - Soft ambient background for chips & inner sections
+  static const Color surfaceContainerLow = Color(0xFFF5F3F0);
+
+  /// Surface Container (#EFEEEB) - Standard grouped container surface
+  static const Color surfaceContainer = Color(0xFFEFEEEB);
+
+  /// Surface Container High (#EAE8E5) - Structural separator container
+  static const Color surfaceContainerHigh = Color(0xFFEAE8E5);
+
+  /// Surface Container Highest (#E4E2DF) - Highest contrast surface tier
+  static const Color surfaceContainerHighest = Color(0xFFE4E2DF);
+
+  /// Ambient warm card shadow: 0 4px 16px -2px rgba(120, 113, 108, 0.08)
+  static const List<BoxShadow> warmAmbientShadow = [
+    BoxShadow(
+      color: Color(0x1478716C),
+      blurRadius: 16,
+      offset: Offset(0, 4),
+      spreadRadius: -2,
+    ),
+    BoxShadow(
+      color: Color(0x0A78716C),
+      blurRadius: 6,
+      offset: Offset(0, 2),
+      spreadRadius: -1,
+    ),
+  ];
+
   // --- Borders, Dividers & Overlays ---
   /// Subtle Warm Border (#F1EDE4)
   static const Color borderWarm = Color(0xFFF1EDE4);

@@ -9,6 +9,7 @@ import '../../../staff_profile/domain/entities/staff_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/text_styles.dart';
 import '../../../../core/widgets/animated_pressable.dart';
@@ -122,6 +123,13 @@ class _CasesBoardViewState extends State<_CasesBoardView> {
             ? widget.initialCases!.where((c) => c.isRoutine).length
             : state.routineCount;
 
+        final authState = context.watch<AuthBloc?>()?.state;
+        String doctorName = 'Dr. Jenkins';
+        if (authState is AuthAuthenticated) {
+          final rawName = authState.session.user.name;
+          doctorName = rawName.startsWith('Dr.') ? rawName : 'Dr. $rawName';
+        }
+
         return Scaffold(
           backgroundColor: AppColors.backgroundCream,
           appBar: AppBar(
@@ -166,9 +174,9 @@ class _CasesBoardViewState extends State<_CasesBoardView> {
                 ),
                 tooltip: context.l10n.practitionerProfile,
                 onPressed: () {
-                  final authState = context.read<AuthBloc?>()?.state;
-                  if (authState is AuthAuthenticated) {
-                    final staff = StaffEntity.fromAuthUser(authState.session.user);
+                  final currentAuthState = context.read<AuthBloc?>()?.state;
+                  if (currentAuthState is AuthAuthenticated) {
+                    final staff = StaffEntity.fromAuthUser(currentAuthState.session.user);
                     context.push(AppRoutes.doctorProfile, extra: staff);
                   } else {
                     context.push(AppRoutes.doctorProfile);
@@ -281,33 +289,37 @@ class _CasesBoardViewState extends State<_CasesBoardView> {
               widget.onSync?.call();
               await Future<void>.delayed(const Duration(milliseconds: 600));
             },
-            child: state.status == CasesBoardStatus.loading && cases.isEmpty
-                ? const Center(
-                    child: CircularProgressIndicator(color: AppColors.primaryEmerald),
-                  )
-                : cases.isEmpty
-                    ? CustomScrollView(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        slivers: [
-                          SliverFillRemaining(
-                            hasScrollBody: false,
-                            child: _buildEmptyState(state.activePriority),
-                          ),
-                        ],
-                      )
-                    : ListView.builder(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        padding: const EdgeInsets.all(16),
-                        itemCount: cases.length,
-                        itemBuilder: (context, index) {
-                          return CaseCard(
-                            clinicalCase: cases[index],
-                            repository: widget.repository,
-                            mediaRepository: widget.mediaRepository,
-                            index: index,
-                          );
-                        },
-                      ),
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildClinicianWelcomeHeader(doctorName),
+                  const SizedBox(height: 12),
+                  _buildQuickSearchBar(),
+                  const SizedBox(height: 14),
+                  _buildQuickStatsRibbon(allCount, criticalCount, urgentCount, routineCount),
+                  const SizedBox(height: 14),
+                  _buildQuickActionBar(context),
+                  const SizedBox(height: 18),
+                  _buildQueueSectionHeader(allCount),
+                  const SizedBox(height: 10),
+                  if (cases.isEmpty)
+                    _buildEmptyState(state.activePriority)
+                  else
+                    ...cases.asMap().entries.map((entry) => CaseCard(
+                          clinicalCase: entry.value,
+                          repository: widget.repository,
+                          mediaRepository: widget.mediaRepository,
+                          index: entry.key,
+                        )),
+                  const SizedBox(height: 20),
+                  _buildDiagnosticsAlertsSection(),
+                  const SizedBox(height: 40),
+                ],
+              ),
+            ),
           ),
           floatingActionButton: FloatingActionButton.extended(
             heroTag: 'cases_board_triage_case_fab',
@@ -325,6 +337,514 @@ class _CasesBoardViewState extends State<_CasesBoardView> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildClinicianWelcomeHeader(String doctorName) {
+    final now = DateTime.now();
+    final dateStr = DateFormat('EEEE, MMM d').format(now);
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.calendar_today_outlined, size: 14, color: AppColors.primaryEmerald),
+                  const SizedBox(width: 4),
+                  Flexible(
+                    child: Text(
+                      dateStr,
+                      style: AppTextStyles.labelSmall.copyWith(
+                        color: AppColors.textMuted,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 3),
+              RichText(
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                text: TextSpan(
+                  style: AppTextStyles.headlineSmall.copyWith(
+                    color: AppColors.textCharcoal,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  children: [
+                    const TextSpan(text: 'Good morning, '),
+                    TextSpan(
+                      text: doctorName,
+                      style: const TextStyle(color: AppColors.primaryEmerald, fontWeight: FontWeight.w800),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 8),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceWhite,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppColors.borderWarm),
+                boxShadow: AppColors.warmAmbientShadow,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 7,
+                    height: 7,
+                    decoration: const BoxDecoration(
+                      color: AppColors.primaryEmerald,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  const Text(
+                    'Oakwood Animal',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textCharcoal,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: AppColors.surfaceContainer,
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.borderWarm),
+                boxShadow: AppColors.warmAmbientShadow,
+              ),
+              child: const Icon(Icons.person_rounded, size: 22, color: AppColors.primaryEmerald),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildQuickSearchBar() {
+    return Container(
+      height: 46,
+      decoration: BoxDecoration(
+        color: AppColors.surfaceWhite,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.borderWarm),
+        boxShadow: AppColors.warmAmbientShadow,
+      ),
+      child: TextField(
+        controller: _searchController,
+        onChanged: _onSearchChanged,
+        style: AppTextStyles.bodySmall.copyWith(color: AppColors.textCharcoal),
+        decoration: InputDecoration(
+          prefixIcon: const Icon(Icons.search_rounded, size: 20, color: AppColors.textLight),
+          suffixIcon: IconButton(
+            icon: const Icon(Icons.tune_rounded, size: 18, color: AppColors.textLight),
+            onPressed: () {},
+          ),
+          hintText: 'Search patient, breed, microchip, or owner...',
+          hintStyle: AppTextStyles.bodySmall.copyWith(color: AppColors.textLight),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(vertical: 12),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuickStatsRibbon(int allCount, int criticalCount, int urgentCount, int routineCount) {
+    return SizedBox(
+      height: 104,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        children: [
+          _buildStatCard(
+            title: 'Schedule',
+            count: allCount,
+            subtitle: 'Appointments',
+            icon: Icons.event_note_outlined,
+            isHighlighted: false,
+          ),
+          const SizedBox(width: 10),
+          _buildStatCard(
+            title: 'In Clinic',
+            count: routineCount + urgentCount,
+            subtitle: 'Waiting / Exam',
+            icon: Icons.pets_outlined,
+            isHighlighted: true,
+            highlightColor: AppColors.primaryEmerald,
+          ),
+          const SizedBox(width: 10),
+          _buildStatCard(
+            title: 'SOAP / Labs',
+            count: allCount > 0 ? (allCount / 2).ceil() : 0,
+            subtitle: 'Need Review',
+            icon: Icons.science_outlined,
+            isHighlighted: false,
+          ),
+          const SizedBox(width: 10),
+          _buildStatCard(
+            title: 'Triage Alert',
+            count: criticalCount,
+            subtitle: 'Urgent Queue',
+            icon: Icons.emergency_outlined,
+            isHighlighted: criticalCount > 0,
+            highlightColor: AppColors.secondaryCoral,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatCard({
+    required String title,
+    required int count,
+    required String subtitle,
+    required IconData icon,
+    bool isHighlighted = false,
+    Color highlightColor = AppColors.primaryEmerald,
+  }) {
+    return Container(
+      width: 140,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceWhite,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isHighlighted ? highlightColor.withValues(alpha: 0.4) : AppColors.borderWarm,
+          width: isHighlighted ? 1.5 : 1.0,
+        ),
+        boxShadow: AppColors.warmAmbientShadow,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: isHighlighted ? highlightColor : AppColors.textMuted,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Icon(icon, size: 16, color: isHighlighted ? highlightColor : AppColors.textLight),
+            ],
+          ),
+          Text(
+            '$count',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              color: isHighlighted ? highlightColor : AppColors.textCharcoal,
+            ),
+          ),
+          Text(
+            subtitle,
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w500,
+              color: isHighlighted ? highlightColor.withValues(alpha: 0.8) : AppColors.textLight,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuickActionBar(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          flex: 2,
+          child: SizedBox(
+            height: 48,
+            child: ElevatedButton.icon(
+              onPressed: () => _showOpenCaseModal(context),
+              icon: const Icon(Icons.person_add_alt_1_rounded, size: 18),
+              label: const Text(
+                '+ New Check-in',
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryEmerald,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          flex: 1,
+          child: SizedBox(
+            height: 48,
+            child: OutlinedButton(
+              onPressed: () {
+                AppSnackbar.showInfo(context, 'Quick Vitals available on active encounter');
+              },
+              style: OutlinedButton.styleFrom(
+                backgroundColor: AppColors.surfaceWhite,
+                side: const BorderSide(color: AppColors.borderWarm),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding: EdgeInsets.zero,
+              ),
+              child: const Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.monitor_heart_outlined, size: 18, color: AppColors.primaryEmerald),
+                  SizedBox(height: 2),
+                  Text('Vitals', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.textCharcoal)),
+                ],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          flex: 1,
+          child: SizedBox(
+            height: 48,
+            child: OutlinedButton(
+              onPressed: () {
+                AppSnackbar.showInfo(context, 'eMAR Barcode scanner ready');
+              },
+              style: OutlinedButton.styleFrom(
+                backgroundColor: AppColors.surfaceWhite,
+                side: const BorderSide(color: AppColors.borderWarm),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding: EdgeInsets.zero,
+              ),
+              child: const Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.qr_code_scanner_rounded, size: 18, color: AppColors.primaryEmerald),
+                  SizedBox(height: 2),
+                  Text('eMAR Scan', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.textCharcoal)),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildQueueSectionHeader(int activeCount) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          children: [
+            Text(
+              "Today's Patient Queue",
+              style: AppTextStyles.titleMedium.copyWith(
+                fontWeight: FontWeight.w700,
+                color: AppColors.textCharcoal,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceContainerHigh,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                '$activeCount active',
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textCharcoal,
+                ),
+              ),
+            ),
+          ],
+        ),
+        Text(
+          'View All',
+          style: AppTextStyles.labelSmall.copyWith(
+            color: AppColors.primaryEmerald,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDiagnosticsAlertsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Lab Results & Critical Alerts',
+              style: AppTextStyles.titleMedium.copyWith(
+                fontWeight: FontWeight.w700,
+                fontSize: 15,
+                color: AppColors.textCharcoal,
+              ),
+            ),
+            Text(
+              'Diagnostics',
+              style: AppTextStyles.labelSmall.copyWith(
+                color: AppColors.primaryEmerald,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        // Normal Lab Result Card
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceWhite,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.borderWarm),
+            boxShadow: AppColors.warmAmbientShadow,
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: AppColors.badgeStableMint,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.check_circle_rounded, color: AppColors.badgeStableMintText, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'CBC & Chemistry Panel - Max (Canine)',
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textCharcoal),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    RichText(
+                      text: const TextSpan(
+                        style: TextStyle(fontSize: 11, color: AppColors.textMuted),
+                        children: [
+                          TextSpan(text: 'Marked: '),
+                          TextSpan(text: 'Normal', style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.badgeStableMintText)),
+                          TextSpan(text: ' • Reviewed 15m ago'),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.visibility_outlined, size: 20, color: AppColors.textLight),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        // Urgent Lab Alert Card
+        Container(
+          clipBehavior: Clip.antiAlias,
+          decoration: BoxDecoration(
+            color: AppColors.surfaceWhite,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.borderWarm),
+            boxShadow: AppColors.warmAmbientShadow,
+          ),
+          child: IntrinsicHeight(
+            child: Row(
+              children: [
+                Container(width: 4, color: AppColors.secondaryCoral),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 38,
+                          height: 38,
+                          decoration: BoxDecoration(
+                            color: AppColors.secondaryCoralLight,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(Icons.crisis_alert_rounded, color: AppColors.secondaryCoral, size: 20),
+                        ),
+                        const SizedBox(width: 12),
+                        const Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Biochemistry flag: Milo (Feline)',
+                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.secondaryCoral),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              SizedBox(height: 2),
+                              Text(
+                                'Elevated BUN/Creatinine • Needs clinician call',
+                                style: TextStyle(fontSize: 11, color: AppColors.textMuted),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: AppColors.secondaryCoralLight,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text('Review', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.secondaryCoral)),
+                              SizedBox(width: 2),
+                              Icon(Icons.arrow_forward_rounded, size: 12, color: AppColors.secondaryCoral),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 

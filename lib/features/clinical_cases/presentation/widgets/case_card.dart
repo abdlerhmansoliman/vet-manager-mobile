@@ -47,83 +47,52 @@ class CaseCard extends StatelessWidget {
             onTap: openContainer,
             borderRadius: BorderRadius.circular(16),
             child: Container(
-              padding: const EdgeInsets.all(14),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: AppColors.surfaceWhite,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color: clinicalCase.isCritical
-                      ? AppColors.badgeCriticalRoseText.withValues(alpha: 0.3)
+                      ? AppColors.secondaryCoral.withValues(alpha: 0.6)
                       : AppColors.borderWarm,
-                  width: clinicalCase.isCritical ? 1.3 : 1.0,
+                  width: clinicalCase.isCritical ? 1.5 : 1.0,
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.02),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+                boxShadow: AppColors.warmAmbientShadow,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Top Row: Case Code + Priority Badge
+                  // Top Row: Patient Avatar + Name & Triage Tag + Time
                   Row(
-                    children: [
-                      Text(
-                        clinicalCase.caseNumber,
-                        style: AppTextStyles.titleMedium.copyWith(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 14,
-                          color: AppColors.textCharcoal,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      if (clinicalCase.syncStatus != 'synced')
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: AppColors.badgeObsAmber,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: const Text(
-                            'OFFLINE',
-                            style: TextStyle(
-                              fontSize: 9,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.badgeObsAmberText,
-                            ),
-                          ),
-                        ),
-                      const Spacer(),
-                      TriagePriorityBadge.fromString(clinicalCase.priority),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-
-                  // Middle Row: Patient Avatar + Name + Species • Breed • Age
-                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       AnimalSpeciesAvatar(
                         species: clinicalCase.species,
-                        radius: 22,
+                        radius: 24,
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              clinicalCase.patientName,
-                              style: AppTextStyles.titleMedium.copyWith(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 15,
-                                color: AppColors.textCharcoal,
-                              ),
-                              overflow: TextOverflow.ellipsis,
+                            Row(
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    clinicalCase.patientName,
+                                    style: AppTextStyles.titleMedium.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 16,
+                                      color: AppColors.textCharcoal,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                TriagePriorityBadge.fromString(clinicalCase.priority),
+                              ],
                             ),
-                            const SizedBox(height: 2),
+                            const SizedBox(height: 3),
                             Text(
                               '${clinicalCase.species}${clinicalCase.breed != null ? " • ${clinicalCase.breed}" : ""}${clinicalCase.ageFormatted != null ? " • ${clinicalCase.ageFormatted}" : ""}',
                               style: AppTextStyles.bodySmall.copyWith(
@@ -135,42 +104,110 @@ class CaseCard extends StatelessWidget {
                           ],
                         ),
                       ),
-                      const Icon(
-                        Icons.chevron_right_rounded,
-                        color: AppColors.textMuted,
-                        size: 20,
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            _formatClockTime(clinicalCase.admittedAt),
+                            style: AppTextStyles.labelMedium.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: clinicalCase.isCritical
+                                  ? AppColors.secondaryCoral
+                                  : AppColors.textCharcoal,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            _formatAdmissionTime(clinicalCase.admittedAt),
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: AppColors.textLight,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 12),
 
-                  // Chief Complaint Snippet
+                  // Reason / Chief Complaint Bar with Open Action
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
-                      color: AppColors.backgroundCream,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: AppColors.borderWarm),
+                      color: clinicalCase.isCritical
+                          ? AppColors.secondaryCoralLight.withValues(alpha: 0.5)
+                          : AppColors.surfaceContainerLow,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: clinicalCase.isCritical
+                            ? AppColors.secondaryCoral.withValues(alpha: 0.3)
+                            : AppColors.borderWarm,
+                      ),
                     ),
                     child: Row(
                       children: [
-                        const Icon(
-                          Icons.medical_information_outlined,
-                          size: 14,
-                          color: AppColors.secondaryCoral,
+                        Icon(
+                          clinicalCase.isCritical
+                              ? Icons.warning_amber_rounded
+                              : Icons.medical_information_outlined,
+                          size: 16,
+                          color: clinicalCase.isCritical
+                              ? AppColors.secondaryCoral
+                              : AppColors.primaryEmerald,
                         ),
-                        const SizedBox(width: 6),
+                        const SizedBox(width: 8),
                         Expanded(
-                          child: Text(
-                            clinicalCase.chiefComplaint,
-                            style: AppTextStyles.bodySmall.copyWith(
-                              color: AppColors.textCharcoal,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                            ),
+                          child: RichText(
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
+                            text: TextSpan(
+                              style: AppTextStyles.bodySmall.copyWith(
+                                color: AppColors.textMuted,
+                                fontSize: 12,
+                              ),
+                              children: [
+                                const TextSpan(text: 'Reason: '),
+                                TextSpan(
+                                  text: clinicalCase.chiefComplaint,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    color: clinicalCase.isCritical
+                                        ? AppColors.secondaryCoral
+                                        : AppColors.textCharcoal,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: clinicalCase.isCritical
+                                ? AppColors.secondaryCoral
+                                : AppColors.primaryEmerald,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                clinicalCase.isCritical ? 'Triage' : 'Open Visit',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(width: 2),
+                              const Icon(
+                                Icons.chevron_right_rounded,
+                                color: Colors.white,
+                                size: 14,
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -178,10 +215,10 @@ class CaseCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
 
-                  // Bottom Row: Owner Name + Time + Status Chip
+                  // Bottom Sub-strip: Owner & Case Number
                   Row(
                     children: [
-                      const Icon(Icons.person_outline_rounded, size: 13, color: AppColors.textMuted),
+                      const Icon(Icons.person_outline_rounded, size: 13, color: AppColors.textLight),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
@@ -194,26 +231,11 @@ class CaseCard extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        _formatAdmissionTime(clinicalCase.admittedAt),
+                        clinicalCase.caseNumber,
                         style: AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.textMuted,
+                          color: AppColors.textLight,
                           fontSize: 11,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryEmeraldLight,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          clinicalCase.status.replaceAll('_', ' ').toUpperCase(),
-                          style: const TextStyle(
-                            fontSize: 9,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.primaryEmeraldDark,
-                          ),
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],
@@ -259,5 +281,12 @@ class CaseCard extends StatelessWidget {
     } else {
       return '${dt.day}/${dt.month}';
     }
+  }
+
+  String _formatClockTime(DateTime dt) {
+    final hour = dt.hour == 0 ? 12 : (dt.hour > 12 ? dt.hour - 12 : dt.hour);
+    final minute = dt.minute.toString().padLeft(2, '0');
+    final period = dt.hour >= 12 ? 'PM' : 'AM';
+    return '$hour:$minute $period';
   }
 }

@@ -93,6 +93,8 @@ class _CaseDetailView extends StatefulWidget {
 }
 
 class _CaseDetailViewState extends State<_CaseDetailView> {
+  String _visitFilter = 'all';
+
   ICaseRepository? _resolveCaseRepo(BuildContext context) {
     if (widget.repository != null) return widget.repository;
     try {
@@ -102,6 +104,30 @@ class _CaseDetailViewState extends State<_CaseDetailView> {
     }
   }
 
+  Widget _buildVisitFilterChip(String label, String key) {
+    final isSelected = _visitFilter == key;
+    return GestureDetector(
+      onTap: () => setState(() => _visitFilter = key),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primaryEmerald : AppColors.surfaceWhite,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? AppColors.primaryEmerald : AppColors.borderWarm,
+          ),
+          boxShadow: isSelected ? null : AppColors.warmAmbientShadow,
+        ),
+        child: Text(
+          label,
+          style: AppTextStyles.labelMedium.copyWith(
+            color: isSelected ? Colors.white : AppColors.textCharcoal,
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -230,6 +256,12 @@ class _CaseDetailViewState extends State<_CaseDetailView> {
     final visits = detail.visits;
     final repo = _resolveCaseRepo(context);
 
+    final filteredVisits = visits.where((v) {
+      if (_visitFilter == 'in_progress') return v.isOpen;
+      if (_visitFilter == 'completed') return v.isLocked;
+      return true;
+    }).toList();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -268,6 +300,23 @@ class _CaseDetailViewState extends State<_CaseDetailView> {
           ],
         ),
         const SizedBox(height: 12),
+
+        // Filter chips row (if visits exist)
+        if (visits.isNotEmpty) ...[
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _buildVisitFilterChip('All Visits (${visits.length})', 'all'),
+                const SizedBox(width: 8),
+                _buildVisitFilterChip('In Progress (${visits.where((v) => v.isOpen).length})', 'in_progress'),
+                const SizedBox(width: 8),
+                _buildVisitFilterChip('Completed (${visits.where((v) => v.isLocked).length})', 'completed'),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
 
         // Prominent Primary Action Button: "Start New Visit" (shown when visits already exist)
         if (visits.isNotEmpty) ...[
@@ -318,10 +367,10 @@ class _CaseDetailViewState extends State<_CaseDetailView> {
           ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: visits.length,
+            itemCount: filteredVisits.length,
             separatorBuilder: (_, __) => const SizedBox(height: 12),
             itemBuilder: (context, index) {
-              final visit = visits[index];
+              final visit = filteredVisits[index];
               return VisitCard(
                 visit: visit,
                 animationIndex: index,
@@ -480,13 +529,7 @@ class _CaseDetailViewState extends State<_CaseDetailView> {
         color: AppColors.surfaceWhite,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.borderWarm),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: AppColors.warmAmbientShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -574,6 +617,90 @@ class _CaseDetailViewState extends State<_CaseDetailView> {
                   style: AppTextStyles.bodySmall.copyWith(
                     fontWeight: FontWeight.w600,
                     color: AppColors.textCharcoal,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+          // Clinician and Admitted Sub-metrics Bento
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceContainerLow,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: const BoxDecoration(
+                          color: AppColors.primaryEmeraldLight,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.medical_services_outlined, size: 14, color: AppColors.primaryEmeraldDark),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Clinician',
+                              style: AppTextStyles.labelSmall.copyWith(color: AppColors.textMuted, fontSize: 10),
+                            ),
+                            Text(
+                              s.primaryVeterinarianName ?? 'Dr. Attending, DVM',
+                              style: AppTextStyles.labelMedium.copyWith(color: AppColors.textCharcoal, fontWeight: FontWeight.w700),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceContainerLow,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: const BoxDecoration(
+                          color: AppColors.surfaceContainerHighest,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.calendar_today_rounded, size: 14, color: AppColors.textCharcoal),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Admitted',
+                              style: AppTextStyles.labelSmall.copyWith(color: AppColors.textMuted, fontSize: 10),
+                            ),
+                            Text(
+                              '${s.admittedAt.day}/${s.admittedAt.month}/${s.admittedAt.year}',
+                              style: AppTextStyles.labelMedium.copyWith(color: AppColors.textCharcoal, fontWeight: FontWeight.w700),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),

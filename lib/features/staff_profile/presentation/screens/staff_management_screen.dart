@@ -133,6 +133,9 @@ class _StaffManagementScreenState extends State<StaffManagementScreen> {
               // Search & Filter Header
               _buildSearchAndFilterHeader(),
 
+              if (!isLoading && !isError && state.staffMembers.isNotEmpty)
+                _buildFacilityOverviewBanner(state.staffMembers),
+
               // Body Content
               Expanded(
                 child: isError
@@ -252,6 +255,138 @@ class _StaffManagementScreenState extends State<StaffManagementScreen> {
     );
   }
 
+  Widget _buildFacilityOverviewBanner(List<StaffEntity> allStaff) {
+    final docCount = allStaff.where((s) => s.role.isDoctor).length;
+    final techCount = allStaff.where((s) => s.role == StaffRole.vetTech).length;
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceWhite,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.borderWarm),
+        boxShadow: AppColors.warmAmbientShadow,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.domain_rounded, size: 16, color: AppColors.primaryEmerald),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Clinical Division',
+                    style: AppTextStyles.labelSmall.copyWith(
+                      color: AppColors.primaryEmeraldDark,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: AppColors.badgeStableMint,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF065F46),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Facility Live',
+                      style: AppTextStyles.labelSmall.copyWith(
+                        color: const Color(0xFF065F46),
+                        fontWeight: FontWeight.w800,
+                        fontSize: 9,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceContainerLow,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryEmeraldLight,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(Icons.medical_services_outlined, size: 16, color: AppColors.primaryEmeraldDark),
+                      ),
+                      const SizedBox(width: 8),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Clinicians', style: AppTextStyles.labelSmall.copyWith(color: AppColors.textMuted, fontSize: 10)),
+                          Text('$docCount Active', style: AppTextStyles.labelMedium.copyWith(color: AppColors.textCharcoal, fontWeight: FontWeight.w800)),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceContainerLow,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: AppColors.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(Icons.vaccines_outlined, size: 16, color: AppColors.textCharcoal),
+                      ),
+                      const SizedBox(width: 8),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Vet Techs', style: AppTextStyles.labelSmall.copyWith(color: AppColors.textMuted, fontSize: 10)),
+                          Text('$techCount On site', style: AppTextStyles.labelMedium.copyWith(color: AppColors.textCharcoal, fontWeight: FontWeight.w800)),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildStaffCard(StaffEntity staff, int index) {
     final initials = staff.name.trim().isNotEmpty
         ? staff.name.trim().split(' ').map((n) => n[0]).take(2).join().toUpperCase()
@@ -262,13 +397,7 @@ class _StaffManagementScreenState extends State<StaffManagementScreen> {
         color: AppColors.surfaceWhite,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.borderWarm),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: AppColors.warmAmbientShadow,
       ),
       child: Material(
         color: Colors.transparent,

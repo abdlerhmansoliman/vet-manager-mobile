@@ -127,6 +127,27 @@ abstract final class AppTextStyles {
         letterSpacing: 0.3,
       );
 
+  static TextStyle get labelLarge => _font(
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textCharcoal,
+        letterSpacing: 0.1,
+      );
+
+  static TextStyle get labelMedium => _font(
+        fontSize: 12,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textCharcoal,
+        letterSpacing: 0.2,
+      );
+
+  static TextStyle get labelSmall => _font(
+        fontSize: 11,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textMuted,
+        letterSpacing: 0.3,
+      );
+
   static TextStyle get caseIdLabel => GoogleFonts.jetBrainsMono(
         fontSize: 12,
         fontWeight: FontWeight.w600,

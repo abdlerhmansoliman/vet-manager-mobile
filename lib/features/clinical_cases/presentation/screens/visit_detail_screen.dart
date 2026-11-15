@@ -185,6 +185,9 @@ class _VisitDetailViewState extends State<_VisitDetailView> {
                     .slideY(begin: 0.08, end: 0, curve: Curves.easeOutQuad),
                 const SizedBox(height: 16),
 
+                // Quick Vitals Ribbon
+                _buildQuickVitalsRibbon(visit),
+
                 // Scoped Action Buttons
                 _buildActionButtons(context, visit)
                     .animate()
@@ -277,6 +280,168 @@ class _VisitDetailViewState extends State<_VisitDetailView> {
     );
   }
 
+  Widget _buildQuickVitalsRibbon(VisitEntity visit) {
+    final note = visit.soapNote;
+    if (note == null || !note.hasVitals) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.monitor_heart_outlined, size: 18, color: AppColors.primaryEmerald),
+                const SizedBox(width: 6),
+                Text(
+                  'Vitals & Triage',
+                  style: AppTextStyles.titleMedium.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textCharcoal,
+                  ),
+                ),
+              ],
+            ),
+            Text(
+              _formatDate(note.recordedAt),
+              style: AppTextStyles.labelSmall.copyWith(color: AppColors.textMuted, fontSize: 11),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              if (note.temperatureCelsius != null)
+                _buildVitalMetricCard(
+                  icon: Icons.thermostat_outlined,
+                  label: 'Temperature',
+                  value: '${note.temperatureCelsius!.toStringAsFixed(1)}°C',
+                  badgeText: 'Normal',
+                  badgeColor: AppColors.badgeStableMint,
+                  badgeTextColor: const Color(0xFF065F46),
+                ),
+              if (note.heartRateBpm != null) ...[
+                const SizedBox(width: 8),
+                _buildVitalMetricCard(
+                  icon: Icons.favorite_outline_rounded,
+                  label: 'Heart Rate',
+                  value: '${note.heartRateBpm} bpm',
+                  badgeText: 'Steady',
+                  badgeColor: AppColors.badgeStableMint,
+                  badgeTextColor: const Color(0xFF065F46),
+                ),
+              ],
+              if (note.respiratoryRateBpm != null) ...[
+                const SizedBox(width: 8),
+                _buildVitalMetricCard(
+                  icon: Icons.air_rounded,
+                  label: 'Resp Rate',
+                  value: '${note.respiratoryRateBpm} bpm',
+                  badgeText: 'Regular',
+                  badgeColor: AppColors.badgeStableMint,
+                  badgeTextColor: const Color(0xFF065F46),
+                ),
+              ],
+              if (note.bodyConditionScore != null) ...[
+                const SizedBox(width: 8),
+                _buildVitalMetricCard(
+                  icon: Icons.pets_outlined,
+                  label: 'Body Cond',
+                  value: '${note.bodyConditionScore}/9',
+                  badgeText: 'BCS',
+                  badgeColor: AppColors.badgeObsAmber,
+                  badgeTextColor: AppColors.badgeObsAmberText,
+                ),
+              ],
+              if (note.painScore != null) ...[
+                const SizedBox(width: 8),
+                _buildVitalMetricCard(
+                  icon: Icons.healing_outlined,
+                  label: 'Pain Score',
+                  value: '${note.painScore}/4',
+                  badgeText: 'Assessed',
+                  badgeColor: AppColors.badgeObsAmber,
+                  badgeTextColor: AppColors.badgeObsAmberText,
+                ),
+              ],
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+      ],
+    );
+  }
+
+  Widget _buildVitalMetricCard({
+    required IconData icon,
+    required String label,
+    required String value,
+    required String badgeText,
+    required Color badgeColor,
+    required Color badgeTextColor,
+  }) {
+    return Container(
+      width: 135,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceWhite,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.borderWarm),
+        boxShadow: AppColors.warmAmbientShadow,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceContainerLow,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, size: 16, color: AppColors.primaryEmerald),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: badgeColor,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  badgeText,
+                  style: TextStyle(
+                    fontSize: 9,
+                    fontWeight: FontWeight.w700,
+                    color: badgeTextColor,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: AppTextStyles.labelSmall.copyWith(color: AppColors.textMuted, fontSize: 10),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            value,
+            style: AppTextStyles.titleMedium.copyWith(
+              fontWeight: FontWeight.w800,
+              color: AppColors.textCharcoal,
+              fontSize: 15,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildVisitMetadataCard(VisitEntity visit) {
     return Container(
       width: double.infinity,
@@ -285,13 +450,7 @@ class _VisitDetailViewState extends State<_VisitDetailView> {
         color: AppColors.surfaceWhite,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.borderWarm),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: AppColors.warmAmbientShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -745,6 +904,57 @@ class _VisitDetailViewState extends State<_VisitDetailView> {
               );
             },
           ),
+        if (visit.isOpen) ...[
+          const SizedBox(height: 10),
+          AnimatedPressable(
+            onTap: () {
+              AdministerMedicationSheet.show(
+                context: context,
+                defaultVetName: visit.veterinarianName,
+                onConfirm: ({
+                  required prescription,
+                  required veterinarianName,
+                  clinicalNotes,
+                }) {
+                  context.read<VisitDetailBloc>().add(
+                        VisitMedicationAdministered(
+                          prescription: prescription,
+                          veterinarianName: veterinarianName,
+                          clinicalNotes: clinicalNotes,
+                        ),
+                      );
+                },
+              );
+            },
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceWhite,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: AppColors.primaryEmerald.withValues(alpha: 0.4),
+                  width: 1.2,
+                ),
+                boxShadow: AppColors.warmAmbientShadow,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.add_circle_outline_rounded, size: 16, color: AppColors.primaryEmerald),
+                  const SizedBox(width: 6),
+                  Text(
+                    '+ Add Dose',
+                    style: AppTextStyles.labelMedium.copyWith(
+                      color: AppColors.primaryEmerald,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }

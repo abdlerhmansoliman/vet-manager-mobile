@@ -23,28 +23,23 @@ class DoseAdministrationCard extends StatelessWidget {
         color: AppColors.surfaceWhite,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.borderWarm),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: AppColors.warmAmbientShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                padding: const EdgeInsets.all(7),
+                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: AppColors.primaryEmeraldLight,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(
-                  Icons.vaccines_rounded,
-                  size: 16,
+                  Icons.medication_outlined,
+                  size: 18,
                   color: AppColors.primaryEmeraldDark,
                 ),
               ),
@@ -53,15 +48,44 @@ class DoseAdministrationCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      dose.medicineName,
-                      style: AppTextStyles.titleMedium.copyWith(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textCharcoal,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            dose.medicineName,
+                            style: AppTextStyles.titleMedium.copyWith(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textCharcoal,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: AppColors.badgeStableMint,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.check, size: 10, color: Color(0xFF065F46)),
+                              const SizedBox(width: 2),
+                              Text(
+                                'Administered',
+                                style: AppTextStyles.labelSmall.copyWith(
+                                  color: const Color(0xFF065F46),
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 3),
                     Row(
                       children: [
                         Container(
@@ -90,14 +114,15 @@ class DoseAdministrationCard extends StatelessWidget {
                         ),
                       ],
                     ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Given at ${_formatTimestamp(dose.administeredAt)} • ${dose.veterinarianName}',
+                      style: AppTextStyles.labelSmall.copyWith(
+                        color: AppColors.textMuted,
+                        fontSize: 10,
+                      ),
+                    ),
                   ],
-                ),
-              ),
-              Text(
-                _formatTimestamp(dose.administeredAt),
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: AppColors.textMuted,
-                  fontSize: 11,
                 ),
               ),
             ],

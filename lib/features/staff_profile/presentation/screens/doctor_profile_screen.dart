@@ -320,13 +320,7 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
         color: AppColors.surfaceWhite,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.borderWarm),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        boxShadow: AppColors.warmAmbientShadow,
       ),
       child: Row(
         children: [
@@ -409,13 +403,7 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
         color: AppColors.surfaceWhite,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.borderWarm),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
+        boxShadow: AppColors.warmAmbientShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -504,13 +492,7 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
           color: isAvailable ? AppColors.primaryEmerald.withValues(alpha: 0.3) : AppColors.borderWarm,
           width: 1.5,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
+        boxShadow: AppColors.warmAmbientShadow,
       ),
       child: Row(
         children: [
@@ -835,13 +817,7 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
         color: AppColors.surfaceWhite,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.borderWarm),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
+        boxShadow: AppColors.warmAmbientShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1074,13 +1050,7 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
         color: AppColors.surfaceWhite,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.borderWarm),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
+        boxShadow: AppColors.warmAmbientShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

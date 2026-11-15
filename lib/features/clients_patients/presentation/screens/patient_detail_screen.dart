@@ -799,21 +799,38 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
         color: AppColors.badgeCriticalRose,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: const Color(0xFFFECDD3)),
+        boxShadow: AppColors.warmAmbientShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Icon(Icons.warning_amber_rounded, color: AppColors.badgeCriticalRoseText, size: 20),
-              SizedBox(width: 8),
-              Text(
-                'HIGH-RISK ALLERGY ALERT',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0.5,
-                  color: AppColors.badgeCriticalRoseText,
+              const Row(
+                children: [
+                  Icon(Icons.warning_amber_rounded, color: AppColors.badgeCriticalRoseText, size: 20),
+                  SizedBox(width: 8),
+                  Text(
+                    'HIGH-RISK ALLERGY ALERT',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.5,
+                      color: AppColors.badgeCriticalRoseText,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.8),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Text(
+                  'Verified Alert',
+                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.badgeCriticalRoseText),
                 ),
               ),
             ],
@@ -853,16 +870,26 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
         color: AppColors.surfaceWhite,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.borderWarm),
+        boxShadow: AppColors.warmAmbientShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Patient Demographics',
-            style: AppTextStyles.titleMedium.copyWith(
-              fontWeight: FontWeight.w700,
-              color: AppColors.textCharcoal,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Patient Demographics',
+                style: AppTextStyles.titleMedium.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textCharcoal,
+                ),
+              ),
+              Text(
+                'ID: #${_patient.id.length > 8 ? _patient.id.substring(0, 8) : _patient.id}',
+                style: AppTextStyles.labelSmall.copyWith(color: AppColors.textLight),
+              ),
+            ],
           ),
           const SizedBox(height: 14),
           _buildInfoRow(
@@ -901,12 +928,17 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
 
   Widget _buildOwnerCard() {
     final client = _patient.client;
+    final initials = client.name.isNotEmpty
+        ? client.name.split(' ').map((e) => e.isNotEmpty ? e[0] : '').take(2).join().toUpperCase()
+        : 'CL';
+
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: AppColors.surfaceWhite,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.borderWarm),
+        boxShadow: AppColors.warmAmbientShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -914,12 +946,34 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Registered Owner',
-                style: AppTextStyles.titleMedium.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textCharcoal,
-                ),
+              Row(
+                children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: const BoxDecoration(
+                      color: AppColors.primaryEmeraldLight,
+                      shape: BoxShape.circle,
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      initials,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.primaryEmeraldDark,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    'Registered Owner',
+                    style: AppTextStyles.titleMedium.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textCharcoal,
+                    ),
+                  ),
+                ],
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -967,6 +1021,53 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> {
               icon: Icons.location_on_outlined,
             ),
           ],
+          const SizedBox(height: 16),
+          // Contact Touch Actions (Call & WhatsApp)
+          Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 44,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      AppSnackbar.showInfo(context, 'Calling ${client.name} (${client.phonePrimary})');
+                    },
+                    icon: const Icon(Icons.call_outlined, size: 18, color: AppColors.primaryEmerald),
+                    label: const Text(
+                      'Call Owner',
+                      style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: AppColors.textCharcoal),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: AppColors.surfaceContainerLow,
+                      side: const BorderSide(color: AppColors.borderWarm),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: SizedBox(
+                  height: 44,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      AppSnackbar.showInfo(context, 'Opening WhatsApp chat with ${client.name}');
+                    },
+                    icon: const Icon(Icons.chat_outlined, size: 18, color: AppColors.badgeStableMintText),
+                    label: const Text(
+                      'WhatsApp',
+                      style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: AppColors.textCharcoal),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: AppColors.surfaceContainerLow,
+                      side: const BorderSide(color: AppColors.borderWarm),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );

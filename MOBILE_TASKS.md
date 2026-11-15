@@ -39,6 +39,7 @@
 | **13-B** | `mobile/multi-clinic-switcher` | Multi-Clinic Switcher (Practice Selection & Tenant Re-authentication) | 🟢 **Completed** |
 | **14** | `mobile/14-store-review-hardening` | Privacy manifest, account deletion & medical disclaimers | 🟢 **Completed** |
 | **15** | `mobile/15-bilingual-localization` | Full-stack Arabic & English (`Accept-Language`, Cairo font, RTL, LocaleCubit) | 🟢 **Completed** |
+| **16** | `feat/stitch-warm-clinical-ui` | Stitch Warm Clinical UI Modernization (Queue Bento, Multi-Visit Timeline, Vitals Ribbon, Alert Badges) | 🟢 **Completed** |
 | **WEB** | `feat/clinic-doctor-web-portal` | Vue 3 + Inertia.js Clinic Doctor Web Portal with Strict 3-Tier Hierarchy & MinIO S3 | 🟢 **Completed** |
 | **10** | `mobile/10-case-study-pdf-export` | Case study PDF generator with owner anonymization toggle (deferred) | ⚪ Deferred |
 | **12** | `mobile/12-witness-pin-and-dosing` | Fractional dosing slider & blurred witness PIN bottom sheet (deferred) | ⚪ Deferred |
@@ -432,5 +433,36 @@
   - `test/features/staff_profile/doctor_profile_screen_test.dart` (Language selection and modal bottom sheet widget tests).
 * **Definition of Done**:
   - Full Arabic and English parity across Backend and Mobile; dynamic RTL mirroring and Cairo typography; entire UI layer translated with zero hardcoded English leaks; 100% test coverage with 300 passing mobile tests and 0 `flutter analyze` issues.
+
+---
+
+### Phase 4: UI Modernization & Clinical Ergonomics
+
+#### Part 16: Stitch Warm Clinical UI Modernization
+* **Branch**: `feat/stitch-warm-clinical-ui`
+* **Status**: 🟢 Completed
+* **Design Inspiration**:
+  - Google Stitch UI specifications (`/home/abdelrhaman/www/stitch_vet_clinical_encounter_screen`).
+  - Strict preservation of the **3-Tier Clinical Hierarchy** (`Patient -> Case -> Visit`).
+* **Design System & Token Upgrades**:
+  - `lib/app/theme/app_colors.dart`: Added Stitch surface elevation scale (`surfaceContainerLowest`, `surfaceContainerLow`, `surfaceContainer`, `surfaceContainerHigh`, `surfaceContainerHighest`) and ultra-soft `warmAmbientShadow`.
+  - `lib/app/theme/text_styles.dart`: Added `labelLarge`, `labelMedium`, and `labelSmall` tokens.
+* **Component & Screen Modernizations**:
+  - `lib/features/clinical_cases/presentation/widgets/case_card.dart`: Modernized queue card with animal avatar, triage priority badge, clock/relative time pill, chief complaint, reason tag, and direct "Open Visit" / "Triage" CTA.
+  - `lib/features/clinical_cases/presentation/screens/cases_board_screen.dart`: Clinician Welcome Header ("Good morning, Dr. [Name]"), search bar, Quick Stats ribbon (Total Active, Critical, Triage Alert, Stable), Quick Action bar (+ New Case, Register Patient), Queue Section header, and Diagnostics Alerts preview.
+  - `lib/features/clients_patients/presentation/screens/patient_detail_screen.dart`: Redesigned "Verified Alert" high-risk allergy banner, Demographics card with Patient ID header and age/weight/sex badges, Owner Contact card with avatar initials and Call / WhatsApp buttons, Case history cards with warm ambient shadows.
+  - `lib/features/clinical_cases/presentation/widgets/visit_card.dart`: Bento layout with encounter ID, date/time badge, attending clinician pill, Mini Vitals Rail (TEMP, HEART RATE, RESP RATE), SOAP clinical preview snippet, administered medications tags, and "Continue Charting" / "View Full SOAP Record" CTA.
+  - `lib/features/clinical_cases/presentation/screens/case_detail_screen.dart`: Stitch Case Master Bento layout with patient header, triage priority chip, Chief Complaint, Clinician & Admitted sub-metrics bento, Segmented Filter Chips (`All Visits`, `In Progress`, `Completed`), and chronological Visit timeline. Strictly zero diagnostic media galleries.
+  - `lib/features/clinical_cases/presentation/screens/visit_detail_screen.dart`: Integrated horizontal scrollable Vitals Ribbon (`_buildQuickVitalsRibbon`) displaying Temp, Heart Rate, Resp Rate, BCS, and Pain score cards; dashed ergonomic `+ Add Dose` button; updated card shadows to `warmAmbientShadow`. Sole location for SOAP charting and diagnostic media uploads.
+  - `lib/features/clinical_cases/presentation/widgets/soap_progress_card.dart`: Stitch 4-tier cards with colored letter pills (S amber, O emerald, A mint, P rose), character count indicators (`${content.length} chars`), and warm ambient shadow.
+  - `lib/features/clinical_cases/presentation/widgets/dose_administration_card.dart`: Pill icon, green `✓ Administered` status badge, dose/route styling, timestamp, and clinician name.
+  - `lib/features/staff_profile/presentation/screens/staff_management_screen.dart`: Added Stitch Clinic Division / "Facility Live" banner with live counters for active Clinicians and Vet Techs on site.
+  - `lib/features/staff_profile/presentation/screens/doctor_profile_screen.dart`: Upgraded all section cards to warm ambient elevation.
+* **Verification & Testing**:
+  - `flutter analyze`: 0 issues found.
+  - `flutter test`: 310/310 passed (100% test pass rate across all unit, widget, and BLoC tests).
+* **Definition of Done**:
+  - All screens match Google Stitch Warm Clinical aesthetic with full multi-visit support; zero breaking changes to existing Drift SQLite persistence, sync engine, or API contracts; strict 3-tier hierarchy preserved; 100% test pass rate.
+
 
 

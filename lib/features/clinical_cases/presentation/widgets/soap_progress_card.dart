@@ -25,13 +25,7 @@ class SoapProgressCard extends StatelessWidget {
         color: AppColors.surfaceWhite,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.borderWarm),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: AppColors.warmAmbientShadow,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -183,23 +177,81 @@ class SoapProgressCard extends StatelessWidget {
   }
 
   Widget _buildSoapSection(String letter, String title, String content) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+    Color badgeBg;
+    Color badgeFg;
+    switch (letter) {
+      case 'S':
+        badgeBg = AppColors.badgeObsAmber;
+        badgeFg = AppColors.badgeObsAmberText;
+        break;
+      case 'O':
+        badgeBg = AppColors.primaryEmeraldLight;
+        badgeFg = AppColors.primaryEmeraldDark;
+        break;
+      case 'A':
+        badgeBg = AppColors.badgeStableMint;
+        badgeFg = const Color(0xFF065F46);
+        break;
+      case 'P':
+      default:
+        badgeBg = AppColors.badgeCriticalRose;
+        badgeFg = AppColors.badgeCriticalRoseText;
+        break;
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.borderWarm.withValues(alpha: 0.6)),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              Row(
+                children: [
+                  Container(
+                    width: 22,
+                    height: 22,
+                    decoration: BoxDecoration(
+                      color: badgeBg,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      letter,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        color: badgeFg,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '$letter: $title',
+                    style: AppTextStyles.labelMedium.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textCharcoal,
+                    ),
+                  ),
+                ],
+              ),
               Text(
-                '$letter: $title',
-                style: AppTextStyles.bodySmall.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.primaryEmeraldDark,
+                '${content.length} chars',
+                style: AppTextStyles.labelSmall.copyWith(
+                  color: AppColors.textMuted,
+                  fontSize: 10,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 3),
+          const SizedBox(height: 6),
           Text(
             content,
             style: AppTextStyles.bodyMedium.copyWith(
