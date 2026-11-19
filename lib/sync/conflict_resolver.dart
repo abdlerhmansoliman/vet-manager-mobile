@@ -689,6 +689,95 @@ class ConflictResolver {
           }
         }
       }
+
+      // 9. Dose Administrations
+      if (deltas['dose_administrations'] is List) {
+        for (final rawItem in deltas['dose_administrations'] as List) {
+          if (rawItem is! Map) continue;
+          final item = Map<String, dynamic>.from(rawItem);
+
+          final doseId = item['id']?.toString() ?? '';
+          final caseId = item['case_id']?.toString() ?? '';
+          final visitId = item['visit_id']?.toString() ?? '';
+          if (doseId.isEmpty || caseId.isEmpty || visitId.isEmpty) continue;
+
+          // Relational consistency: verify case and visit exist and are properly scoped to this tenant and hierarchy
+          final caseRow = await (db.select(db.clinicalCasesTable)
+                ..where((c) => c.id.equals(caseId) & c.tenantId.equals(tenantId)))
+              .getSingleOrNull();
+          if (caseRow == null) continue;
+
+          final visitRow = await (db.select(db.visitsTable)
+                ..where((v) =>
+                    v.id.equals(visitId) &
+                    v.tenantId.equals(tenantId) &
+                    v.caseId.equals(caseId)))
+              .getSingleOrNull();
+          if (visitRow == null) continue;
+
+          final patientId = item['patient_id']?.toString() ?? caseRow.patientId;
+          if (patientId != caseRow.patientId) continue;
+
+          // Prevent fabricating missing clinical data: medicine name and dose amount are strictly required
+          final medicineName = item['medicine_name']?.toString() ?? item['product_name']?.toString();
+          final doseQty = (item['dose_quantity'] ?? item['dose_amount_base_units'] ?? item['dose_amount'])?.toString();
+          if (medicineName == null || medicineName.trim().isEmpty || doseQty == null || doseQty.trim().isEmpty) {
+            continue;
+          }
+
+          // Conflict resolution: protect un-synced offline local mutations from blind server overwrites
+          final existing = await (db.select(db.doseAdministrationsTable)
+                ..where((d) => d.id.equals(doseId)))
+              .getSingleOrNull();
+          if (existing != null && existing.syncStatus != 'synced') {
+            continue;
+          }
+
+          final unit = (item['unit'] ?? item['base_unit'])?.toString() ?? 'ml';
+          final route = (item['route'] ?? item['route_administered'])?.toString() ?? 'PO';
+          final notes = (item['clinical_notes'] ?? item['notes'])?.toString();
+          final vetId = (item['veterinarian_id'] ?? item['administered_by_user_id'])?.toString() ?? caseRow.primaryVeterinarianId;
+          final vetName = item['veterinarian_name']?.toString() ?? caseRow.primaryVeterinarianName ?? 'Attending Clinician';
+
+          DateTime administeredAt = now;
+          final rawAdministeredAt = (item['administered_at'] ?? item['created_at'])?.toString();
+          if (rawAdministeredAt != null && rawAdministeredAt.isNotEmpty) {
+            final parsed = DateTime.tryParse(rawAdministeredAt);
+            if (parsed != null) {
+              administeredAt = parsed.toUtc();
+            }
+          }
+
+          DateTime createdAt = now;
+          final rawCreatedAt = item['created_at']?.toString();
+          if (rawCreatedAt != null && rawCreatedAt.isNotEmpty) {
+            final parsed = DateTime.tryParse(rawCreatedAt);
+            if (parsed != null) {
+              createdAt = parsed.toUtc();
+            }
+          }
+
+          await db.into(db.doseAdministrationsTable).insertOnConflictUpdate(
+            DoseAdministrationsTableCompanion(
+              id: Value(doseId),
+              tenantId: Value(tenantId),
+              visitId: Value(visitId),
+              caseId: Value(caseId),
+              patientId: Value(patientId),
+              medicineName: Value(medicineName),
+              doseQuantity: Value(doseQty),
+              unit: Value(unit),
+              route: Value(route),
+              clinicalNotes: Value(notes),
+              veterinarianId: Value(vetId),
+              veterinarianName: Value(vetName),
+              administeredAt: Value(administeredAt),
+              createdAt: Value(createdAt),
+              syncStatus: const Value('synced'),
+            ),
+          );
+        }
+      }
     });
   }
 }

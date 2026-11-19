@@ -568,5 +568,310 @@ void main() {
       final result = await dispatcher.flush(tenantId: tenantId);
       expect(result.syncedCount, 4);
     });
+
+    test('ConflictResolver ingests dose_administrations deltas into local database', () async {
+      const tenantId = 'tenant-alpha';
+      final now = DateTime.now().toUtc();
+
+      // Seed parent hierarchy: client -> patient -> case -> visit
+      await db.into(db.clientsTable).insert(
+            ClientsTableCompanion.insert(
+              id: 'c-dose-1',
+              tenantId: tenantId,
+              name: 'Owner',
+              phonePrimary: '555-1234',
+              clientType: const Value('individual'),
+              createdAt: now,
+              updatedAt: now,
+            ),
+          );
+
+      await db.into(db.patientsTable).insert(
+            PatientsTableCompanion.insert(
+              id: 'pat-dose-1',
+              tenantId: tenantId,
+              clientId: 'c-dose-1',
+              nameOrTag: 'Buddy',
+              species: 'Canine',
+              createdAt: now,
+              updatedAt: now,
+            ),
+          );
+
+      await db.into(db.clinicalCasesTable).insert(
+            ClinicalCasesTableCompanion.insert(
+              id: 'case-dose-1',
+              tenantId: tenantId,
+              caseNumber: 'CAS-DOSE-001',
+              patientId: 'pat-dose-1',
+              primaryVeterinarianId: 'vet-1',
+              chiefComplaint: 'Limping',
+              admittedAt: now,
+              createdAt: now,
+              updatedAt: now,
+            ),
+          );
+
+      await db.into(db.visitsTable).insert(
+            VisitsTableCompanion.insert(
+              id: 'visit-dose-1',
+              tenantId: tenantId,
+              caseId: 'case-dose-1',
+              patientId: 'pat-dose-1',
+              veterinarianId: 'vet-1',
+              veterinarianName: 'Dr. John Miller',
+              title: 'Initial Consultation',
+              visitDate: now,
+              createdAt: now,
+              updatedAt: now,
+            ),
+          );
+
+      // Ingest dose delta from server
+      await resolver.applyServerDeltas(
+        tenantId: tenantId,
+        deltas: {
+          'dose_administrations': [
+            {
+              'id': 'dose-srv-1',
+              'case_id': 'case-dose-1',
+              'visit_id': 'visit-dose-1',
+              'patient_id': 'pat-dose-1',
+              'medicine_name': 'Meloxicam 1.5mg/ml',
+              'dose_amount_base_units': '0.5000',
+              'unit': 'ml',
+              'route_administered': 'SQ',
+              'clinical_notes': 'Injected subcutaneously between shoulder blades',
+              'administered_by_user_id': 'vet-1',
+              'created_at': now.toIso8601String(),
+            },
+          ],
+        },
+      );
+
+      final doses = await (db.select(db.doseAdministrationsTable)
+            ..where((d) => d.id.equals('dose-srv-1')))
+          .get();
+
+      expect(doses.length, 1);
+      final dose = doses.first;
+      expect(dose.medicineName, 'Meloxicam 1.5mg/ml');
+      expect(dose.doseQuantity, '0.5000');
+      expect(dose.unit, 'ml');
+      expect(dose.route, 'SQ');
+      expect(dose.veterinarianId, 'vet-1');
+      expect(dose.patientId, 'pat-dose-1');
+      expect(dose.tenantId, tenantId);
+      expect(dose.syncStatus, 'synced');
+    });
+
+    test('ConflictResolver rejects doses with mismatched visit-case hierarchy or missing required drug info', () async {
+      const tenantId = 'tenant-alpha';
+      final now = DateTime.now().toUtc();
+
+      // Seed valid hierarchy
+      await db.into(db.clientsTable).insert(
+            ClientsTableCompanion.insert(
+              id: 'c-val-1',
+              tenantId: tenantId,
+              name: 'Owner',
+              phonePrimary: '555-9999',
+              clientType: const Value('individual'),
+              createdAt: now,
+              updatedAt: now,
+            ),
+          );
+
+      await db.into(db.patientsTable).insert(
+            PatientsTableCompanion.insert(
+              id: 'pat-val-1',
+              tenantId: tenantId,
+              clientId: 'c-val-1',
+              nameOrTag: 'Bella',
+              species: 'Feline',
+              createdAt: now,
+              updatedAt: now,
+            ),
+          );
+
+      await db.into(db.clinicalCasesTable).insert(
+            ClinicalCasesTableCompanion.insert(
+              id: 'case-val-1',
+              tenantId: tenantId,
+              caseNumber: 'CAS-VAL-001',
+              patientId: 'pat-val-1',
+              primaryVeterinarianId: 'vet-1',
+              chiefComplaint: 'Vomiting',
+              admittedAt: now,
+              createdAt: now,
+              updatedAt: now,
+            ),
+          );
+
+      await db.into(db.visitsTable).insert(
+            VisitsTableCompanion.insert(
+              id: 'visit-val-1',
+              tenantId: tenantId,
+              caseId: 'case-val-1',
+              patientId: 'pat-val-1',
+              veterinarianId: 'vet-1',
+              veterinarianName: 'Dr. John Miller',
+              title: 'Checkup',
+              visitDate: now,
+              createdAt: now,
+              updatedAt: now,
+            ),
+          );
+
+      // Attempt to ingest doses:
+      // 1. Visit belongs to a different case
+      // 2. Missing medicine name
+      // 3. Missing dose quantity
+      await resolver.applyServerDeltas(
+        tenantId: tenantId,
+        deltas: {
+          'dose_administrations': [
+            {
+              'id': 'dose-invalid-1',
+              'case_id': 'case-other-unknown',
+              'visit_id': 'visit-val-1',
+              'patient_id': 'pat-val-1',
+              'medicine_name': 'Amoxicillin',
+              'dose_amount_base_units': '1.0000',
+            },
+            {
+              'id': 'dose-invalid-2',
+              'case_id': 'case-val-1',
+              'visit_id': 'visit-val-1',
+              'patient_id': 'pat-val-1',
+              'medicine_name': '', // Empty name!
+              'dose_amount_base_units': '1.0000',
+            },
+            {
+              'id': 'dose-invalid-3',
+              'case_id': 'case-val-1',
+              'visit_id': 'visit-val-1',
+              'patient_id': 'pat-val-1',
+              'medicine_name': 'Amoxicillin',
+              'dose_amount_base_units': '', // Empty dose!
+            },
+          ],
+        },
+      );
+
+      final invalidDoses = await (db.select(db.doseAdministrationsTable)
+            ..where((d) => d.id.isIn(['dose-invalid-1', 'dose-invalid-2', 'dose-invalid-3'])))
+          .get();
+
+      expect(invalidDoses, isEmpty);
+    });
+
+    test('ConflictResolver preserves un-synced offline dose from being overwritten by server delta', () async {
+      const tenantId = 'tenant-alpha';
+      final now = DateTime.now().toUtc();
+
+      // Seed valid hierarchy
+      await db.into(db.clientsTable).insert(
+            ClientsTableCompanion.insert(
+              id: 'c-offline-1',
+              tenantId: tenantId,
+              name: 'Owner',
+              phonePrimary: '555-8888',
+              clientType: const Value('individual'),
+              createdAt: now,
+              updatedAt: now,
+            ),
+          );
+
+      await db.into(db.patientsTable).insert(
+            PatientsTableCompanion.insert(
+              id: 'pat-offline-1',
+              tenantId: tenantId,
+              clientId: 'c-offline-1',
+              nameOrTag: 'Rocky',
+              species: 'Canine',
+              createdAt: now,
+              updatedAt: now,
+            ),
+          );
+
+      await db.into(db.clinicalCasesTable).insert(
+            ClinicalCasesTableCompanion.insert(
+              id: 'case-offline-1',
+              tenantId: tenantId,
+              caseNumber: 'CAS-OFFLINE-001',
+              patientId: 'pat-offline-1',
+              primaryVeterinarianId: 'vet-1',
+              chiefComplaint: 'Pain Management',
+              admittedAt: now,
+              createdAt: now,
+              updatedAt: now,
+            ),
+          );
+
+      await db.into(db.visitsTable).insert(
+            VisitsTableCompanion.insert(
+              id: 'visit-offline-1',
+              tenantId: tenantId,
+              caseId: 'case-offline-1',
+              patientId: 'pat-offline-1',
+              veterinarianId: 'vet-1',
+              veterinarianName: 'Dr. John Miller',
+              title: 'Pain Exam',
+              visitDate: now,
+              createdAt: now,
+              updatedAt: now,
+            ),
+          );
+
+      // Local dose recorded offline with pending sync
+      await db.into(db.doseAdministrationsTable).insert(
+            DoseAdministrationsTableCompanion.insert(
+              id: 'dose-offline-1',
+              tenantId: tenantId,
+              visitId: 'visit-offline-1',
+              caseId: 'case-offline-1',
+              patientId: 'pat-offline-1',
+              medicineName: 'Tramadol 50mg',
+              doseQuantity: '2.0000',
+              unit: 'tablets',
+              route: 'PO',
+              veterinarianId: 'vet-1',
+              veterinarianName: 'Dr. John Miller',
+              administeredAt: now,
+              createdAt: now,
+              syncStatus: const Value('pending'),
+            ),
+          );
+
+      // Incoming server delta for same ID
+      await resolver.applyServerDeltas(
+        tenantId: tenantId,
+        deltas: {
+          'dose_administrations': [
+            {
+              'id': 'dose-offline-1',
+              'case_id': 'case-offline-1',
+              'visit_id': 'visit-offline-1',
+              'patient_id': 'pat-offline-1',
+              'medicine_name': 'Server Tramadol Overwrite Attempt',
+              'dose_amount_base_units': '10.0000',
+              'unit': 'tablets',
+              'route_administered': 'PO',
+              'created_at': now.toIso8601String(),
+            },
+          ],
+        },
+      );
+
+      final dose = await (db.select(db.doseAdministrationsTable)
+            ..where((d) => d.id.equals('dose-offline-1')))
+          .getSingle();
+
+      // Must NOT be overwritten
+      expect(dose.medicineName, 'Tramadol 50mg');
+      expect(dose.doseQuantity, '2.0000');
+      expect(dose.syncStatus, 'pending');
+    });
   });
 }
